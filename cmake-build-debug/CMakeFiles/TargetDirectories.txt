@@ -1,3 +1,0 @@
-C:/Users/xomaq/TransportCatalog/cmake-build-debug/CMakeFiles/TransportCatalog.dir
-C:/Users/xomaq/TransportCatalog/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/xomaq/TransportCatalog/cmake-build-debug/CMakeFiles/rebuild_cache.dir

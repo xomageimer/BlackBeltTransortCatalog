@@ -43,3 +43,4 @@
 *.vcxproj.user
 cmake-build-debug
 /Debug
+*.idea
