@@ -27,10 +27,10 @@ public:
 struct ExecuteRequest : public  IRequest {
 public:
     inline static const std::map<std::string_view, Type> AsType{
-            {"bus", Type::FIND_BUS},
-            {"stop", Type::FIND_STOP},
-            {"route", Type::FIND_ROUTE},
-            {"map", Type::BUILD_MAP}
+            {"Bus", Type::FIND_BUS},
+            {"Stop", Type::FIND_STOP},
+            {"Route", Type::FIND_ROUTE},
+            {"Map", Type::BUILD_MAP}
     };
     inline static int requests_count = 0;
     void ParseFrom(Json::Node const & json_node) override {
@@ -95,8 +95,8 @@ struct ModifyRequest : public IRequest {
 public:
     using IRequest::IRequest;
     inline static const std::map<std::string_view, Type> AsType{
-            {"bus", Type::READ_BUS},
-            {"stop", Type::READ_STOP}
+            {"Bus", Type::READ_BUS},
+            {"Stop", Type::READ_STOP}
     };
     void ParseFrom(Json::Node const & json_node) override {
         title = json_node["name"].AsString();

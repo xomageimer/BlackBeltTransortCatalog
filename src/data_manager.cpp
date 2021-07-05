@@ -75,7 +75,7 @@ Data_Structure::DataBase::DataBase(std::vector<DBItem> items, std::pair<double, 
 
         size_t i = 0;
         for (auto const & el : render_settings["stop_label_offset"].AsArray()){
-            ren_set.stop_label_offset[i] = el.AsNumber<double>();
+            ren_set.stop_label_offset[i++] = el.AsNumber<double>();
         }
 
         auto get_color = [](const Json::Node & r_s) {

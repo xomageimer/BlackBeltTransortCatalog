@@ -172,7 +172,7 @@ namespace Svg {
     public:
         Document();
         template <typename T>
-        std::enable_if_t<is_inherited<T, Primitive<T>>::value, void> Add(T && obj) noexcept {
+        std::enable_if_t<is_inherited<std::decay_t<T>, Primitive<std::decay_t<T>>>::value, void> Add(T && obj) noexcept {
             primitives.emplace_back(std::forward<T>(obj));
         }
         template <typename T>

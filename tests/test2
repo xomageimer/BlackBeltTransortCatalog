@@ -1,0 +1,445 @@
+{
+    "stat_requests": [
+        {
+            "type": "Map",
+            "id": 1821171961
+        }
+    ],
+    "render_settings": {
+        "underlayer_width": 3,
+        "height": 950,
+        "stop_radius": 3,
+        "underlayer_color": [
+            255,
+            255,
+            255,
+            0.85
+        ],
+        "width": 1500,
+        "stop_label_font_size": 13,
+        "padding": 50,
+        "color_palette": [
+            "red",
+            "green",
+            "blue",
+            "brown",
+            "orange"
+        ],
+        "stop_label_offset": [
+            7,
+            -3
+        ],
+        "line_width": 10
+    },
+    "base_requests": [
+        {
+            "stops": [
+                "Sanatorium Salute",
+                "Sanatorium street",
+                "Holiday Hotel Neva",
+                "Sanatorium Rainbow",
+                "Sanatorium Rodina",
+                "Sportivnaya",
+                "Riviera Park",
+                "Sea Station",
+                "Organ Hall",
+                "Theater",
+                "Boarding house Svetlana",
+                "Circus",
+                "Stadium",
+                "Sanatorium Metallurg",
+                "Bytkha Street"
+            ],
+            "name": "23",
+            "type": "Bus",
+            "is_roundtrip": false
+        },
+        {
+            "stops": [
+                "Liza Chaikina Street",
+                "111 Pionerskaya Street",
+                "Garden",
+                "Theater"
+            ],
+            "name": "13",
+            "type": "Bus",
+            "is_roundtrip": false
+        },
+        {
+            "stops": [
+                "Sea Station",
+                "Sberbank",
+                "Bus Station",
+                "Hotel Zvezdny",
+                "Store Byt",
+                "Bread factory",
+                "Jubilee cinema",
+                "Novaya Zarya",
+                "Woodworking combine",
+                "5 Tselinnaya Street",
+                "5 Tselinnaya Street7",
+                "Tselinnaya street"
+            ],
+            "name": "36",
+            "type": "Bus",
+            "is_roundtrip": false
+        },
+        {
+            "stops": [
+                "Boarding house Svetlana",
+                "Bald Hill Street",
+                "Lysaya Gora Street"
+            ],
+            "name": "44к",
+            "type": "Bus",
+            "is_roundtrip": false
+        },
+        {
+            "stops": [
+                "Kraevo-Gretskaya Street",
+                "Bytkha Street",
+                "Sanatorium them. Voroshilov",
+                "Primorye Sanatorium",
+                "Sanatorium Zarya",
+                "Matsesta",
+                "Matsesta Valley"
+            ],
+            "name": "90",
+            "type": "Bus",
+            "is_roundtrip": false
+        },
+        {
+            "name": "Kraevo-Gretskaya Street",
+            "latitude": 43.565551,
+            "type": "Stop",
+            "longitude": 39.776858,
+            "road_distances": {
+                "Bytkha Street": 1780
+            }
+        },
+        {
+            "name": "Sanatorium them. Voroshilov",
+            "latitude": 43.557935,
+            "type": "Stop",
+            "longitude": 39.764452,
+            "road_distances": {
+                "Primorye Sanatorium": 950
+            }
+        },
+        {
+            "name": "Primorye Sanatorium",
+            "latitude": 43.554202,
+            "type": "Stop",
+            "longitude": 39.77256,
+            "road_distances": {
+                "Sanatorium Zarya": 2350
+            }
+        },
+        {
+            "name": "Sanatorium Zarya",
+            "latitude": 43.549618,
+            "type": "Stop",
+            "longitude": 39.780908,
+            "road_distances": {
+                "Matsesta": 800
+            }
+        },
+        {
+            "name": "Matsesta",
+            "latitude": 43.545509,
+            "type": "Stop",
+            "longitude": 39.788993,
+            "road_distances": {
+                "Matsesta Valley": 2350
+            }
+        },
+        {
+            "name": "Matsesta Valley",
+            "latitude": 43.560422,
+            "type": "Stop",
+            "longitude": 39.798219,
+            "road_distances": {}
+        },
+        {
+            "name": "Bald Hill Street",
+            "latitude": 43.577997,
+            "type": "Stop",
+            "longitude": 39.741685,
+            "road_distances": {
+                "Lysaya Gora Street": 640
+            }
+        },
+        {
+            "name": "Lysaya Gora Street",
+            "latitude": 43.58092,
+            "type": "Stop",
+            "longitude": 39.744749,
+            "road_distances": {}
+        },
+        {
+            "name": "Sea Station",
+            "latitude": 43.581969,
+            "type": "Stop",
+            "longitude": 39.719848,
+            "road_distances": {
+                "Sberbank": 870,
+                "Organ Hall": 570
+            }
+        },
+        {
+            "name": "Sberbank",
+            "latitude": 43.585969,
+            "type": "Stop",
+            "longitude": 39.725175,
+            "road_distances": {
+                "Bus Station": 870
+            }
+        },
+        {
+            "name": "Bus Station",
+            "latitude": 43.592956,
+            "type": "Stop",
+            "longitude": 39.727798,
+            "road_distances": {
+                "Hotel Zvezdny": 700
+            }
+        },
+        {
+            "name": "Hotel Zvezdny",
+            "latitude": 43.596585,
+            "type": "Stop",
+            "longitude": 39.721151,
+            "road_distances": {
+                "Store Byt": 1000
+            }
+        },
+        {
+            "name": "Store Byt",
+            "latitude": 43.604025,
+            "type": "Stop",
+            "longitude": 39.724492,
+            "road_distances": {
+                "Bread factory": 420
+            }
+        },
+        {
+            "name": "Bread factory",
+            "latitude": 43.607364,
+            "type": "Stop",
+            "longitude": 39.726643,
+            "road_distances": {
+                "Jubilee cinema": 2110
+            }
+        },
+        {
+            "name": "Jubilee cinema",
+            "latitude": 43.623382,
+            "type": "Stop",
+            "longitude": 39.720626,
+            "road_distances": {
+                "Novaya Zarya": 450
+            }
+        },
+        {
+            "name": "Novaya Zarya",
+            "latitude": 43.626842,
+            "type": "Stop",
+            "longitude": 39.717802,
+            "road_distances": {
+                "Woodworking combine": 530
+            }
+        },
+        {
+            "name": "Woodworking combine",
+            "latitude": 43.631035,
+            "type": "Stop",
+            "longitude": 39.714624,
+            "road_distances": {
+                "5 Tselinnaya Street": 840
+            }
+        },
+        {
+            "name": "5 Tselinnaya Street",
+            "latitude": 43.633353,
+            "type": "Stop",
+            "longitude": 39.710257,
+            "road_distances": {
+                "5 Tselinnaya Street7": 1270
+            }
+        },
+        {
+            "name": "5 Tselinnaya Street7",
+            "latitude": 43.640536,
+            "type": "Stop",
+            "longitude": 39.713253,
+            "road_distances": {
+                "Tselinnaya street": 1050
+            }
+        },
+        {
+            "name": "Tselinnaya street",
+            "latitude": 43.647968,
+            "type": "Stop",
+            "longitude": 39.717733,
+            "road_distances": {}
+        },
+        {
+            "name": "Sanatorium Salute",
+            "latitude": 43.623238,
+            "type": "Stop",
+            "longitude": 39.704646,
+            "road_distances": {
+                "Sanatorium street": 1500
+            }
+        },
+        {
+            "name": "Sanatorium street",
+            "latitude": 43.620766,
+            "type": "Stop",
+            "longitude": 39.719058,
+            "road_distances": {
+                "Holiday Hotel Neva": 670
+            }
+        },
+        {
+            "name": "Holiday Hotel Neva",
+            "latitude": 43.614288,
+            "type": "Stop",
+            "longitude": 39.718674,
+            "road_distances": {
+                "Sanatorium Rainbow": 520
+            }
+        },
+        {
+            "name": "Sanatorium Rainbow",
+            "latitude": 43.609951,
+            "type": "Stop",
+            "longitude": 39.72143,
+            "road_distances": {
+                "Sanatorium Rodina": 1190
+            }
+        },
+        {
+            "name": "Sanatorium Rodina",
+            "latitude": 43.601202,
+            "type": "Stop",
+            "longitude": 39.715498,
+            "road_distances": {
+                "Sportivnaya": 1100
+            }
+        },
+        {
+            "name": "Sportivnaya",
+            "latitude": 43.593689,
+            "type": "Stop",
+            "longitude": 39.717642,
+            "road_distances": {
+                "Riviera Park": 640
+            }
+        },
+        {
+            "name": "Riviera Park",
+            "latitude": 43.588296,
+            "type": "Stop",
+            "longitude": 39.715956,
+            "road_distances": {
+                "Sea Station": 730
+            }
+        },
+        {
+            "name": "Organ Hall",
+            "latitude": 43.57926,
+            "type": "Stop",
+            "longitude": 39.725574,
+            "road_distances": {
+                "Theater": 770
+            }
+        },
+        {
+            "name": "Boarding house Svetlana",
+            "latitude": 43.571807,
+            "type": "Stop",
+            "longitude": 39.735866,
+            "road_distances": {
+                "Circus": 520,
+                "Bald Hill Street": 1070
+            }
+        },
+        {
+            "name": "Circus",
+            "latitude": 43.569207,
+            "type": "Stop",
+            "longitude": 39.739869,
+            "road_distances": {
+                "Stadium": 860
+            }
+        },
+        {
+            "name": "Stadium",
+            "latitude": 43.565301,
+            "type": "Stop",
+            "longitude": 39.749485,
+            "road_distances": {
+                "Sanatorium Metallurg": 950
+            }
+        },
+        {
+            "name": "Sanatorium Metallurg",
+            "latitude": 43.561005,
+            "type": "Stop",
+            "longitude": 39.760511,
+            "road_distances": {
+                "Bytkha Street": 900
+            }
+        },
+        {
+            "name": "Bytkha Street",
+            "latitude": 43.566135,
+            "type": "Stop",
+            "longitude": 39.762109,
+            "road_distances": {
+                "Sanatorium them. Voroshilov": 1160
+            }
+        },
+        {
+            "name": "Liza Chaikina Street",
+            "latitude": 43.590317,
+            "type": "Stop",
+            "longitude": 39.746833,
+            "road_distances": {
+                "111 Pionerskaya Street": 950
+            }
+        },
+        {
+            "name": "111 Pionerskaya Street",
+            "latitude": 43.587257,
+            "type": "Stop",
+            "longitude": 39.740325,
+            "road_distances": {
+                "Garden": 520
+            }
+        },
+        {
+            "name": "Garden",
+            "latitude": 43.58395,
+            "type": "Stop",
+            "longitude": 39.736938,
+            "road_distances": {
+                "Theater": 1300
+            }
+        },
+        {
+            "name": "Theater",
+            "latitude": 43.57471,
+            "type": "Stop",
+            "longitude": 39.731954,
+            "road_distances": {
+                "Boarding house Svetlana": 390
+            }
+        }
+    ],
+    "routing_settings": {
+        "bus_wait_time": 2,
+        "bus_velocity": 30
+    }
+}

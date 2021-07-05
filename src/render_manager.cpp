@@ -12,6 +12,8 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
                                        RenderSettings render_set) : renderSettings(std::move(render_set)){
     CalculateCoordinates(stops);
     DrawStopsPolylines(buses, stops);
+    DrawStopsRound(stops);
+    DrawStopsText(stops);
 
     doc.SimpleRender();
 }
@@ -31,6 +33,7 @@ void Data_Structure::DataBaseSvgBuilder::DrawStopsPolylines(const Dict<Data_Stru
         auto polyline = Svg::Polyline{}
                     .SetStrokeColor(renderSettings.color_palette[i++ % size])
                     .SetStrokeWidth(renderSettings.line_width)
+                    .SetStrokeLineJoin("round")
                     .SetStrokeLineCap("round");
         for (auto & stop : bus.second->stops){
             auto & distance = stops.at(stop)->dist;
@@ -44,8 +47,8 @@ void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_St
     std::pair<std::optional<double>, std::optional<double>> min_lon_lat;
     std::pair<std::optional<double>, std::optional<double>> max_lon_lat;
     for (auto & [_, stop] : stops){
-        auto lon = stop->dist.GetLongitude();
-        auto lat = stop->dist.GetLatitude();
+        auto lon = std::abs(stop->dist.GetLongitude());
+        auto lat = std::abs(stop->dist.GetLatitude());
 
         if (!min_lon_lat.first || min_lon_lat.first > lon)
             min_lon_lat.first = lon;
@@ -68,8 +71,8 @@ void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_St
         height_zoom_coef = (renderSettings.height - 2 * renderSettings.padding) /
                 (max_lon_lat.second.value() - min_lon_lat.second.value());
 
-    auto min_if = [](const auto first, const auto sec) {
-        double min = 0;
+    auto min_ = [](const auto first, const auto sec) {
+        double min = 0.;
         if (first != 0 && sec != 0)
             min = std::min(first, sec);
         else if (first != 0)
@@ -77,5 +80,55 @@ void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_St
         else min = sec;
         return min;
     };
-    zoom_coef = min_if(width_zoom_coef, height_zoom_coef);
+    zoom_coef = min_(width_zoom_coef, height_zoom_coef);
+}
+
+void Data_Structure::DataBaseSvgBuilder::DrawStopsRound(const Dict<Data_Structure::Stop> & stops) {
+    auto cal_x = [this](double lon) {
+        return (lon - min_lon) * zoom_coef + renderSettings.padding;
+    };
+    auto cal_y = [this](double lat) {
+        return (max_lat - lat) * zoom_coef + renderSettings.padding;
+    };
+
+    for (auto & [_, stop] : stops){
+        auto & distance = stop->dist;
+        doc.Add(Svg::Circle{}
+                    .SetFillColor("white")
+                    .SetRadius(renderSettings.stop_radius)
+                    .SetCenter({cal_x(distance.GetLongitude()), cal_y(distance.GetLatitude())}));
+    }
+}
+
+void Data_Structure::DataBaseSvgBuilder::DrawStopsText(const Dict<Data_Structure::Stop> & stops) {
+    auto cal_x = [this](double lon) {
+        return (lon - min_lon) * zoom_coef + renderSettings.padding;
+    };
+    auto cal_y = [this](double lat) {
+        return (max_lat - lat) * zoom_coef + renderSettings.padding;
+    };
+
+    for (auto & [_, stop] : stops){
+        auto & distance = stop->dist;
+        auto & name = stop->name;
+        Svg::Text text = Svg::Text{}
+                        .SetPoint({cal_x(distance.GetLongitude()), cal_y(distance.GetLatitude())})
+                        .SetOffset({renderSettings.stop_label_offset[0], renderSettings.stop_label_offset[1]})
+                        .SetFontSize(renderSettings.stop_label_font_size)
+                        .SetFontFamily("Verdana")
+                        .SetData(name);
+
+        Svg::Text substrates = text;
+        substrates
+        .SetFillColor(renderSettings.underlayer_color)
+        .SetStrokeColor(renderSettings.underlayer_color)
+        .SetStrokeWidth(renderSettings.underlayer_width)
+        .SetStrokeLineCap("round")
+        .SetStrokeLineJoin("round");
+
+        text.SetFillColor("black");
+
+        doc.Add(std::move(substrates));
+        doc.Add(std::move(text));
+    }
 }

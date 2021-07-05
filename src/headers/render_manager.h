@@ -40,6 +40,8 @@ namespace Data_Structure {
     private:
         void CalculateCoordinates(const Dict<struct Stop> & stops);
         void DrawStopsPolylines(const Dict<struct Bus> &, const Dict<Data_Structure::Stop> &);
+        void DrawStopsRound(const Dict<Data_Structure::Stop> &);
+        void DrawStopsText(const Dict<Data_Structure::Stop> &);
 
         std::vector<std::pair<double, double>> stops_coordinates;
         RenderSettings renderSettings;
