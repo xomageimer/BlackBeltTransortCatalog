@@ -123,4 +123,9 @@ namespace Json::Serializer{
         }
         output << "}";
     }
+
+    template<>
+    void Serialize<XML::xml>(const Json::Node &node, std::ostream &output){
+        XML::Serializer::Serialize(node.AsXML(), output);
+    }
 }

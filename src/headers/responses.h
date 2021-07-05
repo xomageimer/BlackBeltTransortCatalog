@@ -5,6 +5,7 @@
 #include <string_view>
 #include <memory>
 
+#include "xml.h"
 #include "json.h"
 
 using JsonResponse = Json::Node;
@@ -16,7 +17,7 @@ public:
     int id;
     virtual void MakeJson() = 0;
 
-    Dict const & GetJson() const;
+    [[nodiscard]] Dict const & GetJson() const;
 protected:
     Dict valid_data;
 };
@@ -63,6 +64,13 @@ public:
 
     double total_time;
     std::vector<ItemPtr> items;
+};
+
+struct MapResponse : public Response {
+public:
+    void MakeJson() override;
+
+    XML::xml svg_xml_answer;
 };
 
 struct BadResponse : public Response {

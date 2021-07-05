@@ -1,0 +1,178 @@
+{
+    "routing_settings": {
+        "bus_wait_time": 2,
+        "bus_velocity": 30
+    },
+    "render_settings": {
+        "width": 1200,
+        "height": 1200,
+        "padding": 50,
+        "stop_radius": 5,
+        "line_width": 14,
+        "stop_label_font_size": 20,
+        "stop_label_offset": [
+            7,
+            -3
+        ],
+        "underlayer_color": [
+            255,
+            255,
+            255,
+            0.85
+        ],
+        "underlayer_width": 3,
+        "color_palette": [
+            "green",
+            [
+                255,
+                160,
+                0
+            ],
+            "red"
+        ]
+    },
+    "base_requests": [
+        {
+            "type": "bus",
+            "name": "14",
+            "stops": [
+                "Lisa Chaikina Street",
+                "Electrical networks",
+                "Riviera Bridge",
+                "Sochi Hotel",
+                "Kuban street",
+                "On demand",
+                "Dokuchaeva Street",
+                "Lisa Chaikina Street"
+            ],
+            "is_roundtrip": true
+        },
+        {
+            "type": "bus",
+            "name": "24",
+            "stops": [
+                "Dokuchaeva Street",
+                "Parallel street",
+                "Electrical networks",
+                "Sanatorium Rodina"
+            ],
+            "is_roundtrip": false
+        },
+        {
+            "type": "bus",
+            "name": "114",
+            "stops": [
+                "Marine Station",
+                "Riviera Bridge"
+            ],
+            "is_roundtrip": false
+        },
+        {
+            "type": "stop",
+            "name": "Lisa Chaikina Street",
+            "latitude": 43.590317,
+            "longitude": 39.746833,
+            "road_distances": {
+                "Electrical networks": 4300,
+                "Dokuchaeva Street": 2000
+            }
+        },
+        {
+            "type": "stop",
+            "name": "Marine Station",
+            "latitude": 43.581969,
+            "longitude": 39.719848,
+            "road_distances": {
+                "Riviera Bridge": 850
+            }
+        },
+        {
+            "type": "stop",
+            "name": "Electrical networks",
+            "latitude": 43.598701,
+            "longitude": 39.730623,
+            "road_distances": {
+                "Sanatorium Rodina": 4500,
+                "Parallel street": 1200,
+                "Riviera Bridge": 1900
+            }
+        },
+        {
+            "type": "stop",
+            "name": "Riviera Bridge",
+            "latitude": 43.587795,
+            "longitude": 39.716901,
+            "road_distances": {
+                "Marine Station": 850,
+                "Sochi Hotel": 1740
+            }
+        },
+        {
+            "type": "stop",
+            "name": "Sochi Hotel",
+            "latitude": 43.578079,
+            "longitude": 39.728068,
+            "road_distances": {
+                "Kuban street": 320
+            }
+        },
+        {
+            "type": "stop",
+            "name": "Kuban street",
+            "latitude": 43.578509,
+            "longitude": 39.730959,
+            "road_distances": {
+                "On demand": 370
+            }
+        },
+        {
+            "type": "stop",
+            "name": "On demand",
+            "latitude": 43.579285,
+            "longitude": 39.733742,
+            "road_distances": {
+                "Dokuchaeva Street": 600
+            }
+        },
+        {
+            "type": "stop",
+            "name": "Dokuchaeva Street",
+            "latitude": 43.585586,
+            "longitude": 39.733879,
+            "road_distances": {
+                "Parallel street": 1100
+            }
+        },
+        {
+            "type": "stop",
+            "name": "Parallel street",
+            "latitude": 43.590041,
+            "longitude": 39.732886,
+            "road_distances": {}
+        },
+        {
+            "type": "stop",
+            "name": "Sanatorium Rodina",
+            "latitude": 43.601202,
+            "longitude": 39.715498,
+            "road_distances": {}
+        }
+    ],
+    "stat_requests": [
+        {
+            "id": 826874078,
+            "type": "bus",
+            "name": "14"
+        },
+        {
+            "id": 1086967114,
+            "type": "route",
+            "from": "Marine Station",
+            "to": "Parallel street"
+        },
+        {
+            "id": 1218663236,
+            "type": "map"
+        }
+    ]
+}

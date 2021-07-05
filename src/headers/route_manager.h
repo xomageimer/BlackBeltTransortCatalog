@@ -10,7 +10,7 @@
 #include "responses.h"
 
 template <typename T>
-using Dict = std::unordered_map<std::string, const T *>;
+using Dict = std::map<std::string, const T *>;
 
 namespace Data_Structure {
     using RouteRespType = std::shared_ptr<RouteResponse>;

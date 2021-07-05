@@ -41,6 +41,11 @@ void RouteResponse::MakeJson() {
     valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("items"), std::forward_as_tuple(items_));
 }
 
+void MapResponse::MakeJson() {
+    valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("request_id"), std::forward_as_tuple(id));
+    valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("map"), std::forward_as_tuple(std::move(svg_xml_answer)));
+}
+
 void BadResponse::MakeJson() {
     valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("request_id"), std::forward_as_tuple(id));
     valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("error_message"), std::forward_as_tuple(error_message));

@@ -27,41 +27,6 @@ std::vector<JsonResponse> ReadStatRequests(const DS::DataBase &db, const Json::N
     return std::move(responses);
 }
 
-//#include <thread>
-//#include <mutex>
-//
-//std::vector<JsonResponse> ReadStatRequests(const DS::DataBase &db, const Json::Node &input) {
-//    std::vector<std::thread> threads;
-//    auto thread_size = std::thread::hardware_concurrency() - 1;
-//    threads.resize(thread_size);
-//    auto block_size = input.AsArray().size() / thread_size;
-//    std::vector<JsonResponse> responses;
-//    std::mutex m;
-//    auto cmd = [&responses, &input, &db, &m](size_t start, size_t end){
-//        RequestType req_handler;
-//        for (auto it = input.AsArray().begin() + start; it != input.AsArray().begin() + end; it++) {
-//            req_handler = CreateRequest(ExecuteRequest::AsType.at((*it)["type"].AsString()));
-//            req_handler->ParseFrom((*it));
-//            auto resp = reinterpret_cast<ExecuteRequest *>(req_handler.get())->Process(db);
-//            std::lock_guard lk(m);
-//            responses.emplace_back(std::move(resp));
-//        }
-//    };
-//    auto block_start = 0;
-//    auto block_end = block_size;
-//    for (size_t i = 0; i < thread_size - 1; i++){
-//        threads[i] = std::thread(cmd, block_size, block_end);
-//        block_start = block_end;
-//        block_end += block_size;
-//    }
-//    threads[thread_size - 1] = std::thread(cmd, block_start, input.AsArray().size());
-//
-//    for (auto & el : threads)
-//        el.join();
-//
-//    return std::move(responses);
-//}
-
 DS::DBItem AddStopRequest::Process() {
    return DS::Stop{std::move(title), dist, std::move(adjacent_stops)};
 }
@@ -82,6 +47,10 @@ JsonResponse FindRouteRequest::Process(const DS::DataBase & db) {
     return ProcessResponse(&DS::DataBase::FindRoute, std::ref(db), std::ref(from), std::ref(to));
 }
 
+JsonResponse MapRouteRequest::Process(const DS::DataBase & db) {
+    return ProcessResponse(&DS::DataBase::BuildMap, std::ref(db));
+}
+
 RequestType CreateRequest(IRequest::Type type) {
     switch(type){
         case IRequest::Type::READ_BUS:
@@ -94,6 +63,8 @@ RequestType CreateRequest(IRequest::Type type) {
             return std::make_unique<FindStopRequest>();
         case IRequest::Type::FIND_ROUTE:
             return std::make_unique<FindRouteRequest>();
+        case IRequest::Type::BUILD_MAP:
+            return std::make_unique<MapRouteRequest>();
     }
     throw std::logic_error("Bad type");
 }

@@ -11,6 +11,7 @@
 namespace Svg {
     struct Rgb{
         uint8_t red, green, blue;
+        std::optional<double> alpha;
     };
     struct Color {
         Color() = default;
@@ -21,9 +22,14 @@ namespace Svg {
         explicit operator std::string() const{
             if (std::holds_alternative<Rgb>(color)) {
                 auto const & rgb_c = std::get<Rgb>(color);
-                return std::string("rgb(" + std::to_string(rgb_c.red) + ", "
-                    + std::to_string(rgb_c.green) + ", "
-                        + std::to_string(rgb_c.blue)) + ")";
+                if (!rgb_c.alpha)
+                    return std::string("rgb(" + std::to_string(rgb_c.red) + ", "
+                        + std::to_string(rgb_c.green) + ", "
+                            + std::to_string(rgb_c.blue)) + ")";
+                else
+                    return std::string("rgba(" + std::to_string(rgb_c.red) + ", "
+                                       + std::to_string(rgb_c.green) + ", "
+                                       + std::to_string(rgb_c.blue)) + ", " + std::to_string(*rgb_c.alpha) + ")";
             } else {
                 return std::string(std::get<std::string>(color));
             }
@@ -175,6 +181,9 @@ namespace Svg {
         }
 
         void Render(std::ostream & out = std::cout);
+        void SimpleRender();
+
+        [[nodiscard]] XML::xml Get() const;
     private:
         std::vector<sigma_types> primitives;
         std::vector<XML::xml> xml_s;

@@ -10,13 +10,14 @@
 
 #include <unordered_map>
 
-#include "route_structure.h"
-#include "distance.h"
+#include "route_manager.h"
+#include "render_manager.h"
 
+#include "distance.h"
 #include "responses.h"
 
 template <typename T>
-using Dict = std::unordered_map<std::string, const T *>;
+using Dict = std::map<std::string, const T *>;
 
 namespace Data_Structure {
     struct Bus {
@@ -36,6 +37,7 @@ namespace Data_Structure {
     using DBItem = std::variant<Stop, Bus>;
     using StopRespType = std::shared_ptr<StopResponse>;
     using BusRespType = std::shared_ptr<BusResponse>;
+    using MapRespType = std::shared_ptr<MapResponse>;
 
     struct DataBase{
     private:
@@ -43,14 +45,18 @@ namespace Data_Structure {
         std::unordered_map<std::string, BusRespType> buses;
 
         std::unique_ptr<DataBaseRouter> router;
+        std::unique_ptr<DataBaseSvgBuilder> svg_builder;
     public:
         DataBase(std::vector<DBItem>, std::pair<double, int> routing_settings_);
+        DataBase(std::vector<DBItem>, std::pair<double, int> routing_settings_, Json::Node const & render_settings);
 
         ResponseType FindBus(const std::string & title) const;
         ResponseType FindStop(const std::string & title) const;
         ResponseType FindRoute(const std::string & from, const std::string & to) const;
+        ResponseType BuildMap() const;
     private:
         static ResponseType GenerateBad() ;
+        std::pair<Dict<Stop>, Dict<Bus>> Init(std::vector<DBItem> const &);
     };
 }
 

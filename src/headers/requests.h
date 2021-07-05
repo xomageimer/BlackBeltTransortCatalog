@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "json.h"
-#include "data_structure.h"
+#include "data_manager.h"
 #include <functional>
 
 namespace DS = Data_Structure;
@@ -17,7 +17,8 @@ public:
         READ_BUS,
         FIND_STOP,
         FIND_BUS,
-        FIND_ROUTE
+        FIND_ROUTE,
+        BUILD_MAP
     };
     virtual void ParseFrom(Json::Node const & json_node) = 0;
     virtual ~IRequest() = default;
@@ -26,9 +27,10 @@ public:
 struct ExecuteRequest : public  IRequest {
 public:
     inline static const std::map<std::string_view, Type> AsType{
-            {"Bus", Type::FIND_BUS},
-            {"Stop", Type::FIND_STOP},
-            {"Route", Type::FIND_ROUTE}
+            {"bus", Type::FIND_BUS},
+            {"stop", Type::FIND_STOP},
+            {"route", Type::FIND_ROUTE},
+            {"map", Type::BUILD_MAP}
     };
     inline static int requests_count = 0;
     void ParseFrom(Json::Node const & json_node) override {
@@ -81,12 +83,20 @@ private:
     std::string from, to;
 };
 
+struct MapRouteRequest final : public ExecuteRequest{
+public:
+    JsonResponse Process(const DS::DataBase &) override;
+    void ParseFrom(Json::Node const & json_node) override {
+        ExecuteRequest::ParseFrom(json_node);
+    }
+};
+
 struct ModifyRequest : public IRequest {
 public:
     using IRequest::IRequest;
     inline static const std::map<std::string_view, Type> AsType{
-            {"Bus", Type::READ_BUS},
-            {"Stop", Type::READ_STOP}
+            {"bus", Type::READ_BUS},
+            {"stop", Type::READ_STOP}
     };
     void ParseFrom(Json::Node const & json_node) override {
         title = json_node["name"].AsString();

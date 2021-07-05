@@ -173,3 +173,25 @@ Svg::Document::Document() {
     xml_.data = std::move(arr);
     xml_s.emplace_back(xml_);
 }
+
+void Svg::Document::SimpleRender() {
+    XML::config_with_parameters conf;
+    conf.open = "svg";
+    conf.close = "/svg";
+    conf.data.emplace_back("version", std::to_string(1.1));
+    conf.data.emplace_back("xmlns", "http://www.w3.org/2000/svg");
+
+    std::vector<XML::xml> pod_xml;
+    auto visitor = [&pod_xml](const auto & prim_node) {
+        pod_xml.emplace_back(prim_node.MakeXml());
+    };
+    for (auto & el : primitives){
+        std::visit(visitor, el);
+    }
+    conf.parameters->emplace<std::vector<XML::xml>>(pod_xml);
+    xml_s.emplace_back(conf);
+}
+
+XML::xml Svg::Document::Get() const {
+    return xml_s;
+}

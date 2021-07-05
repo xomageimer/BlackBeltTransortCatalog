@@ -4,7 +4,7 @@
 
 template<>
 void XML::Serializer::Serialize<std::string>(const std::string &xml_str, std::ostream &out) {
-    out << std::quoted(xml_str);
+    out << "\\\"" << xml_str << "\\\"";
 }
 
 template<>

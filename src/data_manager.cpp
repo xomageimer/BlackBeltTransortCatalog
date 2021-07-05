@@ -1,8 +1,18 @@
-#include "data_structure.h"
+#include "data_manager.h"
 
 #include <algorithm>
 
 Data_Structure::DataBase::DataBase(std::vector<DBItem> elems, const std::pair<double, int> routing_settings_) {
+    auto [stops_ptrs, buses_ptrs] = Init(elems);
+
+    router = std::make_unique<DataBaseRouter>(
+            stops_ptrs,
+            buses_ptrs,
+            routing_settings_
+    );
+}
+
+std::pair<Dict<Data_Structure::Stop>, Dict<Data_Structure::Bus>> Data_Structure::DataBase::Init(std::vector<DBItem> const & elems) {
     Dict<Stop> stops_ptrs;
     Dict<Bus> buses_ptrs;
     for (auto & el : elems){
@@ -26,8 +36,8 @@ Data_Structure::DataBase::DataBase(std::vector<DBItem> elems, const std::pair<do
             buses.emplace(bus->name, std::move(bus_resp));
 
             for (auto &el : !bus->is_roundtrip
-                    ? Ranges::ToMiddle(Ranges::AsRange(bus->stops))
-                    : Ranges::AsRange(bus->stops)) {
+                            ? Ranges::ToMiddle(Ranges::AsRange(bus->stops))
+                            : Ranges::AsRange(bus->stops)) {
                 stops[el]->buses.emplace(bus->name);
             }
         }
@@ -35,11 +45,67 @@ Data_Structure::DataBase::DataBase(std::vector<DBItem> elems, const std::pair<do
         std::cout << "The DB condition is violated\n";
     }
 
+    return {stops_ptrs, buses_ptrs};
+}
+
+#define METHOD(property, m) ren_set.property = render_settings[#property].m
+
+Data_Structure::DataBase::DataBase(std::vector<DBItem> items, std::pair<double, int> routing_settings_,
+                                   const Json::Node &render_settings) {
+
+    const auto [stops_ptrs, buses_ptrs] = Init(items);
+
     router = std::make_unique<DataBaseRouter>(
             stops_ptrs,
             buses_ptrs,
             routing_settings_
     );
+
+    if (std::holds_alternative<std::map<std::string, Json::Node>>(render_settings) && !render_settings.AsMap().empty()) {
+        RenderSettings ren_set;
+
+        METHOD(width, AsNumber<double>());
+        METHOD(height, AsNumber<double>());
+        METHOD(padding, AsNumber<double>());
+        METHOD(stop_radius, AsNumber<double>());
+        METHOD(line_width, AsNumber<double>());
+
+        METHOD(stop_label_font_size, AsNumber<int>());
+        METHOD(underlayer_width, AsNumber<double>());
+
+        size_t i = 0;
+        for (auto const & el : render_settings["stop_label_offset"].AsArray()){
+            ren_set.stop_label_offset[i] = el.AsNumber<double>();
+        }
+
+        auto get_color = [](const Json::Node & r_s) {
+            Svg::Color color;
+            if (std::holds_alternative<std::vector<Json::Node>>(r_s)) {
+                auto rgba = r_s.AsArray();
+                Svg::Rgb rgb{static_cast<uint8_t>(rgba[0].AsNumber<int>()),
+                             static_cast<uint8_t>(rgba[1].AsNumber<int>()),
+                             static_cast<uint8_t>(rgba[2].AsNumber<int>())};
+                if (rgba.size() == 4) {
+                    rgb.alpha.emplace(rgba[3].AsNumber<double>());
+                }
+                color = Svg::Color(rgb);
+            } else {
+                color = Svg::Color(r_s.AsString());
+            }
+            return color;
+        };
+
+        ren_set.underlayer_color = get_color(render_settings["underlayer_color"]);
+        for (auto const & el : render_settings["color_palette"].AsArray()) {
+            ren_set.color_palette.emplace_back(get_color(el));
+        }
+
+        svg_builder = std::make_unique<DataBaseSvgBuilder>(
+                stops_ptrs,
+                buses_ptrs,
+                std::move(ren_set)
+        );
+    }
 }
 
 ResponseType Data_Structure::DataBase::FindBus(const std::string &title) const {
@@ -64,6 +130,12 @@ ResponseType Data_Structure::DataBase::FindRoute(const std::string &from, const 
         return ret;
     }
     else return GenerateBad();
+}
+
+ResponseType Data_Structure::DataBase::BuildMap() const {
+    if (!svg_builder)
+        return GenerateBad();
+    return svg_builder->RenderMap();
 }
 
 ResponseType Data_Structure::DataBase::GenerateBad() {

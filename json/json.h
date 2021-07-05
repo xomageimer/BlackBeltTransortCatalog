@@ -9,6 +9,8 @@
 #include <vector>
 #include <iomanip>
 
+#include "xml.h"
+
 namespace Json {
     template<typename T>
     struct is_number : std::false_type {};
@@ -19,7 +21,7 @@ namespace Json {
     struct is_number<double> : std::true_type {};
 
     struct Node;
-    using variant_inheritance = std::variant<int, double, bool, std::string, std::vector<Node>, std::map<std::string, Node>>;
+    using variant_inheritance = std::variant<int, double, bool, std::string, std::vector<Node>, std::map<std::string, Node>, XML::xml>;
 
     struct Node : public Json::variant_inheritance {
     public:
@@ -53,6 +55,10 @@ namespace Json {
 
         [[nodiscard]] inline std::map<std::string, Node> const &AsMap() const {
             return std::get<std::map<std::string, Node>>(*this);
+        }
+
+        [[nodiscard]] inline XML::xml const &AsXML() const {
+            return std::get<XML::xml>(*this);
         }
 
         [[nodiscard]] const Json::Node & operator[](std::string const & key) const {
@@ -108,6 +114,9 @@ namespace Json {
         std::enable_if_t<is_number<T>::value, void> Serialize(const Json::Node &node, std::ostream &output) {
             output << node.AsNumber<T>();
         }
+
+        template<>
+        void Serialize<XML::xml>(const Json::Node &node, std::ostream &output);
 
         template<>
         void Serialize<std::string>(const Json::Node &node, std::ostream &output);

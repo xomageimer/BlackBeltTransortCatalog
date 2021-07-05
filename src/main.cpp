@@ -2,7 +2,7 @@
 
 #include "requests.h"
 #include "responses.h"
-#include "data_structure.h"
+#include "data_manager.h"
 
 int main(){
     const auto doc = Json::Load(std::cin);
@@ -10,7 +10,8 @@ int main(){
 
     const DS::DataBase db{
             ReadBaseRequests(input_map["base_requests"]),
-            ReadRoutingSettings(input_map["routing_settings"])
+            ReadRoutingSettings(input_map["routing_settings"]),
+            input_map["render_settings"]
     };
 
     std::cout << std::setprecision(6);
