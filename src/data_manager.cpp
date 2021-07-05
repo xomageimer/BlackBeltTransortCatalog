@@ -107,6 +107,10 @@ Data_Structure::DataBase::DataBase(std::vector<DBItem> items, std::pair<double, 
             ren_set.color_palette.emplace_back(get_color(el));
         }
 
+        for (auto const & el : render_settings["layers"].AsArray()){
+            ren_set.layers.emplace_back(el.AsString());
+        }
+
         svg_builder = std::make_unique<DataBaseSvgBuilder>(
                 stops_ptrs,
                 buses_ptrs,

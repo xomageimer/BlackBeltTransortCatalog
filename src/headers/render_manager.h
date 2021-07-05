@@ -1,7 +1,8 @@
 #ifndef RENDER_MANAGER_H
 #define RENDER_MANAGER_H
 
-#include <unordered_map>
+#include <map>
+#include <memory>
 #include <functional>
 
 #include "responses.h"
@@ -31,29 +32,69 @@ namespace Data_Structure {
         double underlayer_width;
 
         std::vector<Svg::Color> color_palette;
+
+        std::vector<std::string> layers;
+    };
+
+    struct ILayersStrategy {
+        virtual void Draw(struct DataBaseSvgBuilder *) = 0;
+    };
+
+    struct BusPolylinesDrawer : public ILayersStrategy{
+    public:
+        explicit BusPolylinesDrawer(const Dict<struct Stop> & stp_, const Dict<struct Bus> & bus_) : stops(stp_), buses(bus_) {}
+        void Draw(struct DataBaseSvgBuilder *) override;
+    private:
+        const Dict<struct Bus> & buses;
+        const Dict<struct Stop> & stops;
+    };
+
+    struct StopsRoundDrawer : public ILayersStrategy{
+    public:
+        explicit StopsRoundDrawer(const Dict<Data_Structure::Stop> & stp_) : stops(stp_) {}
+        void Draw(struct DataBaseSvgBuilder *) override;
+    private:
+        const Dict<struct Stop> & stops;
+    };
+
+    struct StopsTextDrawer : public ILayersStrategy{
+    public:
+        explicit StopsTextDrawer(const Dict<Data_Structure::Stop> & stp_) : stops(stp_) {}
+        void Draw(struct DataBaseSvgBuilder *) override;
+    private:
+        const Dict<struct Stop> & stops;
+    };
+
+    struct BusTextDrawer : public ILayersStrategy{
+    public:
+        explicit BusTextDrawer(const Dict<Data_Structure::Stop> & stps_, const Dict<Data_Structure::Bus> & bus_) : stops(stps_),  buses(bus_) {}
+        void Draw(struct DataBaseSvgBuilder *) override;
+    private:
+        const Dict<struct Bus> & buses;
+        const Dict<struct Stop> & stops;
     };
 
     struct DataBaseSvgBuilder {
     public:
-        using RouteRespType = std::shared_ptr<RouteResponse>;
-
         explicit DataBaseSvgBuilder(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses,
                                     RenderSettings render_set);
         [[nodiscard]] MapRespType RenderMap() const;
 
+        friend BusPolylinesDrawer;
+        friend StopsRoundDrawer;
+        friend StopsTextDrawer;
+        friend BusTextDrawer;
     private:
+        void Init(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses);
         void CalculateCoordinates(const Dict<struct Stop> & stops);
-        void DrawStopsPolylines(const Dict<struct Bus> &, const Dict<Data_Structure::Stop> &);
-        void DrawStopsRound(const Dict<Data_Structure::Stop> &);
-        void DrawStopsText(const Dict<Data_Structure::Stop> &);
-        void DrawBusText(const Dict<Data_Structure::Bus> & buses, const Dict<Data_Structure::Stop> & stops);
 
-        std::vector<std::pair<double, double>> stops_coordinates;
         RenderSettings renderSettings;
         Svg::Document doc;
 
         std::function<double(double)> cal_x;
         std::function<double(double)> cal_y;
+
+        std::map<std::string, std::shared_ptr<ILayersStrategy>> layersStrategy;
     };
 }
 
