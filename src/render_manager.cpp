@@ -12,9 +12,9 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
                                        RenderSettings render_set) : renderSettings(std::move(render_set)){
     CalculateCoordinates(stops);
     DrawStopsPolylines(buses, stops);
+    DrawBusText(buses, stops);
     DrawStopsRound(stops);
     DrawStopsText(stops);
-    DrawBusText(buses, stops);
 
     doc.SimpleRender();
 }
@@ -126,7 +126,7 @@ void Data_Structure::DataBaseSvgBuilder::DrawBusText(const Dict<Data_Structure::
     size_t i = 0;
     for (auto & [_, bus] : buses){
         auto beg = bus->stops.begin();
-        auto last = std::prev(bus->stops.end());
+        auto last = std::prev(Ranges::ToMiddle(Ranges::AsRange(bus->stops)).end());
 
         auto text = Svg::Text{}
                     .SetOffset({renderSettings.bus_label_offset[0],
@@ -147,32 +147,32 @@ void Data_Structure::DataBaseSvgBuilder::DrawBusText(const Dict<Data_Structure::
             auto text2 = text;
             auto substrates2 = substrates;
 
-            text.SetPoint({stops.at(*beg)->dist.GetLongitude(),
-                           stops.at(*beg)->dist.GetLatitude()});
-            substrates.SetPoint({stops.at(*beg)->dist.GetLongitude(),
-                                 stops.at(*beg)->dist.GetLatitude()});
+            text.SetPoint({cal_x(stops.at(*beg)->dist.GetLongitude()),
+                           cal_y( stops.at(*beg)->dist.GetLatitude())});
+            substrates.SetPoint({cal_x(stops.at(*beg)->dist.GetLongitude()),
+                                 cal_y(stops.at(*beg)->dist.GetLatitude())});
 
-            doc.Add(text);
             doc.Add(substrates);
+            doc.Add(text);
 
-            text2.SetPoint({stops.at(*last)->dist.GetLongitude(),
-                            stops.at(*last)->dist.GetLatitude()});
-            substrates2.SetPoint({stops.at(*last)->dist.GetLongitude(),
-                                 stops.at(*last)->dist.GetLatitude()});
+            text2.SetPoint({cal_x(stops.at(*last)->dist.GetLongitude()),
+                            cal_y(stops.at(*last)->dist.GetLatitude())});
+            substrates2.SetPoint({cal_x(stops.at(*last)->dist.GetLongitude()),
+                                  cal_y(stops.at(*last)->dist.GetLatitude())});
 
-            doc.Add(text2);
             doc.Add(substrates2);
+            doc.Add(text2);
         } else {
             auto text2 = text;
             auto substrates2 = substrates;
 
-            text.SetPoint({stops.at(*beg)->dist.GetLongitude(),
-                           stops.at(*beg)->dist.GetLatitude()});
-            substrates.SetPoint({stops.at(*beg)->dist.GetLongitude(),
-                                 stops.at(*beg)->dist.GetLatitude()});
+            text.SetPoint({cal_x(stops.at(*beg)->dist.GetLongitude()),
+                           cal_y(stops.at(*beg)->dist.GetLatitude())});
+            substrates.SetPoint({cal_x(stops.at(*beg)->dist.GetLongitude()),
+                                 cal_y(stops.at(*beg)->dist.GetLatitude())});
 
-            doc.Add(text);
             doc.Add(substrates);
+            doc.Add(text);
         }
     }
 }
