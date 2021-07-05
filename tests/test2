@@ -6,31 +6,36 @@
         }
     ],
     "render_settings": {
-        "underlayer_width": 3,
-        "height": 950,
-        "stop_radius": 3,
-        "underlayer_color": [
-            255,
-            255,
-            255,
-            0.85
-        ],
-        "width": 1500,
-        "stop_label_font_size": 13,
-        "padding": 50,
-        "color_palette": [
-            "red",
-            "green",
-            "blue",
-            "brown",
-            "orange"
-        ],
-        "stop_label_offset": [
-            7,
-            -3
-        ],
-        "line_width": 10
-    },
+           "bus_label_font_size": 18,
+           "padding": 50,
+           "height": 950,
+           "line_width": 10,
+           "underlayer_color": [
+               255,
+               255,
+               255,
+               0.85
+           ],
+           "underlayer_width": 3,
+           "stop_label_font_size": 13,
+           "stop_radius": 3,
+           "width": 1500,
+           "bus_label_offset": [
+               7,
+               15
+           ],
+           "color_palette": [
+               "red",
+               "green",
+               "blue",
+               "brown",
+               "orange"
+           ],
+           "stop_label_offset": [
+               7,
+               -3
+           ]
+       },
     "base_requests": [
         {
             "stops": [

@@ -139,12 +139,14 @@ namespace Svg {
         Text & SetFontSize(uint32_t) &;
         Text & SetFontFamily(const std::string &) &;
         Text & SetData(const std::string &) &;
+        Text & SetFontWeight(const std::string &) &;
 
         Text && SetPoint(Point) &&;
         Text && SetOffset(Point) &&;
         Text && SetFontSize(uint32_t) &&;
         Text && SetFontFamily(const std::string &) &&;
         Text && SetData(const std::string &) &&;
+        Text && SetFontWeight(const std::string &) &&;
 
         [[nodiscard]] XML::xml MakeXml() const;
     private:
@@ -152,6 +154,7 @@ namespace Svg {
         Point offset;
         uint32_t font_size {1};
         std::string font_family;
+        std::string font_weight;
         XML::text text;
     };
 

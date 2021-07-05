@@ -73,9 +73,16 @@ Data_Structure::DataBase::DataBase(std::vector<DBItem> items, std::pair<double, 
         METHOD(stop_label_font_size, AsNumber<int>());
         METHOD(underlayer_width, AsNumber<double>());
 
+        METHOD(bus_label_font_size, AsNumber<int>());
+
         size_t i = 0;
         for (auto const & el : render_settings["stop_label_offset"].AsArray()){
             ren_set.stop_label_offset[i++] = el.AsNumber<double>();
+        }
+
+        i = 0;
+        for (auto const & el : render_settings["bus_label_offset"].AsArray()){
+            ren_set.bus_label_offset[i++] = el.AsNumber<double>();
         }
 
         auto get_color = [](const Json::Node & r_s) {

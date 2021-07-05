@@ -99,6 +99,11 @@ Svg::Text &Svg::Text::SetData(const std::string & data) & {
     return *this;
 }
 
+Svg::Text &Svg::Text::SetFontWeight(const std::string & f_weight) &{
+    font_weight = f_weight;
+    return *this;
+}
+
 Svg::Text &&Svg::Text::SetPoint(Svg::Point pnt) && {
     point = pnt;
     return std::move(*this);
@@ -124,6 +129,12 @@ Svg::Text &&Svg::Text::SetData(const std::string & data) && {
     return std::move(*this);
 }
 
+Svg::Text &&Svg::Text::SetFontWeight(const std::string & f_weight) &&{
+    font_weight = f_weight;
+    return std::move(*this);
+}
+
+
 XML::xml Svg::Text::MakeXml() const {
     auto xml = Primitive<Text>::MakeXml();
     auto xml_par = XML::config_with_parameters();
@@ -138,6 +149,8 @@ XML::xml Svg::Text::MakeXml() const {
     xml_par.data.emplace_back("font-size", std::to_string(font_size));
     if (!font_family.empty())
         xml_par.data.emplace_back("font-family", font_family);
+    if (!font_weight.empty())
+        xml_par.data.emplace_back("font-weight", font_weight);
     xml_par.parameters->emplace<XML::text>(text);
 
     return xml_par;

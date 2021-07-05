@@ -2,6 +2,7 @@
 #define RENDER_MANAGER_H
 
 #include <unordered_map>
+#include <functional>
 
 #include "responses.h"
 
@@ -23,6 +24,9 @@ namespace Data_Structure {
         int stop_label_font_size;
         double stop_label_offset[2];
 
+        int bus_label_font_size;
+        double bus_label_offset[2];
+
         Svg::Color underlayer_color;
         double underlayer_width;
 
@@ -42,14 +46,14 @@ namespace Data_Structure {
         void DrawStopsPolylines(const Dict<struct Bus> &, const Dict<Data_Structure::Stop> &);
         void DrawStopsRound(const Dict<Data_Structure::Stop> &);
         void DrawStopsText(const Dict<Data_Structure::Stop> &);
+        void DrawBusText(const Dict<Data_Structure::Bus> & buses, const Dict<Data_Structure::Stop> & stops);
 
         std::vector<std::pair<double, double>> stops_coordinates;
         RenderSettings renderSettings;
         Svg::Document doc;
 
-        double min_lon;
-        double max_lat;
-        double zoom_coef;
+        std::function<double(double)> cal_x;
+        std::function<double(double)> cal_y;
     };
 }
 
