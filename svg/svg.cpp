@@ -4,8 +4,8 @@ template<typename cur_prim>
 XML::config Svg::Primitive<cur_prim>::MakeXml() const {
     XML::config xml;
 
-    xml.data.emplace_back("fill", (fill_color != Svg::NoneColor ? static_cast<std::string>(fill_color) : "none"));
-    xml.data.emplace_back("stroke", (stroke_color != Svg::NoneColor ? static_cast<std::string>(stroke_color) : "none"));
+    xml.data.emplace_back("fill", (!fill_color.IsNone() ? static_cast<std::string>(fill_color) : "none"));
+    xml.data.emplace_back("stroke", (!stroke_color.IsNone() ? static_cast<std::string>(stroke_color) : "none"));
     xml.data.emplace_back("stroke-width", std::to_string(stroke_width));
 
     if (!type_of_stroke_linecap.empty())

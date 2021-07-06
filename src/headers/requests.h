@@ -158,5 +158,6 @@ RequestType CreateRequest(IRequest::Type type);
 std::vector<DS::DBItem> ReadBaseRequests(Json::Node const & input);
 std::pair<double, int> ReadRoutingSettings(Json::Node const & input);
 std::vector<JsonResponse> ReadStatRequests(const DS::DataBase & db, Json::Node const & input);
+DS::RenderSettings ReadRenderSettings(Json::Node const & input);
 
 #endif //REQUESTS_H

@@ -9,19 +9,23 @@
 #include <string>
 
 namespace Svg {
-    struct Rgb{
+    struct Rgba{
         uint8_t red, green, blue;
         std::optional<double> alpha;
     };
     struct Color {
-        Color() = default;
+        Color() : color(std::monostate{}) {};
         Color(std::string const & color_str) : color(color_str) {};
         Color(const char * color_str) : color(color_str) {};
-        Color(Svg::Rgb const & color_rgb) : color(color_rgb) {}
+        Color(Svg::Rgba const & color_rgb) : color(color_rgb) {}
+
+        inline bool IsNone() const {
+            return std::holds_alternative<std::monostate>(color);
+        }
 
         explicit operator std::string() const{
-            if (std::holds_alternative<Rgb>(color)) {
-                auto const & rgb_c = std::get<Rgb>(color);
+            if (std::holds_alternative<Rgba>(color)) {
+                auto const & rgb_c = std::get<Rgba>(color);
                 if (!rgb_c.alpha)
                     return std::string("rgb(" + std::to_string(rgb_c.red) + ", "
                         + std::to_string(rgb_c.green) + ", "
@@ -35,14 +39,9 @@ namespace Svg {
             }
         }
 
-        std::variant<std::string, Rgb> color;
+    private:
+        std::variant<std::monostate, std::string, Rgba> color;
     };
-    inline bool operator==(const Color & color1, const Color & color2){
-        return color1.color == color2.color;
-    }
-    inline bool operator!=(const Color & color1, const Color & color2){
-        return color1.color != color2.color;
-    }
     [[maybe_unused]] const Color NoneColor {};
 
     struct Point{

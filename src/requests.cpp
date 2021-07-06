@@ -68,3 +68,59 @@ RequestType CreateRequest(IRequest::Type type) {
     }
     throw std::logic_error("Bad type");
 }
+
+#define METHOD(property, m) ren_set.property = render_settings[#property].m
+
+DS::RenderSettings ReadRenderSettings(const Json::Node &input) {
+        auto render_settings = input.AsMap();
+        DS::RenderSettings ren_set;
+
+        METHOD(width, AsNumber<double>());
+        METHOD(height, AsNumber<double>());
+        METHOD(padding, AsNumber<double>());
+        METHOD(stop_radius, AsNumber<double>());
+        METHOD(line_width, AsNumber<double>());
+
+        METHOD(stop_label_font_size, AsNumber<int>());
+        METHOD(underlayer_width, AsNumber<double>());
+
+        METHOD(bus_label_font_size, AsNumber<int>());
+
+        size_t i = 0;
+        for (auto const & el : render_settings["stop_label_offset"].AsArray()){
+            ren_set.stop_label_offset[i++] = el.AsNumber<double>();
+        }
+
+        i = 0;
+        for (auto const & el : render_settings["bus_label_offset"].AsArray()){
+            ren_set.bus_label_offset[i++] = el.AsNumber<double>();
+        }
+
+        auto get_color = [](const Json::Node & r_s) {
+            Svg::Color color;
+            if (std::holds_alternative<std::vector<Json::Node>>(r_s)) {
+                auto rgba = r_s.AsArray();
+                Svg::Rgba rgb{static_cast<uint8_t>(rgba[0].AsNumber<int>()),
+                              static_cast<uint8_t>(rgba[1].AsNumber<int>()),
+                              static_cast<uint8_t>(rgba[2].AsNumber<int>())};
+                if (rgba.size() == 4) {
+                    rgb.alpha.emplace(rgba[3].AsNumber<double>());
+                }
+                color = Svg::Color(rgb);
+            } else {
+                color = Svg::Color(r_s.AsString());
+            }
+            return color;
+        };
+
+        ren_set.underlayer_color = get_color(render_settings["underlayer_color"]);
+        for (auto const & el : render_settings["color_palette"].AsArray()) {
+            ren_set.color_palette.emplace_back(get_color(el));
+        }
+
+        for (auto const & el : render_settings["layers"].AsArray()){
+            ren_set.layers.emplace_back(el.AsString());
+        }
+
+        return std::move(ren_set);
+}

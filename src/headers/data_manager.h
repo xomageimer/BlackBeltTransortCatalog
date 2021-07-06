@@ -47,8 +47,8 @@ namespace Data_Structure {
         std::unique_ptr<DataBaseRouter> router;
         std::unique_ptr<DataBaseSvgBuilder> svg_builder;
     public:
-        DataBase(std::vector<DBItem>, std::pair<double, int> routing_settings_);
-        DataBase(std::vector<DBItem>, std::pair<double, int> routing_settings_, Json::Node const & render_settings);
+        DataBase(const std::vector<DBItem>&, std::pair<double, int> routing_settings_);
+        DataBase(std::vector<DBItem>, std::pair<double, int> routing_settings_, RenderSettings render_settings);
 
         ResponseType FindBus(const std::string & title) const;
         ResponseType FindStop(const std::string & title) const;

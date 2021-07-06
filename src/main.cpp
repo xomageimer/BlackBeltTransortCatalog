@@ -11,7 +11,7 @@ int main(){
     const DS::DataBase db{
             ReadBaseRequests(input_map["base_requests"]),
             ReadRoutingSettings(input_map["routing_settings"]),
-            input_map["render_settings"]
+            ReadRenderSettings(input_map["render_settings"])
     };
 
     std::cout << std::setprecision(6);
