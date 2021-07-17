@@ -38,7 +38,8 @@
             "layers": [
                "bus_lines",
                "stop_points",
-               "bus_labels"
+               "bus_labels",
+               "stop_labels"
             ]
        },
     "base_requests": [

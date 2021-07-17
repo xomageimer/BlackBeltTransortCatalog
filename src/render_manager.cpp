@@ -1,6 +1,8 @@
 #include "render_manager.h"
 #include "data_manager.h"
 
+#include<cmath>
+
 Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderMap() const {
     MapRespType MapResp = std::make_shared<MapResponse>();
     MapResp->svg_xml_answer = doc.Get();
@@ -19,12 +21,61 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
     doc.SimpleRender();
 }
 
+auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_Structure::Stop> &stops) {
+    std::map<double, std::string> sorted_x;
+    std::map<double, std::string, std::greater<>> sorted_y;
+
+    for (auto & [_, stop] : stops) {
+        auto distance = stop->dist;
+        sorted_x.emplace(distance.GetLongitude(), stop->name);
+        sorted_y.emplace(distance.GetLatitude(), stop->name);
+    }
+
+    int point_size = sorted_x.size() - 1;
+    std::map<std::string, double> new_x;
+    std::map<std::string, double> new_y;
+    if (point_size == 0){
+        new_x.emplace(stops.begin()->first, renderSettings.padding);
+        new_y.emplace(stops.begin()->first, renderSettings.height - renderSettings.padding);
+    } else {
+        double x_step = (renderSettings.width - 2. * renderSettings.padding) / point_size;
+        double y_step = (renderSettings.height - 2. * renderSettings.padding) / point_size;
+
+        size_t i = 0;
+        for (auto &el : sorted_x) {
+            new_x.emplace(el.second, i * x_step + renderSettings.padding);
+            i++;
+        }
+        i = 0;
+        for (auto &el : sorted_y) {
+            new_y.emplace(el.second, renderSettings.height - renderSettings.padding - i * y_step);
+            i++;
+        }
+    }
+
+    std::map<std::string, Distance> CompressCoord;
+
+    for (auto & [stop_name, _] : stops){
+        CompressCoord.emplace(stop_name, Distance{new_x.at(stop_name), new_y.at(stop_name)});
+    }
+    return CompressCoord;
+}
+
 void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_Structure::Stop> &stops) {
+    auto compress_stops = CoordinateCompression(stops);
+
+    if (stops.size() == 1){
+        auto stop = stops.begin()->second;
+        auto & dist = compress_stops.begin()->second;
+        stops_coordinates.emplace(stop->name, Svg::Point{dist.GetLongitude(), dist.GetLatitude()});
+        return;
+    }
+
     std::pair<std::optional<double>, std::optional<double>> min_lon_lat;
     std::pair<std::optional<double>, std::optional<double>> max_lon_lat;
-    for (auto & [_, stop] : stops){
-        auto lon = std::abs(stop->dist.GetLongitude());
-        auto lat = std::abs(stop->dist.GetLatitude());
+    for (auto & [stop_name, dist] : compress_stops){
+        auto lon = std::abs(dist.GetLongitude());
+        auto lat = std::abs(dist.GetLatitude());
 
         if (!min_lon_lat.first || min_lon_lat.first > lon)
             min_lon_lat.first = lon;
@@ -58,12 +109,16 @@ void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_St
     };
     auto zoom_coef = min_(width_zoom_coef, height_zoom_coef);
 
-    cal_x = [min_lon = min_lon, zoom_coef = zoom_coef, padding = this->renderSettings.padding](double lon) {
+    auto call_x = [min_lon = min_lon, zoom_coef = zoom_coef, padding = this->renderSettings.padding](double lon) {
         return (std::abs(lon) - min_lon) * zoom_coef + padding;
     };
-    cal_y = [max_lat = max_lat, zoom_coef = zoom_coef, padding = this->renderSettings.padding](double lat) {
+    auto call_y = [max_lat = max_lat, zoom_coef = zoom_coef, padding = this->renderSettings.padding](double lat) {
         return (max_lat - std::abs(lat)) * zoom_coef + padding;
     };
+
+    for (auto & [stop_name, dist] : compress_stops){
+        stops_coordinates.emplace(stop_name, Svg::Point{call_x(dist.GetLongitude()), call_y(dist.GetLatitude())});
+    }
 }
 
 void Data_Structure::DataBaseSvgBuilder::Init(const Dict<Data_Structure::Stop> &stops,
@@ -95,7 +150,7 @@ void Data_Structure::BusPolylinesDrawer::Draw(struct DataBaseSvgBuilder * db_svg
                 .SetStrokeLineCap("round");
         for (auto & stop : bus.second->stops){
             auto & distance = stops.at(stop)->dist;
-            polyline.AddPoint({db_svg->cal_x(distance.GetLongitude()), db_svg->cal_y(distance.GetLatitude())});
+            polyline.AddPoint({db_svg->stops_coordinates.at(stops.at(stop)->name)});
         }
         db_svg->doc.Add(std::move(polyline));
     }
@@ -107,7 +162,7 @@ void Data_Structure::StopsRoundDrawer::Draw(struct DataBaseSvgBuilder * db_svg) 
         db_svg->doc.Add(Svg::Circle{}
                         .SetFillColor("white")
                         .SetRadius(db_svg->renderSettings.stop_radius)
-                        .SetCenter({db_svg->cal_x(distance.GetLongitude()), db_svg->cal_y(distance.GetLatitude())}));
+                        .SetCenter(db_svg->stops_coordinates.at(stop->name)));
     }
 }
 
@@ -116,7 +171,7 @@ void Data_Structure::StopsTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
         auto & distance = stop->dist;
         auto & name = stop->name;
         Svg::Text text = Svg::Text{}
-                .SetPoint({db_svg->cal_x(distance.GetLongitude()), db_svg->cal_y(distance.GetLatitude())})
+                .SetPoint({db_svg->stops_coordinates.at(name)})
                 .SetOffset({db_svg->renderSettings.stop_label_offset[0], db_svg->renderSettings.stop_label_offset[1]})
                 .SetFontSize(db_svg->renderSettings.stop_label_font_size)
                 .SetFontFamily("Verdana")
@@ -163,26 +218,20 @@ void Data_Structure::BusTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
             auto text2 = text;
             auto substrates2 = substrates;
 
-            text.SetPoint({db_svg->cal_x(stops.at(*beg)->dist.GetLongitude()),
-                           db_svg->cal_y( stops.at(*beg)->dist.GetLatitude())});
-            substrates.SetPoint({db_svg->cal_x(stops.at(*beg)->dist.GetLongitude()),
-                                 db_svg->cal_y(stops.at(*beg)->dist.GetLatitude())});
+            text.SetPoint({db_svg->stops_coordinates.at(stops.at(*beg)->name)});
+            substrates.SetPoint({db_svg->stops_coordinates.at(stops.at(*beg)->name)});
 
             db_svg->doc.Add(substrates);
             db_svg->doc.Add(text);
 
-            text2.SetPoint({db_svg->cal_x(stops.at(*last)->dist.GetLongitude()),
-                            db_svg->cal_y(stops.at(*last)->dist.GetLatitude())});
-            substrates2.SetPoint({db_svg->cal_x(stops.at(*last)->dist.GetLongitude()),
-                                  db_svg->cal_y(stops.at(*last)->dist.GetLatitude())});
+            text2.SetPoint({db_svg->stops_coordinates.at(stops.at(*last)->name)});
+            substrates2.SetPoint({db_svg->stops_coordinates.at(stops.at(*last)->name)});
 
             db_svg->doc.Add(substrates2);
             db_svg->doc.Add(text2);
         } else {
-            text.SetPoint({db_svg->cal_x(stops.at(*beg)->dist.GetLongitude()),
-                           db_svg->cal_y(stops.at(*beg)->dist.GetLatitude())});
-            substrates.SetPoint({db_svg->cal_x(stops.at(*beg)->dist.GetLongitude()),
-                                 db_svg->cal_y(stops.at(*beg)->dist.GetLatitude())});
+            text.SetPoint({db_svg->stops_coordinates.at(stops.at(*beg)->name)});
+            substrates.SetPoint({db_svg->stops_coordinates.at(stops.at(*beg)->name)});
 
             db_svg->doc.Add(substrates);
             db_svg->doc.Add(text);

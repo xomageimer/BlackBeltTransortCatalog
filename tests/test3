@@ -1,0 +1,66 @@
+{
+    "stat_requests": [
+        {
+            "type": "Map",
+            "id": 1821171961
+        }
+    ],
+    "render_settings": {
+           "bus_label_font_size": 18,
+           "padding": 50,
+           "height": 950,
+           "line_width": 10,
+           "underlayer_color": [
+               255,
+               255,
+               255,
+               0.85
+           ],
+           "underlayer_width": 3,
+           "stop_label_font_size": 13,
+           "stop_radius": 3,
+           "width": 1500,
+           "bus_label_offset": [
+               7,
+               15
+           ],
+           "color_palette": [
+               "red",
+               "green",
+               "blue",
+               "brown",
+               "orange"
+           ],
+           "stop_label_offset": [
+               7,
+               -3
+           ],
+            "layers": [
+               "bus_lines",
+               "stop_points",
+               "bus_labels",
+               "stop_labels"
+            ]
+       },
+    "base_requests": [
+        {
+            "stops": [
+                "Zagorye"
+            ],
+            "name": "23",
+            "type": "Bus",
+            "is_roundtrip": true
+        },
+        {
+            "name": "Zagorye",
+            "latitude": 55.579909,
+            "type": "Stop",
+            "longitude": 37.000000,
+            "road_distances": {}
+        }
+    ],
+    "routing_settings": {
+        "bus_wait_time": 2,
+        "bus_velocity": 30
+    }
+}

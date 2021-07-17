@@ -87,12 +87,12 @@ namespace Data_Structure {
     private:
         void Init(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses);
         void CalculateCoordinates(const Dict<struct Stop> & stops);
+        auto CoordinateCompression(const Dict<Data_Structure::Stop> &stops);
 
         RenderSettings renderSettings;
         Svg::Document doc;
 
-        std::function<double(double)> cal_x;
-        std::function<double(double)> cal_y;
+        std::map<std::string, Svg::Point> stops_coordinates;
 
         std::map<std::string, std::shared_ptr<ILayersStrategy>> layersStrategy;
     };
