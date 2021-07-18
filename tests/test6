@@ -1,0 +1,136 @@
+{
+  "base_requests": [
+    {
+      "is_roundtrip": true,
+      "name": "289",
+      "stops": [
+        "Zagorye",
+        "Lipetskaya ulitsa 46",
+        "Lipetskaya ulitsa 40",
+        "Lipetskaya ulitsa 40",
+        "Lipetskaya ulitsa 46",
+        "Moskvorechye",
+        "Zagorye"
+      ],
+      "type": "Bus"
+    },
+    {
+      "is_roundtrip": false,
+      "name": "289sch",
+      "stops": [
+        "Lipetskaya ulitsa 40",
+        "Lipetskaya ulitsa 46"
+      ],
+      "type": "Bus"
+    },
+    {
+      "latitude": 55.5799,
+      "longitude": 37.6837,
+      "name": "Zagorye",
+      "road_distances": {
+        "Lipetskaya ulitsa 46": 230
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 55.5814,
+      "longitude": 37.6822,
+      "name": "Lipetskaya ulitsa 46",
+      "road_distances": {
+        "Lipetskaya ulitsa 40": 390,
+        "Moskvorechye": 12400
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 55.5845,
+      "longitude": 37.6791,
+      "name": "Lipetskaya ulitsa 40",
+      "road_distances": {
+        "Lipetskaya ulitsa 40": 1090,
+        "Lipetskaya ulitsa 46": 380,
+        "Moskvorechye": 12790
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 55.6384,
+      "longitude": 37.6384,
+      "name": "Moskvorechye",
+      "road_distances": {
+        "Zagorye": 10000
+      },
+      "type": "Stop"
+    }
+  ],
+  "render_settings": {
+    "bus_label_font_size": 18,
+    "bus_label_offset": [
+      7,
+      15
+    ],
+    "color_palette": [
+      "red",
+      "green",
+      "blue",
+      "brown",
+      "orange"
+    ],
+    "height": 950,
+    "layers": [
+      "bus_lines",
+      "bus_labels",
+      "stop_points",
+      "stop_labels"
+    ],
+    "line_width": 10,
+    "padding": 50,
+    "stop_label_font_size": 13,
+    "stop_label_offset": [
+      7,
+      -3
+    ],
+    "stop_radius": 3,
+    "underlayer_color": [
+      255,
+      255,
+      255,
+      0.85
+    ],
+    "underlayer_width": 3,
+    "width": 1500
+  },
+  "routing_settings": {
+    "bus_velocity": 30,
+    "bus_wait_time": 2
+  },
+  "stat_requests": [
+    {
+      "id": 1241923851,
+      "name": "289",
+      "type": "Bus"
+    },
+    {
+      "from": "Zagorye",
+      "id": 1700479832,
+      "to": "Moskvorechye",
+      "type": "Route"
+    },
+    {
+      "from": "Moskvorechye",
+      "id": 1506052155,
+      "to": "Zagorye",
+      "type": "Route"
+    },
+    {
+      "from": "Lipetskaya ulitsa 40",
+      "id": 301448373,
+      "to": "Lipetskaya ulitsa 40",
+      "type": "Route"
+    },
+    {
+      "id": 1603694358,
+      "type": "Map"
+    }
+  ]
+}

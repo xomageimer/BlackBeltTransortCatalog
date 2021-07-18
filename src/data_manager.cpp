@@ -125,3 +125,12 @@ double Data_Structure::ComputeGeoDistance(const std::vector<std::string> &stops,
     }
     return result;
 }
+
+bool Data_Structure::IsConnected(const Data_Structure::Stop &lhs, const Data_Structure::Stop &rhs) {
+    if (auto lhs_it = lhs.adjacent_stops.find(rhs.name); lhs_it != lhs.adjacent_stops.end())
+        return true;
+    if (auto rhs_it = rhs.adjacent_stops.find(lhs.name); rhs_it != rhs.adjacent_stops.end())
+        return true;
+
+    return false;
+}

@@ -33,6 +33,7 @@ namespace Data_Structure {
     int ComputeStopsDistance(const Stop& lhs, const Stop& rhs);
     int ComputeRouteDistance(std::vector<std::string> const & stops, Dict<Stop> const &);
     double ComputeGeoDistance(std::vector<std::string> const & stops, Dict<Stop> const &);
+    bool IsConnected(const Stop & lhs, const Stop & rhs);
 
     using DBItem = std::variant<Stop, Bus>;
     using StopRespType = std::shared_ptr<StopResponse>;

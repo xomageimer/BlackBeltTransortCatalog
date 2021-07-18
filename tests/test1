@@ -5,11 +5,16 @@
     },
     "render_settings": {
         "width": 1200,
-        "height": 1200,
+        "height": 500,
         "padding": 50,
         "stop_radius": 5,
         "line_width": 14,
-        "stop_label_font_size": 20,
+        "bus_label_font_size": 20,
+        "bus_label_offset": [
+            7,
+            15
+        ],
+        "stop_label_font_size": 18,
         "stop_label_offset": [
             7,
             -3
@@ -29,6 +34,12 @@
                 0
             ],
             "red"
+        ],
+        "layers": [
+            "bus_lines",
+            "bus_labels",
+            "stop_points",
+            "stop_labels"
         ]
     },
     "base_requests": [
@@ -40,7 +51,7 @@
                 "electrical networks",
                 "riviera bridge",
                 "sochi hotel",
-                "kuban street",
+                "kubanskaya street",
                 "on demand",
                 "dokuchaeva street",
                 "lisa chaikina street"
@@ -62,7 +73,7 @@
             "type": "Bus",
             "name": "114",
             "stops": [
-                "marine station",
+                "sea station",
                 "riviera bridge"
             ],
             "is_roundtrip": false
@@ -79,7 +90,7 @@
         },
         {
             "type": "Stop",
-            "name": "marine station",
+            "name": "sea station",
             "latitude": 43.581969,
             "longitude": 39.719848,
             "road_distances": {
@@ -103,7 +114,7 @@
             "latitude": 43.587795,
             "longitude": 39.716901,
             "road_distances": {
-                "marine station": 850,
+                "sea station": 850,
                 "sochi hotel": 1740
             }
         },
@@ -113,12 +124,12 @@
             "latitude": 43.578079,
             "longitude": 39.728068,
             "road_distances": {
-                "kuban street": 320
+                "kubanskaya street": 320
             }
         },
         {
             "type": "Stop",
-            "name": "kuban street",
+            "name": "kubanskaya street",
             "latitude": 43.578509,
             "longitude": 39.730959,
             "road_distances": {
@@ -167,7 +178,7 @@
         {
             "id": 1086967114,
             "type": "Route",
-            "from": "marine station",
+            "from": "sea station",
             "to": "parallel street"
         },
         {

@@ -1,7 +1,7 @@
 #include "render_manager.h"
 #include "data_manager.h"
 
-#include<cmath>
+#include <cmath>
 
 Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderMap() const {
     MapRespType MapResp = std::make_shared<MapResponse>();
@@ -31,25 +31,68 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_S
         sorted_y.emplace(distance.GetLatitude(), stop->name);
     }
 
-    int point_size = sorted_x.size() - 1;
     std::map<std::string, double> new_x;
     std::map<std::string, double> new_y;
-    if (point_size == 0){
+    if (stops.size() == 1) {
         new_x.emplace(stops.begin()->first, renderSettings.padding);
         new_y.emplace(stops.begin()->first, renderSettings.height - renderSettings.padding);
     } else {
-        double x_step = (renderSettings.width - 2. * renderSettings.padding) / point_size;
-        double y_step = (renderSettings.height - 2. * renderSettings.padding) / point_size;
-
-        size_t i = 0;
-        for (auto &el : sorted_x) {
-            new_x.emplace(el.second, i * x_step + renderSettings.padding);
-            i++;
+        int xid = 0;
+        std::map<std::string, int> gluing_x;
+        auto beg_of_cur_idx = sorted_x.begin();
+        for (auto it_x = sorted_x.begin(); it_x != std::prev(sorted_x.end()); it_x++) {
+            gluing_x[it_x->second] = xid;
+            for (auto cur_it = beg_of_cur_idx; cur_it != std::next(it_x); cur_it++){
+                if (IsConnected(*stops.at(cur_it->second), *stops.at(std::next(it_x)->second))) {
+                    xid++;
+                    beg_of_cur_idx = std::next(it_x);
+                    break;
+                }
+            }
         }
-        i = 0;
-        for (auto &el : sorted_y) {
-            new_y.emplace(el.second, renderSettings.height - renderSettings.padding - i * y_step);
-            i++;
+        gluing_x[std::prev(sorted_x.end())->second] = xid;
+
+        int yid = 0;
+        std::map<std::string, int> gluing_y;
+        auto beg_of_cur_idy = sorted_y.rbegin();
+        for (auto it_y = sorted_y.rbegin(); it_y != std::prev(sorted_y.rend()); it_y++) {
+            gluing_y[it_y->second] = yid;
+            for (auto cur_it = beg_of_cur_idy; cur_it != std::next(it_y); cur_it++){
+                if (IsConnected(*stops.at(cur_it->second), *stops.at(std::next(it_y)->second))) {
+                    yid++;
+                    beg_of_cur_idy = std::next(it_y);
+                    break;
+                }
+            }
+        }
+        gluing_y[std::prev(sorted_y.rend())->second] = yid;
+
+//        bool is_first = true;
+//        for (auto & [_, name] : sorted_x) {
+//            if (!is_first)
+//                std::cout << ", ";
+//            is_first = false;
+//            std::cout << gluing_x.at(name);
+//        }
+//        std::cout << std::endl << std::endl;
+//
+//        is_first = true;
+//        for (auto & [_, name] : sorted_y) {
+//            if (!is_first)
+//                std::cout << ", ";
+//            is_first = false;
+//            std::cout << gluing_y.at(name);
+//        }
+//        std::cout << std::endl;
+
+        double x_step = (renderSettings.width - 2. * renderSettings.padding) / xid;
+        double y_step = (renderSettings.height - 2. * renderSettings.padding) / yid;
+
+        for (auto &el : sorted_x) {
+            new_x.emplace(el.second, gluing_x.at(el.second) * x_step + renderSettings.padding);
+        }
+        for (auto it = sorted_y.rbegin(); it != sorted_y.rend(); it++) {
+            new_y.emplace(it->second, renderSettings.padding + gluing_y.at(it->second) * y_step);
         }
     }
 
