@@ -13,7 +13,7 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
                                        const Dict<Data_Structure::Bus> &buses,
                                        RenderSettings render_set) : renderSettings(std::move(render_set)){
     Init(stops, buses);
-    CalculateCoordinates(stops);
+    CalculateCoordinates(stops, buses);
     for (const auto & layer : renderSettings.layers) {
         (layersStrategy[layer])->Draw(this);
     }
@@ -21,15 +21,63 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
     doc.SimpleRender();
 }
 
-auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_Structure::Stop> &stops) {
-    std::map<double, std::string> sorted_x;
-    std::map<double, std::string, std::greater<>> sorted_y;
+auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dict<Data_Structure::Stop> &stops,
+                                                                       const Dict<Data_Structure::Bus> &buses) {
+    auto bearing_points = GetBearingPoints(stops, buses);
+    std::pair<std::map<double, std::string>, std::map<double, std::string, std::greater<>>> sorted_xy;
+    auto & sorted_x = sorted_xy.first;
+    auto & sorted_y = sorted_xy.second;
 
-    for (auto & [_, stop] : stops) {
-        auto distance = stop->dist;
-        sorted_x.emplace(distance.GetLongitude(), stop->name);
-        sorted_y.emplace(distance.GetLatitude(), stop->name);
+    auto step = [](double left, double right, size_t count) {
+        return (right - left) / count;
+    };
+
+    // TODO переделать чтобы был обход по всему маршруту автобуса (не до середины)
+    for (auto & [_, bus] : buses) {
+        auto left_bearing_point = bus->stops.begin();
+        size_t l = 0;
+        size_t k = l;
+        auto right_bearing_point = left_bearing_point;
+        size_t count = std::distance(left_bearing_point, right_bearing_point);
+        auto bus_range = bus->is_roundtrip ? Ranges::AsRange(bus->stops) : Ranges::ToMiddle(Ranges::AsRange(bus->stops));
+        for (auto stop_iter = bus_range.begin(); stop_iter != bus_range.end(); stop_iter++){
+            if (stop_iter == right_bearing_point) {
+                left_bearing_point = right_bearing_point;
+                l = ++k;
+                right_bearing_point = std::find_if(std::next(left_bearing_point), bus_range.end(), [&bearing_points](auto const & cur) {
+                    return bearing_points.find(cur) != bearing_points.end();
+                });
+                count = std::distance(left_bearing_point, right_bearing_point);
+            } else {
+                auto right_bearing_distance = (right_bearing_point != bus_range.end())
+                        ? stops.at(*right_bearing_point)->dist
+                        : Distance{0., 0.};
+                ++k;
+                double x = stops.at(*left_bearing_point)->dist.GetLongitude()
+                           + step(stops.at(*left_bearing_point)->dist.GetLongitude(),
+                                  right_bearing_distance.GetLongitude(), count)
+                             * static_cast<double>(k - l);
+                double y = stops.at(*left_bearing_point)->dist.GetLatitude()
+                           + step(stops.at(*left_bearing_point)->dist.GetLatitude(),
+                                  right_bearing_distance.GetLatitude(), count)
+                             * static_cast<double>(k - l);
+                sorted_x.emplace(x, *stop_iter);
+                sorted_y.emplace(y, *stop_iter);
+            }
+        }
     }
+    for (auto & [stop_name, stop] : stops)
+    {
+        if (bearing_points.find(stop_name) != bearing_points.end()) {
+            sorted_x.try_emplace(stop->dist.GetLongitude(), stop_name);
+            sorted_y.try_emplace(stop->dist.GetLatitude(), stop_name);
+        }
+    }
+    return sorted_xy;
+}
+
+auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_Structure::Stop> &stops, const Dict<Data_Structure::Bus> & buses) {
+    auto [sorted_x, sorted_y] = CoordinateUniformDistribution(stops, buses);
 
     std::map<std::string, double> new_x;
     std::map<std::string, double> new_y;
@@ -43,7 +91,7 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_S
         for (auto it_x = sorted_x.begin(); it_x != std::prev(sorted_x.end()); it_x++) {
             gluing_x[it_x->second] = xid;
             for (auto cur_it = beg_of_cur_idx; cur_it != std::next(it_x); cur_it++){
-                if (IsConnected(*stops.at(cur_it->second), *stops.at(std::next(it_x)->second))) {
+                if (IsConnected(*stops.at(cur_it->second), *stops.at(std::next(it_x)->second), buses)) {
                     xid++;
                     beg_of_cur_idx = std::next(it_x);
                     break;
@@ -58,7 +106,7 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_S
         for (auto it_y = sorted_y.rbegin(); it_y != std::prev(sorted_y.rend()); it_y++) {
             gluing_y[it_y->second] = yid;
             for (auto cur_it = beg_of_cur_idy; cur_it != std::next(it_y); cur_it++){
-                if (IsConnected(*stops.at(cur_it->second), *stops.at(std::next(it_y)->second))) {
+                if (IsConnected(*stops.at(cur_it->second), *stops.at(std::next(it_y)->second), buses)) {
                     yid++;
                     beg_of_cur_idy = std::next(it_y);
                     break;
@@ -66,24 +114,6 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_S
             }
         }
         gluing_y[std::prev(sorted_y.rend())->second] = yid;
-
-//        bool is_first = true;
-//        for (auto & [_, name] : sorted_x) {
-//            if (!is_first)
-//                std::cout << ", ";
-//            is_first = false;
-//            std::cout << gluing_x.at(name);
-//        }
-//        std::cout << std::endl << std::endl;
-//
-//        is_first = true;
-//        for (auto & [_, name] : sorted_y) {
-//            if (!is_first)
-//                std::cout << ", ";
-//            is_first = false;
-//            std::cout << gluing_y.at(name);
-//        }
-//        std::cout << std::endl;
 
         double x_step = (renderSettings.width - 2. * renderSettings.padding) / xid;
         double y_step = (renderSettings.height - 2. * renderSettings.padding) / yid;
@@ -104,8 +134,8 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_S
     return CompressCoord;
 }
 
-void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_Structure::Stop> &stops) {
-    auto compress_stops = CoordinateCompression(stops);
+void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_Structure::Stop> &stops, const Dict<Data_Structure::Bus> & buses) {
+    auto compress_stops = CoordinateCompression(stops, buses);
 
     if (stops.size() == 1){
         auto stop = stops.begin()->second;

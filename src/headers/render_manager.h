@@ -86,8 +86,9 @@ namespace Data_Structure {
         friend BusTextDrawer;
     private:
         void Init(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses);
-        void CalculateCoordinates(const Dict<struct Stop> & stops);
-        auto CoordinateCompression(const Dict<Data_Structure::Stop> &stops);
+        void CalculateCoordinates(const Dict<struct Stop> & stops, const Dict<struct Bus> &buses);
+        auto CoordinateCompression(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
+        static auto CoordinateUniformDistribution(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
 
         RenderSettings renderSettings;
         Svg::Document doc;

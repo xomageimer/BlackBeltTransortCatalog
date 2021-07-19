@@ -126,11 +126,48 @@ double Data_Structure::ComputeGeoDistance(const std::vector<std::string> &stops,
     return result;
 }
 
-bool Data_Structure::IsConnected(const Data_Structure::Stop &lhs, const Data_Structure::Stop &rhs) {
-    if (auto lhs_it = lhs.adjacent_stops.find(rhs.name); lhs_it != lhs.adjacent_stops.end())
-        return true;
-    if (auto rhs_it = rhs.adjacent_stops.find(lhs.name); rhs_it != rhs.adjacent_stops.end())
-        return true;
-
+bool Data_Structure::IsConnected(const Data_Structure::Stop &lhs, const Data_Structure::Stop &rhs, const Dict<Data_Structure::Bus> & buses) {
+    for (auto & [_, bus] : buses) {
+        auto & stops = bus->stops;
+        for (auto stops_it = stops.begin(); stops_it != std::prev(stops.end()); stops_it++) {
+            if (*stops_it == lhs.name && *std::next(stops_it) == rhs.name) {
+                return true;
+            }
+            if (*stops_it == rhs.name && *std::next(stops_it) == lhs.name) {
+                return true;
+            }
+        }
+    }
     return false;
+}
+
+std::set<std::string>
+Data_Structure::GetBearingPoints(const Dict<Data_Structure::Stop> &stops, const Dict<Data_Structure::Bus> &buses) {
+    std::set<std::string> res;
+    std::map<std::string, size_t> count_in_routes;
+
+    for (auto & [stop_name, _] : stops)
+        count_in_routes.emplace(stop_name, 0);
+
+    for (auto & [_, bus] : buses){
+        res.insert(bus->stops.front());
+        res.insert(bus->stops.back());
+        if (!bus->is_roundtrip) {
+            for (auto &stop_name : Ranges::ToMiddle(Ranges::AsRange(bus->stops))) {
+                count_in_routes[stop_name] += 2;
+            }
+            for (auto &stop_name : Ranges::FromMiddle(Ranges::AsRange(bus->stops))) {
+                count_in_routes[stop_name] -= 1;
+            }
+        } else {
+            for (auto & stop_name : bus->stops){
+                count_in_routes[stop_name] += 1;
+            }
+        };
+    }
+    for (auto & [stop_name, count] : count_in_routes)
+        if (count > 1 || count == 0)
+            res.emplace(stop_name);
+
+    return res;
 }
