@@ -50,7 +50,6 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
                 count = std::distance(left_bearing_point, right_bearing_point);
             } else {
                 auto right_bearing_distance = stops.at(*right_bearing_point)->dist;
-                ++k;
                 double x = stops.at(*left_bearing_point)->dist.GetLongitude()
                            + step(stops.at(*left_bearing_point)->dist.GetLongitude(),
                                   right_bearing_distance.GetLongitude(), count)
@@ -62,6 +61,7 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
                 uniform_x.emplace(*stop_iter, x);
                 uniform_y.emplace(*stop_iter, y);
             }
+            ++k;
         }
     }
 
