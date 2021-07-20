@@ -26,7 +26,6 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
     auto bearing_points = GetBearingPoints(stops, buses);
 
     auto step = [](double left, double right, size_t count) {
-        if (count == 0) return right - left;
         return (right - left) / static_cast<double>(count);
     };
     std::map<std::string, double> uniform_x;
@@ -39,7 +38,7 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
         size_t k = l;
         auto right_bearing_point = left_bearing_point;
         size_t count = std::distance(left_bearing_point, right_bearing_point);
-        auto bus_range = bus->is_roundtrip ? Ranges::AsRange(bus->stops) : Ranges::ToMiddle(Ranges::AsRange(bus->stops));
+        auto bus_range = Ranges::AsRange(bus->stops);
         for (auto stop_iter = bus_range.begin(); stop_iter != bus_range.end(); stop_iter++){
             if (stop_iter == right_bearing_point) {
                 left_bearing_point = right_bearing_point;
@@ -49,13 +48,16 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
                 });
                 count = std::distance(left_bearing_point, right_bearing_point);
             } else {
+                if (right_bearing_point == bus_range.end())
+                    throw std::logic_error("bad right point!");
+                auto left_bearing_distance = stops.at(*left_bearing_point)->dist;
                 auto right_bearing_distance = stops.at(*right_bearing_point)->dist;
-                double x = stops.at(*left_bearing_point)->dist.GetLongitude()
-                           + step(stops.at(*left_bearing_point)->dist.GetLongitude(),
+                double x = left_bearing_distance.GetLongitude()
+                           + step(left_bearing_distance.GetLongitude(),
                                   right_bearing_distance.GetLongitude(), count)
                              * static_cast<double>(k - l);
-                double y = stops.at(*left_bearing_point)->dist.GetLatitude()
-                           + step(stops.at(*left_bearing_point)->dist.GetLatitude(),
+                double y = left_bearing_distance.GetLatitude()
+                           + step(left_bearing_distance.GetLatitude(),
                                   right_bearing_distance.GetLatitude(), count)
                              * static_cast<double>(k - l);
                 uniform_x.emplace(*stop_iter, x);

@@ -23,10 +23,10 @@ namespace Data_Structure {
         double line_width;
 
         int stop_label_font_size;
-        double stop_label_offset[2];
+        double stop_label_offset[2] {0};
 
         int bus_label_font_size;
-        double bus_label_offset[2];
+        double bus_label_offset[2] {0};
 
         Svg::Color underlayer_color;
         double underlayer_width;
