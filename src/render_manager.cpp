@@ -33,6 +33,7 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
     std::map<std::string, double> uniform_y;
 
     for (auto & [_, bus] : buses) {
+        if (bus->stops.empty()) continue;
         auto left_bearing_point = bus->stops.begin();
         size_t l = 0;
         size_t k = l;

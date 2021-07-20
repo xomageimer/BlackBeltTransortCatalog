@@ -146,7 +146,11 @@ Data_Structure::GetBearingPoints(const Dict<Data_Structure::Stop> &stops, const 
     std::set<std::string> res;
     std::map<std::string, size_t> count_in_routes;
 
-    for (auto & [_, bus] : buses){
+    for (auto & [stop_name, _] : stops)
+        count_in_routes[stop_name] = 0;
+
+    for (auto & [_, bus] : buses) {
+        if (bus->stops.empty()) continue;
         res.insert(bus->stops.front());
         std::map<std::string, size_t> repeated_in_route;
         if (!bus->is_roundtrip) {
@@ -166,7 +170,7 @@ Data_Structure::GetBearingPoints(const Dict<Data_Structure::Stop> &stops, const 
                 repeated_in_route[stop_name] += 1;
             }
             for (auto & [stop_name, count] : repeated_in_route){
-                if (count > 2)
+                if (count >= 2)
                     res.insert(stop_name);
                 else
                     count_in_routes[stop_name] += 1;

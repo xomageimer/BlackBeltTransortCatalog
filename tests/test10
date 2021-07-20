@@ -1,0 +1,187 @@
+{
+  "base_requests": [
+    {
+      "latitude": 34.91,
+      "longitude": 36,
+      "name": "A",
+      "road_distances": {
+        "B": 1000,
+        "C": 1000
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 35.22,
+      "longitude": 35.92,
+      "name": "B",
+      "road_distances": {
+        "C": 1000,
+        "E": 1000
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 35.03,
+      "longitude": 35.68,
+      "name": "C",
+      "road_distances": {
+        "D": 1000,
+        "E": 1000
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 35.05,
+      "longitude": 35.07,
+      "name": "D",
+      "road_distances": {
+        "E": 1000,
+        "G": 1000
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 35.17,
+      "longitude": 35.36,
+      "name": "E",
+      "road_distances": {
+        "G": 1000
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 35.35,
+      "longitude": 35.45,
+      "name": "F",
+      "road_distances": {
+        "G": 1000,
+        "J": 1000
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 35.36,
+      "longitude": 35.24,
+      "name": "G",
+      "road_distances": {
+        "H": 1000,
+        "I": 1000
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 35.47,
+      "longitude": 34.93,
+      "name": "H",
+      "road_distances": {
+        "I": 1000
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 35.58,
+      "longitude": 35.32,
+      "name": "I",
+      "road_distances": {},
+      "type": "Stop"
+    },
+    {
+      "latitude": 35.69,
+      "longitude": 34.81,
+      "name": "J",
+      "road_distances": {
+        "I": 1000
+      },
+      "type": "Stop"
+    },
+    {
+      "is_roundtrip": true,
+      "name": "PM",
+      "stops": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "G",
+        "I",
+        "H",
+        "G",
+        "F",
+        "J",
+        "F",
+        "G",
+        "E",
+        "C",
+        "A"
+      ],
+      "type": "Bus"
+    },
+    {
+      "is_roundtrip": false,
+      "name": "BED",
+      "stops": [
+        "B",
+        "E",
+        "D"
+      ],
+      "type": "Bus"
+    },
+    {
+      "is_roundtrip": false,
+      "name": "HIJ",
+      "stops": [
+        "H",
+        "I",
+        "J"
+      ],
+      "type": "Bus"
+    }
+  ],
+  "render_settings": {
+ "bus_label_font_size": 18,
+ "padding": 50,
+ "height": 950,
+ "line_width": 10,
+ "underlayer_color": [
+     255,
+     255,
+     255,
+     0.85
+ ],
+ "underlayer_width": 3,
+ "stop_label_font_size": 13,
+ "stop_radius": 3,
+ "width": 1500,
+ "bus_label_offset": [
+     7,
+     15
+ ],
+ "color_palette": [
+     "red",
+     "green",
+     "blue",
+     "brown",
+     "orange"
+ ],
+ "stop_label_offset": [
+     7,
+     -3
+ ],
+  "layers": [
+     "bus_lines",
+     "stop_points",
+     "bus_labels",
+     "stop_labels"
+  ]
+},
+  "routing_settings": {
+    "bus_velocity": 30,
+    "bus_wait_time": 2
+  },
+  "stat_requests": [
+    {
+      "id": 1260462557,
+      "type": "Map"
+    }
+  ]
+}
