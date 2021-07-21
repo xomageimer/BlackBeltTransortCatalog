@@ -38,7 +38,7 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
         size_t k = l;
         auto right_bearing_point = left_bearing_point;
         size_t count = std::distance(left_bearing_point, right_bearing_point);
-        auto bus_range = bus->is_roundtrip ? Ranges::AsRange(bus->stops) : Ranges::ToMiddle(Ranges::AsRange(bus->stops));
+        auto bus_range = Ranges::AsRange(bus->stops);
         for (auto stop_iter = bus_range.begin(); stop_iter != bus_range.end(); stop_iter++){
             if (stop_iter == right_bearing_point) {
                 left_bearing_point = right_bearing_point;
@@ -62,8 +62,8 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
                            + step(left_bearing_distance.GetLatitude(),
                                   right_bearing_distance.GetLatitude(), count)
                              * static_cast<double>(k - l);
-                uniform_x.emplace(*stop_iter, x);
-                uniform_y.emplace(*stop_iter, y);
+                uniform_x.insert_or_assign(*stop_iter, x);
+                uniform_y.insert_or_assign(*stop_iter, y);
             }
             ++k;
         }
@@ -74,17 +74,15 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
     auto & sorted_y = sorted_xy.second;
     for (auto & [stop_name, stop] : stops)
     {
-//        if (bearing_points.find(stop_name) != bearing_points.end()) {
-//            sorted_x.emplace_back(stop->dist.GetLongitude(), stop_name);
-//            sorted_y.emplace_back(stop->dist.GetLatitude(), stop_name);
-//        } else {
-//            auto x = uniform_x.find(stop_name);
-//            auto y = uniform_y.find(stop_name);
-//            sorted_x.emplace_back(x->second, stop_name);
-//            sorted_y.emplace_back(y->second, stop_name);
-//        }
-        sorted_x.emplace_back(stops.at(stop_name)->dist.GetLongitude(), stop_name);
-        sorted_y.emplace_back(stops.at(stop_name)->dist.GetLatitude(), stop_name);
+        if (bearing_points.find(stop_name) != bearing_points.end()) {
+            sorted_x.emplace_back(stop->dist.GetLongitude(), stop_name);
+            sorted_y.emplace_back(stop->dist.GetLatitude(), stop_name);
+        } else {
+            auto x = uniform_x.find(stop_name);
+            auto y = uniform_y.find(stop_name);
+            sorted_x.emplace_back(x->second, stop_name);
+            sorted_y.emplace_back(y->second, stop_name);
+        }
     }
     std::sort(sorted_x.begin(), sorted_x.end());
     std::sort(sorted_y.begin(), sorted_y.end());
@@ -134,10 +132,10 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_S
         double y_step = (renderSettings.height - 2.f * renderSettings.padding) / static_cast<double>(yid);
 
         for (auto &el : sorted_x) {
-            new_x.emplace(el.second, gluing_x.at(el.second) * x_step + renderSettings.padding);
+            new_x.emplace(el.second, static_cast<double>(gluing_x.at(el.second)) * x_step + renderSettings.padding);
         }
         for (auto & it : sorted_y) {
-            new_y.emplace(it.second, renderSettings.padding + gluing_y.at(it.second) * y_step);
+            new_y.emplace(it.second, renderSettings.padding + static_cast<double>(gluing_y.at(it.second)) * y_step);
         }
     }
 

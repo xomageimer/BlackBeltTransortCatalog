@@ -21,8 +21,8 @@
       "type": "Stop"
     },
     {
-      "latitude": 35.135,
-      "longitude": 35.495,
+      "latitude": 35.039,
+      "longitude": 35.68,
       "name": "C",
       "road_distances": {
         "D": 1000,

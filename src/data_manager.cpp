@@ -144,42 +144,33 @@ bool Data_Structure::IsConnected(const Data_Structure::Stop &lhs, const Data_Str
 std::set<std::string>
 Data_Structure::GetBearingPoints(const Dict<Data_Structure::Stop> &stops, const Dict<Data_Structure::Bus> &buses) {
     std::set<std::string> res;
-    std::map<std::string, size_t> count_in_routes;
+    std::map<std::string, std::string> stop_and_buses;
+    std::map<std::string, int> stops_count;
 
-    for (auto & [stop_name, _] : stops)
-        count_in_routes[stop_name] = 0;
-
-    for (auto & [_, bus] : buses) {
-        if (bus->stops.empty()) continue;
-        res.insert(bus->stops.front());
-        std::map<std::string, size_t> repeated_in_route;
-        if (!bus->is_roundtrip) {
-            auto range = Ranges::ToMiddle(Ranges::AsRange(bus->stops));
-            res.insert(*std::prev(range.end()));
-            for (auto &stop_name : range) {
-                repeated_in_route[stop_name] += 1;
-            }
-            for (auto & [stop_name, count] : repeated_in_route){
-                if (count >= 2)
-                    res.insert(stop_name);
-                else
-                    count_in_routes[stop_name] += 1;
-            }
-        } else {
-            for (auto & stop_name : bus->stops){
-                repeated_in_route[stop_name] += 1;
-            }
-            for (auto & [stop_name, count] : repeated_in_route){
-                if (count > 2)
-                    res.insert(stop_name);
-                else
-                    count_in_routes[stop_name] += 1;
-            }
-        };
+    for (auto & [stop_name, _] : stops){
+        stops_count[stop_name] = 0;
     }
-    for (auto & [stop_name, count] : count_in_routes)
-        if (count > 1 || count == 0)
-            res.emplace(stop_name);
+
+    for (auto const & [_, bus] : buses){
+        if (!bus->stops.empty()) {
+            res.insert(bus->stops.front());
+            if (!bus->is_roundtrip) {
+                res.insert(*(std::prev(Ranges::ToMiddle(Ranges::AsRange(bus->stops)).end())));
+            }
+        }
+        for (auto const & stop_name : bus->stops){
+            ++stops_count[stop_name];
+            const auto [it, inserted] = stop_and_buses.emplace(stop_name, bus->name);
+            if (!inserted && it->second != bus->name)
+                res.insert(stop_name);
+        }
+    }
+
+    for (const auto& [stop, count] : stops_count) {
+        if (count > 2 || count == 0) {
+            res.insert(stop);
+        }
+    }
 
     return res;
 }
