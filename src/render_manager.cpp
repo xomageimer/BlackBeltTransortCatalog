@@ -21,6 +21,10 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
     doc.SimpleRender();
 }
 
+bool operator<(std::pair<double, std::string> const & lhs, std::pair<double, std::string> const & rhs){
+    return lhs.first < rhs.first;
+}
+
 auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dict<Data_Structure::Stop> &stops,
                                                                        const Dict<Data_Structure::Bus> &buses) {
     auto bearing_points = GetBearingPoints(stops, buses);
@@ -37,16 +41,16 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
         size_t l = 0;
         size_t k = l;
         auto right_bearing_point = left_bearing_point;
-        size_t count = std::distance(left_bearing_point, right_bearing_point);
+        size_t count;
         auto bus_range = Ranges::AsRange(bus->stops);
-        for (auto stop_iter = bus_range.begin(); stop_iter != bus_range.end(); stop_iter++){
+        for (auto stop_iter = bus_range.begin(); stop_iter != bus_range.end(); stop_iter++) {
+            count = std::distance(left_bearing_point, right_bearing_point);
             if (stop_iter == right_bearing_point) {
                 left_bearing_point = right_bearing_point;
                 l = k;
                 right_bearing_point = std::find_if(std::next(left_bearing_point), bus_range.end(), [&bearing_points](auto const & cur) {
                     return bearing_points.find(cur) != bearing_points.end();
                 });
-                count = std::distance(left_bearing_point, right_bearing_point);
             } else {
                 if (right_bearing_point == bus_range.end())
                     throw std::logic_error("bad right point!");
@@ -134,9 +138,9 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_S
         new_x.emplace(stop_name, (gluing_x.at(stop_name)) * x_step + renderSettings.padding);
     }
 
-    std::map<std::string, Distance> CompressCoord;
+    std::map<std::string, Svg::Point> CompressCoord;
     for (auto & [stop_name, _] : stops){
-        CompressCoord.emplace(stop_name, Distance{new_x.at(stop_name), new_y.at(stop_name)});
+        CompressCoord.emplace(stop_name, Svg::Point{new_x.at(stop_name), new_y.at(stop_name)});
     }
     return CompressCoord;
 }
@@ -144,10 +148,7 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_S
 void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_Structure::Stop> &stops,
                                                               const Dict<Data_Structure::Bus> & buses) {
     BuildNeighborhoodConnections(stops, buses);
-    auto compress_stops = CoordinateCompression(stops, buses);
-    for (auto & [stop_name, dist] : compress_stops){
-        stops_coordinates.emplace(stop_name, Svg::Point{dist.GetLongitude(), dist.GetLatitude()});
-    }
+    stops_coordinates = CoordinateCompression(stops, buses);
 }
 
 void Data_Structure::DataBaseSvgBuilder::Init(const Dict<Data_Structure::Stop> &stops,
