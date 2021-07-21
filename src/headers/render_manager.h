@@ -4,6 +4,8 @@
 #include <map>
 #include <memory>
 #include <functional>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "responses.h"
 
@@ -79,6 +81,7 @@ namespace Data_Structure {
         explicit DataBaseSvgBuilder(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses,
                                     RenderSettings render_set);
         [[nodiscard]] MapRespType RenderMap() const;
+        bool IsConnected(const Stop & lhs, const Stop & rhs);
 
         friend BusPolylinesDrawer;
         friend StopsRoundDrawer;
@@ -88,6 +91,8 @@ namespace Data_Structure {
         void Init(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses);
         void CalculateCoordinates(const Dict<struct Stop> & stops, const Dict<struct Bus> &buses);
         auto CoordinateCompression(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
+        void BuildNeighborhoodConnections(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses);
+
         static auto CoordinateUniformDistribution(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
 
         RenderSettings renderSettings;
@@ -96,6 +101,8 @@ namespace Data_Structure {
         std::map<std::string, Svg::Point> stops_coordinates;
 
         std::map<std::string, std::shared_ptr<ILayersStrategy>> layersStrategy;
+
+        std::unordered_map<std::string, std::unordered_set<std::string>> db_connected;
     };
 }
 

@@ -126,21 +126,6 @@ double Data_Structure::ComputeGeoDistance(const std::vector<std::string> &stops,
     return result;
 }
 
-bool Data_Structure::IsConnected(const Data_Structure::Stop &lhs, const Data_Structure::Stop &rhs, const Dict<Data_Structure::Bus> & buses) {
-    for (auto & [_, bus] : buses) {
-        auto & stops = bus->stops;
-        for (auto stops_it = stops.begin(); stops_it != std::prev(stops.end()); stops_it++) {
-            if (*stops_it == lhs.name && *std::next(stops_it) == rhs.name) {
-                return true;
-            }
-            if (*stops_it == rhs.name && *std::next(stops_it) == lhs.name) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 std::set<std::string>
 Data_Structure::GetBearingPoints(const Dict<Data_Structure::Stop> &stops, const Dict<Data_Structure::Bus> &buses) {
     std::set<std::string> res;

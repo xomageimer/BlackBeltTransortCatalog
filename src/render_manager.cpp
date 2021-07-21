@@ -90,120 +90,63 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
 }
 
 auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_Structure::Stop> &stops, const Dict<Data_Structure::Bus> & buses) {
-    auto [sorted_x, sorted_y] = CoordinateUniformDistribution(stops, buses);
-
     std::map<std::string, double> new_x;
     std::map<std::string, double> new_y;
-    if (stops.size() == 1) {
-        new_x.emplace(stops.begin()->first, renderSettings.padding);
-        new_y.emplace(stops.begin()->first, renderSettings.height - renderSettings.padding);
-    } else {
-        int xid = 0;
-        std::map<std::string, int> gluing_x;
-        auto beg_of_cur_idx = sorted_x.begin();
-        for (auto it_x = sorted_x.begin(); it_x != std::prev(sorted_x.end()); it_x++) {
-            gluing_x[it_x->second] = xid;
-            for (auto cur_it = beg_of_cur_idx; cur_it != std::next(it_x); cur_it++){
-                if (IsConnected(*stops.at(cur_it->second), *stops.at(std::next(it_x)->second), buses)) {
-                    xid++;
-                    beg_of_cur_idx = std::next(it_x);
-                    break;
-                }
+
+    auto [sorted_x, sorted_y] = CoordinateUniformDistribution(stops, buses);
+
+    int xid = 0;
+    std::map<std::string, int> gluing_x;
+    auto beg_of_cur_idx = sorted_x.begin();
+    for (auto it_x = sorted_x.begin(); it_x != std::prev(sorted_x.end()); it_x++) {
+        gluing_x[it_x->second] = xid;
+        for (auto cur_it = beg_of_cur_idx; cur_it != std::next(it_x); cur_it++){
+            if (IsConnected(*stops.at(cur_it->second), *stops.at(std::next(it_x)->second))) {
+                xid++;
+                beg_of_cur_idx = std::next(it_x);
+                break;
             }
         }
-        gluing_x[std::prev(sorted_x.end())->second] = xid;
+    }
+    gluing_x[std::prev(sorted_x.end())->second] = xid;
 
-        int yid = 0;
-        std::map<std::string, int> gluing_y;
-        auto beg_of_cur_idy = sorted_y.begin();
-        for (auto it_y = sorted_y.begin(); it_y != std::prev(sorted_y.end()); it_y++) {
-            gluing_y[it_y->second] = yid;
-            for (auto cur_it = beg_of_cur_idy; cur_it != std::next(it_y); cur_it++){
-                if (IsConnected(*stops.at(cur_it->second), *stops.at(std::next(it_y)->second), buses)) {
-                    yid++;
-                    beg_of_cur_idy = std::next(it_y);
-                    break;
-                }
+    int yid = 0;
+    std::map<std::string, int> gluing_y;
+    auto beg_of_cur_idy = sorted_y.begin();
+    for (auto it_y = sorted_y.begin(); it_y != std::prev(sorted_y.end()); it_y++) {
+        gluing_y[it_y->second] = yid;
+        for (auto cur_it = beg_of_cur_idy; cur_it != std::next(it_y); cur_it++){
+            if (IsConnected(*stops.at(cur_it->second), *stops.at(std::next(it_y)->second))) {
+                yid++;
+                beg_of_cur_idy = std::next(it_y);
+                break;
             }
         }
-        gluing_y[std::prev(sorted_y.end())->second] = yid;
+    }
+    gluing_y[std::prev(sorted_y.end())->second] = yid;
 
-        double x_step = (renderSettings.width - 2.f * renderSettings.padding) / static_cast<double>(xid);
-        double y_step = (renderSettings.height - 2.f * renderSettings.padding) / static_cast<double>(yid);
-
-        for (auto &el : sorted_x) {
-            new_x.emplace(el.second, static_cast<double>(gluing_x.at(el.second)) * x_step + renderSettings.padding);
-        }
-        for (auto & it : sorted_y) {
-            new_y.emplace(it.second, renderSettings.padding + static_cast<double>(gluing_y.at(it.second)) * y_step);
-        }
+    double x_step = xid ? (renderSettings.width - 2.f * renderSettings.padding) / xid : xid;
+    double y_step = yid ? (renderSettings.height - 2.f * renderSettings.padding) / yid : yid;
+    for (auto [_, stop_name] : sorted_y) {
+        new_y.emplace(stop_name, renderSettings.height - renderSettings.padding - (gluing_y.at(stop_name)) * y_step);
+    }
+    for (auto [_, stop_name]: sorted_x) {
+        new_x.emplace(stop_name, (gluing_x.at(stop_name)) * x_step + renderSettings.padding);
     }
 
     std::map<std::string, Distance> CompressCoord;
-
     for (auto & [stop_name, _] : stops){
         CompressCoord.emplace(stop_name, Distance{new_x.at(stop_name), new_y.at(stop_name)});
     }
     return CompressCoord;
 }
 
-void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_Structure::Stop> &stops, const Dict<Data_Structure::Bus> & buses) {
+void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_Structure::Stop> &stops,
+                                                              const Dict<Data_Structure::Bus> & buses) {
+    BuildNeighborhoodConnections(stops, buses);
     auto compress_stops = CoordinateCompression(stops, buses);
-
-    if (stops.size() == 1){
-        auto stop = stops.begin()->second;
-        auto & dist = compress_stops.begin()->second;
-        stops_coordinates.emplace(stop->name, Svg::Point{dist.GetLongitude(), dist.GetLatitude()});
-        return;
-    }
-
-    std::pair<std::optional<double>, std::optional<double>> min_lon_lat;
-    std::pair<std::optional<double>, std::optional<double>> max_lon_lat;
     for (auto & [stop_name, dist] : compress_stops){
-        auto lon = std::abs(dist.GetLongitude());
-        auto lat = std::abs(dist.GetLatitude());
-
-        if (!min_lon_lat.first || min_lon_lat.first > lon)
-            min_lon_lat.first = lon;
-        if (!min_lon_lat.second || min_lon_lat.second > lat)
-            min_lon_lat.second = lat;
-        if (!max_lon_lat.first || max_lon_lat.first < lon)
-            max_lon_lat.first = lon;
-        if (!max_lon_lat.second || max_lon_lat.second < lat)
-            max_lon_lat.second = lat;
-    }
-    auto min_lon = min_lon_lat.first.value_or(0);
-    auto max_lat = max_lon_lat.second.value_or(0);
-
-    double width_zoom_coef = 0;
-    double height_zoom_coef = 0;
-    if (max_lon_lat.first.value() - min_lon_lat.first.value() != 0)
-        width_zoom_coef = (renderSettings.width - 2 * renderSettings.padding) /
-                (max_lon_lat.first.value() - min_lon_lat.first.value());
-    if (max_lon_lat.second.value() - min_lon_lat.second.value() != 0)
-        height_zoom_coef = (renderSettings.height - 2 * renderSettings.padding) /
-                (max_lon_lat.second.value() - min_lon_lat.second.value());
-
-    auto min_ = [](const auto first, const auto sec) {
-        double min = 0.;
-        if (first != 0 && sec != 0)
-            min = std::min(first, sec);
-        else if (first != 0)
-            min = first;
-        else if (sec != 0) min = sec;
-        return min;
-    };
-    auto zoom_coef = min_(width_zoom_coef, height_zoom_coef);
-
-    auto call_x = [min_lon = min_lon, zoom_coef = zoom_coef, padding = this->renderSettings.padding](double lon) {
-        return (std::abs(lon) - min_lon) * zoom_coef + padding;
-    };
-    auto call_y = [max_lat = max_lat, zoom_coef = zoom_coef, padding = this->renderSettings.padding](double lat) {
-        return (max_lat - std::abs(lat)) * zoom_coef + padding;
-    };
-
-    for (auto & [stop_name, dist] : compress_stops){
-        stops_coordinates.emplace(stop_name, Svg::Point{call_x(dist.GetLongitude()), call_y(dist.GetLatitude())});
+        stops_coordinates.emplace(stop_name, Svg::Point{dist.GetLongitude(), dist.GetLatitude()});
     }
 }
 
@@ -222,6 +165,24 @@ void Data_Structure::DataBaseSvgBuilder::Init(const Dict<Data_Structure::Stop> &
                            std::forward_as_tuple("stop_labels"),
                            std::forward_as_tuple(std::make_shared<StopsTextDrawer>(stops)));
 
+}
+
+void Data_Structure::DataBaseSvgBuilder::BuildNeighborhoodConnections(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses) {
+    for (auto & [_, bus] : buses) {
+        auto & stops_ = bus->stops;
+        for (auto stops_it = stops_.begin(); stops_it != std::prev(stops_.end()); stops_it++) {
+            db_connected[*stops_it].insert(*std::next(stops_it));
+            db_connected[*std::next(stops_it)].insert(*stops_it);
+        }
+    }
+}
+
+bool Data_Structure::DataBaseSvgBuilder::IsConnected(const Data_Structure::Stop &lhs, const Data_Structure::Stop &rhs) {
+    auto it = db_connected.find(lhs.name);
+    if (it != db_connected.end())
+        return it->second.count(rhs.name);
+    else
+        return false;
 }
 
 void Data_Structure::BusPolylinesDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
