@@ -38,7 +38,7 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
         size_t k = l;
         auto right_bearing_point = left_bearing_point;
         size_t count = std::distance(left_bearing_point, right_bearing_point);
-        auto bus_range = Ranges::AsRange(bus->stops);
+        auto bus_range = bus->is_roundtrip ? Ranges::AsRange(bus->stops) : Ranges::ToMiddle(Ranges::AsRange(bus->stops));
         for (auto stop_iter = bus_range.begin(); stop_iter != bus_range.end(); stop_iter++){
             if (stop_iter == right_bearing_point) {
                 left_bearing_point = right_bearing_point;
@@ -50,8 +50,10 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
             } else {
                 if (right_bearing_point == bus_range.end())
                     throw std::logic_error("bad right point!");
+
                 auto left_bearing_distance = stops.at(*left_bearing_point)->dist;
                 auto right_bearing_distance = stops.at(*right_bearing_point)->dist;
+
                 double x = left_bearing_distance.GetLongitude()
                            + step(left_bearing_distance.GetLongitude(),
                                   right_bearing_distance.GetLongitude(), count)
@@ -72,20 +74,20 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
     auto & sorted_y = sorted_xy.second;
     for (auto & [stop_name, stop] : stops)
     {
-        if (bearing_points.find(stop_name) != bearing_points.end()) {
-            sorted_x.emplace_back(stop->dist.GetLongitude(), stop_name);
-            sorted_y.emplace_back(stop->dist.GetLatitude(), stop_name);
-        } else {
-            auto x = uniform_x.find(stop_name);
-            auto y = uniform_y.find(stop_name);
-            sorted_x.emplace_back(x->second, x->first);
-            sorted_y.emplace_back(y->second, y->first);
-        }
+//        if (bearing_points.find(stop_name) != bearing_points.end()) {
+//            sorted_x.emplace_back(stop->dist.GetLongitude(), stop_name);
+//            sorted_y.emplace_back(stop->dist.GetLatitude(), stop_name);
+//        } else {
+//            auto x = uniform_x.find(stop_name);
+//            auto y = uniform_y.find(stop_name);
+//            sorted_x.emplace_back(x->second, stop_name);
+//            sorted_y.emplace_back(y->second, stop_name);
+//        }
+        sorted_x.emplace_back(stops.at(stop_name)->dist.GetLongitude(), stop_name);
+        sorted_y.emplace_back(stops.at(stop_name)->dist.GetLatitude(), stop_name);
     }
     std::sort(sorted_x.begin(), sorted_x.end());
-    std::sort(sorted_y.begin(), sorted_y.end(), [](auto const & lhs, auto const & rhs){
-        return lhs > rhs;
-    });
+    std::sort(sorted_y.begin(), sorted_y.end());
     return sorted_xy;
 }
 
@@ -115,8 +117,8 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_S
 
         int yid = 0;
         std::map<std::string, int> gluing_y;
-        auto beg_of_cur_idy = sorted_y.rbegin();
-        for (auto it_y = sorted_y.rbegin(); it_y != std::prev(sorted_y.rend()); it_y++) {
+        auto beg_of_cur_idy = sorted_y.begin();
+        for (auto it_y = sorted_y.begin(); it_y != std::prev(sorted_y.end()); it_y++) {
             gluing_y[it_y->second] = yid;
             for (auto cur_it = beg_of_cur_idy; cur_it != std::next(it_y); cur_it++){
                 if (IsConnected(*stops.at(cur_it->second), *stops.at(std::next(it_y)->second), buses)) {
@@ -126,16 +128,16 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_S
                 }
             }
         }
-        gluing_y[std::prev(sorted_y.rend())->second] = yid;
+        gluing_y[std::prev(sorted_y.end())->second] = yid;
 
-        double x_step = (renderSettings.width - 2. * renderSettings.padding) / xid;
-        double y_step = (renderSettings.height - 2. * renderSettings.padding) / yid;
+        double x_step = (renderSettings.width - 2.f * renderSettings.padding) / static_cast<double>(xid);
+        double y_step = (renderSettings.height - 2.f * renderSettings.padding) / static_cast<double>(yid);
 
         for (auto &el : sorted_x) {
             new_x.emplace(el.second, gluing_x.at(el.second) * x_step + renderSettings.padding);
         }
-        for (auto it = sorted_y.rbegin(); it != sorted_y.rend(); it++) {
-            new_y.emplace(it->second, renderSettings.padding + gluing_y.at(it->second) * y_step);
+        for (auto & it : sorted_y) {
+            new_y.emplace(it.second, renderSettings.padding + gluing_y.at(it.second) * y_step);
         }
     }
 

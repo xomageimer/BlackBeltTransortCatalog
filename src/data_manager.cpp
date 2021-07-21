@@ -160,7 +160,7 @@ Data_Structure::GetBearingPoints(const Dict<Data_Structure::Stop> &stops, const 
                 repeated_in_route[stop_name] += 1;
             }
             for (auto & [stop_name, count] : repeated_in_route){
-                if (count > 2)
+                if (count >= 2)
                     res.insert(stop_name);
                 else
                     count_in_routes[stop_name] += 1;
