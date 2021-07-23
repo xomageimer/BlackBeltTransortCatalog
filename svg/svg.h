@@ -47,6 +47,9 @@ namespace Svg {
     struct Point{
         double x{0.}, y{0.};
     };
+    inline bool operator<(Point const & lhs, Point const & rhs){
+        return lhs.x < rhs.x || (lhs.x == rhs.x && lhs.y < rhs.y);
+    }
 
     template <typename cur_prim>
     struct Primitive {

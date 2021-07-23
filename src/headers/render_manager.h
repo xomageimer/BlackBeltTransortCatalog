@@ -81,7 +81,6 @@ namespace Data_Structure {
         explicit DataBaseSvgBuilder(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses,
                                     RenderSettings render_set);
         [[nodiscard]] MapRespType RenderMap() const;
-        bool IsConnected(const Stop & lhs, const Stop & rhs);
 
         friend BusPolylinesDrawer;
         friend StopsRoundDrawer;
@@ -91,9 +90,9 @@ namespace Data_Structure {
         void Init(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses);
         void CalculateCoordinates(const Dict<struct Stop> & stops, const Dict<struct Bus> &buses);
         auto CoordinateCompression(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
-        void BuildNeighborhoodConnections(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses);
 
-        static auto CoordinateUniformDistribution(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
+        auto CoordinateUniformDistribution(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
+        void BuildNeighborhoodConnections( std::map<std::string, Svg::Point> const & new_coords, const Dict<struct Bus> &buses);
 
         RenderSettings renderSettings;
         Svg::Document doc;
@@ -102,7 +101,10 @@ namespace Data_Structure {
 
         std::map<std::string, std::shared_ptr<ILayersStrategy>> layersStrategy;
 
-        std::unordered_map<std::string, std::unordered_set<std::string>> db_connected;
+        std::unordered_map<double, std::unordered_set<double>> db_connected_x;
+        std::unordered_map<double, std::unordered_set<double>> db_connected_y;
+        bool IsConnected_x(const double lhs, const double rhs);
+        bool IsConnected_y(const double lhs, const double rhs);
     };
 }
 
