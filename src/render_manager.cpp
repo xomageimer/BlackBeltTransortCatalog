@@ -47,7 +47,7 @@ std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::Coordinate
                     return bearing_points.find(cur) != bearing_points.end();
                 });
                 auto left_bearing_distance = stops.at(*left_bearing_point)->dist;
-                uniform.emplace(*left_bearing_point, Svg::Point{left_bearing_distance.GetLongitude(), left_bearing_distance.GetLatitude()});
+                uniform.insert_or_assign(*left_bearing_point, Svg::Point{left_bearing_distance.GetLongitude(), left_bearing_distance.GetLatitude()});
             } else {
                 if (right_bearing_point == bus_range.end())
                     throw std::logic_error("bad right point!");
@@ -95,43 +95,57 @@ auto Data_Structure::DataBaseSvgBuilder::SortingByCoordinates(const std::map<std
     return std::move(sorted_xy);
 }
 
-std::pair<std::map<double, int>, int> Data_Structure::DataBaseSvgBuilder::GluingCoordinates(
-        const std::vector<std::pair<double, std::string>> &sorted_by_coord,
-        const std::unordered_map<double, std::unordered_set<double>> &neighbours_by_coord) {
+std::pair<std::map<std::string, int>, int> Data_Structure::DataBaseSvgBuilder::GluingCoordinates(
+        const std::vector<std::pair<double, std::string>> &sorted_by_coord) {
+
+    std::map<std::string, int> gluing;
     int idx_max = 0;
+
     int idx = 0;
-    std::map<double, int> gluing;
-    auto beg_of_cur_idx = sorted_by_coord.begin();
-    for (auto it_x = sorted_by_coord.begin(); it_x != std::prev(sorted_by_coord.end()); it_x++) {
-        gluing.emplace(it_x->first, idx);
-        for (auto cur_it = beg_of_cur_idx; cur_it != std::next(it_x); cur_it++){
-            if (IsConnected(cur_it->first, std::next(it_x)->first, neighbours_by_coord)) {
-                idx++;
-                beg_of_cur_idx = std::next(it_x);
-                break;
+
+    auto refresh = [&idx, this, &gluing](std::string const & stop){
+        int potential_id = 0;
+        bool was_checked = false;
+        auto it = db_connected.find(stop);
+        if (it != db_connected.end()) {
+            for (auto &cur_stop : it->second) {
+                auto cur_it = gluing.find(cur_stop);
+                if (cur_it != gluing.end()) {
+                    was_checked = true;
+                    potential_id = std::max(potential_id, cur_it->second);
+                }
             }
         }
+        idx = was_checked ? potential_id + 1 : 0;
+    };
+
+    auto beg_of_cur_idx = sorted_by_coord.begin();
+    for (const auto & it_x : sorted_by_coord) {
+        refresh(it_x.second);
+        gluing.emplace(it_x.second, idx);
+        if (idx > idx_max)
+            idx_max = idx;
     }
-    gluing.emplace(std::prev(sorted_by_coord.end())->first, idx);
-    return {std::move(gluing), idx};
+
+    return {std::move(gluing), idx_max};
 
 }
 
 std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_Structure::Stop> &stops, const Dict<Data_Structure::Bus> & buses) {
     auto [sorted_x, sorted_y] = SortingByCoordinates(CoordinateUniformDistribution(stops, buses), stops);
 
-    auto [gluing_y, yid] = GluingCoordinates(sorted_y, db_connected_y);
-    auto [gluing_x, xid] = GluingCoordinates(sorted_x, db_connected_x);
-    double x_step = xid ? (renderSettings.width - 2.f * renderSettings.padding) / xid : xid;
-    double y_step = yid ? (renderSettings.height - 2.f * renderSettings.padding) / yid : yid;
+    auto [gluing_y, yid] = GluingCoordinates(sorted_y);
+    auto [gluing_x, xid] = GluingCoordinates(sorted_x);
+    double x_step = xid ? (renderSettings.width - 2.f * renderSettings.padding) / xid : 0;
+    double y_step = yid ? (renderSettings.height - 2.f * renderSettings.padding) / yid : 0;
 
     std::map<std::string, double> new_x;
     std::map<std::string, double> new_y;
     for (auto [coord, stop_name] : sorted_y) {
-        new_y.emplace(stop_name, renderSettings.height - renderSettings.padding - (gluing_y.at(coord)) * y_step);
+        new_y.emplace(stop_name, renderSettings.height - renderSettings.padding - (gluing_y.at(stop_name)) * y_step);
     }
     for (auto [coord, stop_name]: sorted_x) {
-        new_x.emplace(stop_name, (gluing_x.at(coord)) * x_step + renderSettings.padding);
+        new_x.emplace(stop_name, (gluing_x.at(stop_name)) * x_step + renderSettings.padding);
     }
 
     std::map<std::string, Svg::Point> CompressCoord;
@@ -169,17 +183,13 @@ void Data_Structure::DataBaseSvgBuilder::BuildNeighborhoodConnections( std::map<
         auto & stops_ = bus->stops;
         if (stops_.empty()) continue;
         for (auto stops_it = stops_.begin(); stops_it != std::prev(stops_.end()); stops_it++) {
-            const auto next_stop_it = std::next(stops_it);
-            const auto [min_lat, max_lat] = std::minmax(new_coords.at(*stops_it).y, new_coords.at(*next_stop_it).y);
-            const auto [min_lon, max_lon] = std::minmax(new_coords.at(*stops_it).x, new_coords.at(*next_stop_it).x);
-            db_connected_x[min_lon].insert(max_lon);
-            db_connected_y[min_lat].insert(max_lat);
+            db_connected[*stops_it].insert(*std::next(stops_it));
+            db_connected[*std::next(stops_it)].insert(*stops_it);
         }
     }
 }
 
-bool Data_Structure::DataBaseSvgBuilder::IsConnected(const double lhs, const double rhs,
-                                                     const std::unordered_map<double, std::unordered_set<double>> &db_s) {
+bool Data_Structure::DataBaseSvgBuilder::IsConnected(std::string const & lhs, std::string const & rhs, std::unordered_map<std::string, std::unordered_set<std::string>> const & db_s) {
     auto it = db_s.find(lhs);
     if (it != db_s.end())
         return it->second.count(rhs);

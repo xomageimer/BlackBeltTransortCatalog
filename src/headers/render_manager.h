@@ -81,7 +81,7 @@ namespace Data_Structure {
         explicit DataBaseSvgBuilder(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses,
                                     RenderSettings render_set);
         [[nodiscard]] MapRespType RenderMap() const;
-        static bool IsConnected(double lhs, double rhs, std::unordered_map<double, std::unordered_set<double>> const & db_s);
+        static bool IsConnected(std::string const & lhs, std::string const & rhs, std::unordered_map<std::string, std::unordered_set<std::string>> const & db_s);
 
         friend BusPolylinesDrawer;
         friend StopsRoundDrawer;
@@ -94,7 +94,7 @@ namespace Data_Structure {
         std::map<std::string, Svg::Point> CoordinateUniformDistribution(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
         void BuildNeighborhoodConnections( std::map<std::string, Svg::Point> const & new_coords, const Dict<struct Bus> &buses);
         auto SortingByCoordinates(std::map<std::string, Svg::Point> const & uniform, const Dict<struct Stop> &stops);
-        std::pair<std::map<double, int>, int> GluingCoordinates(std::vector<std::pair<double, std::string>> const & sorted_by_coord, std::unordered_map<double, std::unordered_set<double>> const & neighbours_by_coord);
+        std::pair<std::map<std::string, int>, int> GluingCoordinates(std::vector<std::pair<double, std::string>> const & sorted_by_coord);
         std::map<std::string, Svg::Point> CoordinateCompression(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
 
         RenderSettings renderSettings;
@@ -104,9 +104,7 @@ namespace Data_Structure {
 
         std::map<std::string, std::shared_ptr<ILayersStrategy>> layersStrategy;
 
-        //TODO избавиться от харкода
-        std::unordered_map<double, std::unordered_set<double>> db_connected_x;
-        std::unordered_map<double, std::unordered_set<double>> db_connected_y;
+        std::unordered_map<std::string, std::unordered_set<std::string>> db_connected;
     };
 }
 
