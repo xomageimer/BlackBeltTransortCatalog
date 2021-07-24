@@ -9,6 +9,7 @@
 #include <string>
 #include <sstream>
 
+// TODO убрать to_string, все примитивы должны выводится в ostream
 namespace Svg {
     struct Rgba{
         uint8_t red, green, blue;

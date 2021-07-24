@@ -21,7 +21,7 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
     doc.SimpleRender();
 }
 
-auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dict<Data_Structure::Stop> &stops,
+std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dict<Data_Structure::Stop> &stops,
                                                                        const Dict<Data_Structure::Bus> &buses) {
     auto bearing_points = GetBearingPoints(stops, buses);
 
@@ -68,8 +68,13 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
             ++k;
         }
     }
-    BuildNeighborhoodConnections(uniform, buses);
 
+    BuildNeighborhoodConnections(uniform, buses);
+    return uniform;
+}
+
+auto Data_Structure::DataBaseSvgBuilder::SortingByCoordinates(const std::map<std::string, Svg::Point> &uniform,
+                                                              const Dict<Data_Structure::Stop> &stops) {
     std::pair<std::vector<std::pair<double, std::string>>, std::vector<std::pair<double, std::string>>> sorted_xy;
     auto & sorted_x = sorted_xy.first;
     auto & sorted_y = sorted_xy.second;
@@ -87,42 +92,36 @@ auto Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dic
     }
     std::sort(sorted_x.begin(), sorted_x.end());
     std::sort(sorted_y.begin(), sorted_y.end());
-    return sorted_xy;
+    return std::move(sorted_xy);
 }
 
-auto Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_Structure::Stop> &stops, const Dict<Data_Structure::Bus> & buses) {
-    auto [sorted_x, sorted_y] = CoordinateUniformDistribution(stops, buses);
-
-    int xid = 0;
-    std::map<double, int> gluing_x;
-    auto beg_of_cur_idx = sorted_x.begin();
-    for (auto it_x = sorted_x.begin(); it_x != std::prev(sorted_x.end()); it_x++) {
-        gluing_x.emplace(it_x->first, xid);
+std::pair<std::map<double, int>, int> Data_Structure::DataBaseSvgBuilder::GluingCoordinates(
+        const std::vector<std::pair<double, std::string>> &sorted_by_coord,
+        const std::unordered_map<double, std::unordered_set<double>> &neighbours_by_coord) {
+    int idx_max = 0;
+    int idx = 0;
+    std::map<double, int> gluing;
+    auto beg_of_cur_idx = sorted_by_coord.begin();
+    for (auto it_x = sorted_by_coord.begin(); it_x != std::prev(sorted_by_coord.end()); it_x++) {
+        gluing.emplace(it_x->first, idx);
         for (auto cur_it = beg_of_cur_idx; cur_it != std::next(it_x); cur_it++){
-            if (IsConnected_x(cur_it->first, std::next(it_x)->first)) {
-                xid++;
+            if (IsConnected(cur_it->first, std::next(it_x)->first, neighbours_by_coord)) {
+                idx++;
                 beg_of_cur_idx = std::next(it_x);
                 break;
             }
         }
     }
-    gluing_x.emplace(std::prev(sorted_x.end())->first, xid);
+    gluing.emplace(std::prev(sorted_by_coord.end())->first, idx);
+    return {std::move(gluing), idx};
 
-    int yid = 0;
-    std::map<double, int> gluing_y;
-    auto beg_of_cur_idy = sorted_y.begin();
-    for (auto it_y = sorted_y.begin(); it_y != std::prev(sorted_y.end()); it_y++) {
-        gluing_y.emplace(it_y->first, yid);
-        for (auto cur_it = beg_of_cur_idy; cur_it != std::next(it_y); cur_it++){
-            if (IsConnected_y(cur_it->first, std::next(it_y)->first)) {
-                yid++;
-                beg_of_cur_idy = std::next(it_y);
-                break;
-            }
-        }
-    }
-    gluing_y.emplace(std::prev(sorted_y.end())->first, yid);
+}
 
+std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_Structure::Stop> &stops, const Dict<Data_Structure::Bus> & buses) {
+    auto [sorted_x, sorted_y] = SortingByCoordinates(CoordinateUniformDistribution(stops, buses), stops);
+
+    auto [gluing_y, yid] = GluingCoordinates(sorted_y, db_connected_y);
+    auto [gluing_x, xid] = GluingCoordinates(sorted_x, db_connected_x);
     double x_step = xid ? (renderSettings.width - 2.f * renderSettings.padding) / xid : xid;
     double y_step = yid ? (renderSettings.height - 2.f * renderSettings.padding) / yid : yid;
 
@@ -178,17 +177,10 @@ void Data_Structure::DataBaseSvgBuilder::BuildNeighborhoodConnections( std::map<
     }
 }
 
-bool Data_Structure::DataBaseSvgBuilder::IsConnected_x(const double lhs, const double rhs) {
-    auto it = db_connected_x.find(lhs);
-    if (it != db_connected_x.end())
-        return it->second.count(rhs);
-    else
-        return false;
-}
-
-bool Data_Structure::DataBaseSvgBuilder::IsConnected_y(const double lhs, const double rhs) {
-    auto it = db_connected_y.find(lhs);
-    if (it != db_connected_y.end())
+bool Data_Structure::DataBaseSvgBuilder::IsConnected(const double lhs, const double rhs,
+                                                     const std::unordered_map<double, std::unordered_set<double>> &db_s) {
+    auto it = db_s.find(lhs);
+    if (it != db_s.end())
         return it->second.count(rhs);
     else
         return false;
@@ -262,12 +254,14 @@ void Data_Structure::BusTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
                 .SetFontFamily("Verdana")
                 .SetFontWeight("bold")
                 .SetData(bus->name);
+
         Svg::Text substrates = text;
         substrates.SetFillColor(db_svg->renderSettings.underlayer_color)
                 .SetStrokeColor(db_svg->renderSettings.underlayer_color)
                 .SetStrokeWidth(db_svg->renderSettings.underlayer_width)
                 .SetStrokeLineCap("round")
                 .SetStrokeLineJoin("round");
+
         text.SetFillColor(db_svg->renderSettings.color_palette[i++ % size]);
 
         if (!bus->is_roundtrip && *last != *beg){
