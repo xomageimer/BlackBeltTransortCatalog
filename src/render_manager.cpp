@@ -251,7 +251,7 @@ void Data_Structure::StopsTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
 void Data_Structure::BusTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
     size_t size = db_svg->renderSettings.color_palette.size();
     size_t i = 0;
-    for (auto & [_, bus] : buses){
+    for (auto & [bus_name, bus] : buses){
         auto beg = bus->stops.begin();
         auto last = std::prev(Ranges::ToMiddle(Ranges::AsRange(bus->stops)).end());
 

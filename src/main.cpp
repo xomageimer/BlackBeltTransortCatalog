@@ -14,7 +14,6 @@ int main(){
             ReadRenderSettings(input_map["render_settings"])
     };
 
-    std::cout << std::setprecision(16);
     PrintResponses(
             ReadStatRequests(db, input_map["stat_requests"]),
             std::cout

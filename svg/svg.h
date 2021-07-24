@@ -7,6 +7,7 @@
 
 #include <variant>
 #include <string>
+#include <sstream>
 
 namespace Svg {
     struct Rgba{
@@ -30,10 +31,13 @@ namespace Svg {
                     return std::string("rgb(" + std::to_string(rgb_c.red) + ", "
                         + std::to_string(rgb_c.green) + ", "
                             + std::to_string(rgb_c.blue)) + ")";
-                else
+                else {
+                    std::stringstream ss_prec;
+                    ss_prec << *rgb_c.alpha;
                     return std::string("rgba(" + std::to_string(rgb_c.red) + ", "
                                        + std::to_string(rgb_c.green) + ", "
-                                       + std::to_string(rgb_c.blue)) + ", " + std::to_string(*rgb_c.alpha) + ")";
+                                       + std::to_string(rgb_c.blue)) + ", " + ss_prec.str() + ")";
+                }
             } else {
                 return std::string(std::get<std::string>(color));
             }

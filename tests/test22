@@ -1531,10 +1531,10 @@
          -3
      ],
       "layers": [
-         "bus_lines",
-         "stop_points",
          "bus_labels",
-         "stop_labels"
+         "stop_labels",
+         "bus_lines",
+         "stop_points"
       ]
     },
   "routing_settings": {
