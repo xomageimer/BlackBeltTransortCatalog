@@ -103,6 +103,7 @@ namespace Json {
         return std::move(Document{Deserializer::LoadNode(input)});
     }
 
+    // TODO переделать сериалайзер чтобы не нужно было задавать шаблон явно!
     namespace Serializer {
         template<typename T>
         std::enable_if_t<!is_number<T>::value, void> Serialize(const Json::Node &node, std::ostream &output = std::cout);

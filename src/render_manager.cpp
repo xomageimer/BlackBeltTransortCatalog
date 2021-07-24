@@ -146,6 +146,7 @@ void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_St
     stops_coordinates = CoordinateCompression(stops, buses);
 }
 
+// TODO придумать более оптимальное решение чем паттерн стратегия
 void Data_Structure::DataBaseSvgBuilder::Init(const Dict<Data_Structure::Stop> &stops,
                                               const Dict<Data_Structure::Bus> &buses) {
     layersStrategy.emplace(std::piecewise_construct,
