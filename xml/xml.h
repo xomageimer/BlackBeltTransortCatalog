@@ -28,7 +28,7 @@ namespace XML {
         std::string raw_str;
     };
 
-    using variant_inheritance = std::variant<std::string, config, config_with_parameters, text, std::vector<struct xml>>;
+    using variant_inheritance = std::variant<std::string, config, config_with_parameters, std::vector<struct xml>, text, int, double, unsigned int>;
     using Array = std::vector<std::pair<std::string, struct xml>>;
 
     struct xml : variant_inheritance {
@@ -66,6 +66,15 @@ namespace XML {
 
         template <>
         void Serialize<std::string>(const std::string & xml_str, std::ostream &out);
+
+        template <>
+        void Serialize<int>(const int &xml_str, std::ostream &out);
+
+        template <>
+        void Serialize<double>(const double & xml_str, std::ostream &out);
+
+        template <>
+        void Serialize<unsigned int>(const unsigned int & xml_str, std::ostream &out);
 
         template <>
         void Serialize<text>(const text & xml_str, std::ostream &out);

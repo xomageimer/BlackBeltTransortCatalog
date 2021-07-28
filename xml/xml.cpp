@@ -2,6 +2,21 @@
 
 #include <iomanip>
 
+template <>
+void XML::Serializer::Serialize<int>(const int &xml_num, std::ostream &out) {
+    out << "\\\"" << xml_num << "\\\"";
+}
+
+template <>
+void XML::Serializer::Serialize<double>(const double & xml_num, std::ostream &out){
+    out << "\\\"" << xml_num << "\\\"";
+}
+
+template <>
+void XML::Serializer::Serialize<unsigned int>(const unsigned int & xml_num, std::ostream &out){
+    out << "\\\"" << xml_num << "\\\"";
+}
+
 template<>
 void XML::Serializer::Serialize<std::string>(const std::string &xml_str, std::ostream &out) {
     out << "\\\"" << xml_str << "\\\"";
@@ -11,7 +26,6 @@ template<>
 void XML::Serializer::Serialize<XML::text>(const XML::text &xml_str, std::ostream &out) {
     out << xml_str.raw_str;
 }
-
 
 template<>
 void XML::Serializer::Serialize<XML::config>(const XML::config &xml_node, std::ostream &out) {

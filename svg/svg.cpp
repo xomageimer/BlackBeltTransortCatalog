@@ -6,7 +6,7 @@ XML::config Svg::Primitive<cur_prim>::MakeXml() const {
 
     xml.data.emplace_back("fill", (!fill_color.IsNone() ? static_cast<std::string>(fill_color) : "none"));
     xml.data.emplace_back("stroke", (!stroke_color.IsNone() ? static_cast<std::string>(stroke_color) : "none"));
-    xml.data.emplace_back("stroke-width", std::to_string(stroke_width));
+    xml.data.emplace_back("stroke-width", stroke_width);
 
     if (!type_of_stroke_linecap.empty())
         xml.data.emplace_back("stroke-linecap", type_of_stroke_linecap);
@@ -32,12 +32,11 @@ XML::xml Svg::Polyline::MakeXml() const {
 
     xml.open = "polyline";
     xml.close = "/";
-    std::string str_points;
-    str_points.reserve(points.size());
+    std::stringstream ss_to_str;
     for (auto & point : points){
-        str_points += std::to_string(point.x) + "," + std::to_string(point.y) + " ";
+        ss_to_str << point.x << "," << point.y << " ";
     }
-    xml.data.emplace_back("points", str_points);
+    xml.data.emplace_back("points", ss_to_str.str());
 
     return xml;
 }
@@ -67,9 +66,9 @@ XML::xml Svg::Circle::MakeXml() const {
 
     xml.open = "circle";
     xml.close = "/";
-    xml.data.emplace_back("cx", std::to_string(point.x));
-    xml.data.emplace_back("cy", std::to_string(point.y));
-    xml.data.emplace_back("r", std::to_string(radius));
+    xml.data.emplace_back("cx", point.x);
+    xml.data.emplace_back("cy", point.y);
+    xml.data.emplace_back("r", radius);
 
     return xml;
 }
@@ -142,11 +141,11 @@ XML::xml Svg::Text::MakeXml() const {
 
     xml_par.open = "text";
     xml_par.close = "/text";
-    xml_par.data.emplace_back("x", std::to_string(point.x));
-    xml_par.data.emplace_back("y", std::to_string(point.y));
-    xml_par.data.emplace_back("dx", std::to_string(offset.x));
-    xml_par.data.emplace_back("dy", std::to_string(offset.y));
-    xml_par.data.emplace_back("font-size", std::to_string(font_size));
+    xml_par.data.emplace_back("x", point.x);
+    xml_par.data.emplace_back("y", point.y);
+    xml_par.data.emplace_back("dx", offset.x);
+    xml_par.data.emplace_back("dy", offset.y);
+    xml_par.data.emplace_back("font-size", font_size);
     if (!font_family.empty())
         xml_par.data.emplace_back("font-family", font_family);
     if (!font_weight.empty())
@@ -160,7 +159,7 @@ void Svg::Document::Render(std::ostream &out) {
     XML::config_with_parameters conf;
     conf.open = "svg";
     conf.close = "/svg";
-    conf.data.emplace_back("version", std::to_string(1.1));
+    conf.data.emplace_back("version", 1.1);
     conf.data.emplace_back("xmlns", "http://www.w3.org/2000/svg");
 
     std::vector<XML::xml> pod_xml;
@@ -191,7 +190,7 @@ void Svg::Document::SimpleRender() {
     XML::config_with_parameters conf;
     conf.open = "svg";
     conf.close = "/svg";
-    conf.data.emplace_back("version", std::to_string(1.1));
+    conf.data.emplace_back("version", 1.1);
     conf.data.emplace_back("xmlns", "http://www.w3.org/2000/svg");
 
     std::vector<XML::xml> pod_xml;

@@ -27,18 +27,14 @@ namespace Svg {
 
         explicit operator std::string() const{
             if (std::holds_alternative<Rgba>(color)) {
+                std::stringstream ss_to_str;
                 auto const & rgb_c = std::get<Rgba>(color);
                 if (!rgb_c.alpha)
-                    return std::string("rgb(" + std::to_string(rgb_c.red) + ", "
-                        + std::to_string(rgb_c.green) + ", "
-                            + std::to_string(rgb_c.blue)) + ")";
+                    ss_to_str << "rgb(" << std::to_string(rgb_c.red) << ", " << std::to_string(rgb_c.green) << ", " << std::to_string(rgb_c.blue) << ")";
                 else {
-                    std::stringstream ss_prec;
-                    ss_prec << *rgb_c.alpha;
-                    return std::string("rgba(" + std::to_string(rgb_c.red) + ", "
-                                       + std::to_string(rgb_c.green) + ", "
-                                       + std::to_string(rgb_c.blue)) + ", " + ss_prec.str() + ")";
+                    ss_to_str << "rgba(" << std::to_string(rgb_c.red) << ", " << std::to_string(rgb_c.green) << ", " << std::to_string(rgb_c.blue) << ", " << *rgb_c.alpha << ")";
                 }
+                return ss_to_str.str();
             } else {
                 return std::string(std::get<std::string>(color));
             }
