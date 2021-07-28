@@ -84,20 +84,20 @@ Json::Node Json::Deserializer::LoadNumber(std::istream &input) {
 
 namespace Json::Serializer{
     template<>
-    void Serialize<bool>(const Json::Node &node, std::ostream &output) {
-        output << (node.AsBool() ? "true" : "false");
+    void Serialize<bool>(const bool &node, std::ostream &output) {
+        output << (node ? "true" : "false");
     }
 
     template<>
-    void Serialize<std::string>(const Json::Node &node, std::ostream &output) {
-        output << std::quoted(node.AsString());
+    void Serialize<std::string>(const std::string &node, std::ostream &output) {
+        output << std::quoted(node);
     }
 
     template<>
-    void Serialize<std::vector<Node>>(const Json::Node &node, std::ostream &output) {
+    void Serialize<std::vector<Node>>(const std::vector<Node> &node, std::ostream &output) {
         output << "[";
         bool is_first = true;
-        for (const auto &el : node.AsArray()) {
+        for (const auto &el : node) {
             if (!is_first)
                 output << ", ";
             is_first = false;
@@ -109,10 +109,10 @@ namespace Json::Serializer{
     }
 
     template<>
-    void Serialize<std::map<std::string, Node>>(const Json::Node &node, std::ostream &output) {
+    void Serialize<std::map<std::string, Node>>(const std::map<std::string, Node> &node, std::ostream &output) {
         output << "{";
         bool is_first = true;
-        for (const auto &[key, value] : node.AsMap()) {
+        for (const auto &[key, value] : node) {
             if (!is_first)
                 output << ", ";
             is_first = false;
@@ -125,9 +125,9 @@ namespace Json::Serializer{
     }
 
     template<>
-    void Serialize<XML::xml>(const Json::Node &node, std::ostream &output){
+    void Serialize<XML::xml>(const XML::xml &node, std::ostream &output){
         output << "\"";
-        XML::Serializer::Serialize(node.AsXML(), output);
+        XML::Serializer::Serialize(node, output);
         output << "\"";
     }
 }

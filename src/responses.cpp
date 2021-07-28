@@ -52,5 +52,5 @@ void BadResponse::MakeJson() {
 }
 
 void PrintResponses(std::vector<JsonResponse> responses, std::ostream & os) {
-    Json::Serializer::Serialize<std::vector<Json::Node>>(responses, os);
+    Json::Serializer::Serialize(responses, os);
 }

@@ -103,30 +103,29 @@ namespace Json {
         return std::move(Document{Deserializer::LoadNode(input)});
     }
 
-    // TODO переделать сериалайзер чтобы не нужно было задавать шаблон явно!
     namespace Serializer {
         template<typename T>
-        std::enable_if_t<!is_number<T>::value, void> Serialize(const Json::Node &node, std::ostream &output = std::cout);
+        std::enable_if_t<!is_number<T>::value, void> Serialize(const T &node, std::ostream &output = std::cout);
 
         template<>
-        void Serialize<bool>(const Json::Node &node, std::ostream &output);
+        void Serialize<bool>(const bool &node, std::ostream &output);
 
         template<typename T>
         std::enable_if_t<is_number<T>::value, void> Serialize(const Json::Node &node, std::ostream &output) {
-            output << node.AsNumber<T>();
+            output << node.template AsNumber<T>();
         }
 
         template<>
-        void Serialize<XML::xml>(const Json::Node &node, std::ostream &output);
+        void Serialize<XML::xml>(const XML::xml &node, std::ostream &output);
 
         template<>
-        void Serialize<std::string>(const Json::Node &node, std::ostream &output);
+        void Serialize<std::string>(const std::string &node, std::ostream &output);
 
         template<>
-        void Serialize<std::vector<Node>>(const Json::Node &node, std::ostream &output);
+        void Serialize<std::vector<Node>>(const std::vector<Json::Node> &node, std::ostream &output);
 
         template<>
-        void Serialize<std::map<std::string, Node>>(const Json::Node &node, std::ostream &output);
+        void Serialize<std::map<std::string, Node>>(const std::map<std::string, Json::Node> &node, std::ostream &output);
     }
 }
 
