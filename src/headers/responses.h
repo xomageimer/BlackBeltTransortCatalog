@@ -64,6 +64,8 @@ public:
 
     double total_time;
     std::vector<ItemPtr> items;
+
+    XML::xml route_render;
 };
 
 struct MapResponse : public Response {

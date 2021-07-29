@@ -84,6 +84,7 @@ ResponseType Data_Structure::DataBase::FindStop(const std::string &title) const 
 ResponseType Data_Structure::DataBase::FindRoute(const std::string &from, const std::string &to) const {
     auto ret = router->CreateRoute(from, to);
     if (ret) {
+        ret->route_render = std::move(svg_builder->RenderRoute(ret->items)->svg_xml_answer);
         return ret;
     }
     else return GenerateBad();

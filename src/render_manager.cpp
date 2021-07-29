@@ -9,13 +9,24 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderMap() cons
     return MapResp;
 }
 
+Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std::vector<RouteResponse::ItemPtr> const &) const {
+    auto route_doc = doc;
+    // рендер маршрута ...
+
+
+
+    MapRespType MapResp = std::make_shared<MapResponse>();
+    MapResp->svg_xml_answer = route_doc.Get();
+    return MapResp;
+}
+
 Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure::Stop> &stops,
                                        const Dict<Data_Structure::Bus> &buses,
                                        RenderSettings render_set) : renderSettings(std::move(render_set)){
     Init(stops, buses);
     CalculateCoordinates(stops, buses);
     for (const auto & layer : renderSettings.layers) {
-        (layersStrategy[layer])->Draw(this);
+        (layersStrategy[layer])->Draw(this->renderSettings, this->stops_coordinates, this->doc);
     }
 
     doc.SimpleRender();
@@ -58,11 +69,11 @@ std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::Coordinate
                 double x = left_bearing_distance.GetLongitude()
                            + step(left_bearing_distance.GetLongitude(),
                                   right_bearing_distance.GetLongitude(), count)
-                             * (k - l);
+                             * static_cast<double>(k - l);
                 double y = left_bearing_distance.GetLatitude()
                            + step(left_bearing_distance.GetLatitude(),
                                   right_bearing_distance.GetLatitude(), count)
-                             * (k - l);
+                             * static_cast<double>(k - l);
                 uniform.insert_or_assign(*stop_iter, Svg::Point{x, y});
             }
             ++k;
@@ -160,7 +171,6 @@ void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_St
     stops_coordinates = CoordinateCompression(stops, buses);
 }
 
-// TODO придумать более оптимальное решение чем паттерн стратегия
 void Data_Structure::DataBaseSvgBuilder::Init(const Dict<Data_Structure::Stop> &stops,
                                               const Dict<Data_Structure::Bus> &buses) {
     layersStrategy.emplace(std::piecewise_construct,
@@ -197,105 +207,105 @@ bool Data_Structure::DataBaseSvgBuilder::IsConnected(std::string const & lhs, st
         return false;
 }
 
-void Data_Structure::BusPolylinesDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
-    size_t size = db_svg->renderSettings.color_palette.size();
+void Data_Structure::BusPolylinesDrawer::Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) {
+    size_t size = rs.color_palette.size();
     size_t i = 0;
 
     for (auto & bus : buses){
         auto polyline = Svg::Polyline{}
-                .SetStrokeColor(db_svg->renderSettings.color_palette[i++ % size])
-                .SetStrokeWidth(db_svg->renderSettings.line_width)
+                .SetStrokeColor(rs.color_palette[i++ % size])
+                .SetStrokeWidth(rs.line_width)
                 .SetStrokeLineJoin("round")
                 .SetStrokeLineCap("round");
         for (auto & stop : bus.second->stops){
             auto & distance = stops.at(stop)->dist;
-            polyline.AddPoint({db_svg->stops_coordinates.at(stops.at(stop)->name)});
+            polyline.AddPoint({stops_coordinates.at(stops.at(stop)->name)});
         }
-        db_svg->doc.Add(std::move(polyline));
+        doc.Add(std::move(polyline));
     }
 }
 
-void Data_Structure::StopsRoundDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
+void Data_Structure::StopsRoundDrawer::Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) {
     for (auto & [_, stop] : stops){
         auto & distance = stop->dist;
-        db_svg->doc.Add(Svg::Circle{}
+        doc.Add(Svg::Circle{}
                         .SetFillColor("white")
-                        .SetRadius(db_svg->renderSettings.stop_radius)
-                        .SetCenter(db_svg->stops_coordinates.at(stop->name)));
+                        .SetRadius(rs.stop_radius)
+                        .SetCenter(stops_coordinates.at(stop->name)));
     }
 }
 
-void Data_Structure::StopsTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
+void Data_Structure::StopsTextDrawer::Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) {
     for (auto & [_, stop] : stops){
         auto & distance = stop->dist;
         auto & name = stop->name;
         Svg::Text text = Svg::Text{}
-                .SetPoint({db_svg->stops_coordinates.at(name)})
-                .SetOffset({db_svg->renderSettings.stop_label_offset[0], db_svg->renderSettings.stop_label_offset[1]})
-                .SetFontSize(db_svg->renderSettings.stop_label_font_size)
+                .SetPoint({stops_coordinates.at(name)})
+                .SetOffset({rs.stop_label_offset[0], rs.stop_label_offset[1]})
+                .SetFontSize(rs.stop_label_font_size)
                 .SetFontFamily("Verdana")
                 .SetData(name);
 
         Svg::Text substrates = text;
         substrates
-                .SetFillColor(db_svg->renderSettings.underlayer_color)
-                .SetStrokeColor(db_svg->renderSettings.underlayer_color)
-                .SetStrokeWidth(db_svg->renderSettings.underlayer_width)
+                .SetFillColor(rs.underlayer_color)
+                .SetStrokeColor(rs.underlayer_color)
+                .SetStrokeWidth(rs.underlayer_width)
                 .SetStrokeLineCap("round")
                 .SetStrokeLineJoin("round");
 
         text.SetFillColor("black");
 
-        db_svg->doc.Add(std::move(substrates));
-        db_svg->doc.Add(std::move(text));
+        doc.Add(std::move(substrates));
+        doc.Add(std::move(text));
     }
 }
 
-void Data_Structure::BusTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
-    size_t size = db_svg->renderSettings.color_palette.size();
+void Data_Structure::BusTextDrawer::Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) {
+    size_t size = rs.color_palette.size();
     size_t i = 0;
     for (auto & [bus_name, bus] : buses){
         auto beg = bus->stops.begin();
         auto last = std::prev(Ranges::ToMiddle(Ranges::AsRange(bus->stops)).end());
 
         auto text = Svg::Text{}
-                .SetOffset({db_svg->renderSettings.bus_label_offset[0],
-                            db_svg->renderSettings.bus_label_offset[1]})
-                .SetFontSize(db_svg->renderSettings.bus_label_font_size)
+                .SetOffset({rs.bus_label_offset[0],
+                            rs.bus_label_offset[1]})
+                .SetFontSize(rs.bus_label_font_size)
                 .SetFontFamily("Verdana")
                 .SetFontWeight("bold")
                 .SetData(bus->name);
 
         Svg::Text substrates = text;
-        substrates.SetFillColor(db_svg->renderSettings.underlayer_color)
-                .SetStrokeColor(db_svg->renderSettings.underlayer_color)
-                .SetStrokeWidth(db_svg->renderSettings.underlayer_width)
+        substrates.SetFillColor(rs.underlayer_color)
+                .SetStrokeColor(rs.underlayer_color)
+                .SetStrokeWidth(rs.underlayer_width)
                 .SetStrokeLineCap("round")
                 .SetStrokeLineJoin("round");
 
-        text.SetFillColor(db_svg->renderSettings.color_palette[i++ % size]);
+        text.SetFillColor(rs.color_palette[i++ % size]);
 
         if (!bus->is_roundtrip && *last != *beg){
             auto text2 = text;
             auto substrates2 = substrates;
 
-            text.SetPoint({db_svg->stops_coordinates.at(stops.at(*beg)->name)});
-            substrates.SetPoint({db_svg->stops_coordinates.at(stops.at(*beg)->name)});
+            text.SetPoint({stops_coordinates.at(stops.at(*beg)->name)});
+            substrates.SetPoint({stops_coordinates.at(stops.at(*beg)->name)});
 
-            db_svg->doc.Add(substrates);
-            db_svg->doc.Add(text);
+            doc.Add(substrates);
+            doc.Add(text);
 
-            text2.SetPoint({db_svg->stops_coordinates.at(stops.at(*last)->name)});
-            substrates2.SetPoint({db_svg->stops_coordinates.at(stops.at(*last)->name)});
+            text2.SetPoint({stops_coordinates.at(stops.at(*last)->name)});
+            substrates2.SetPoint({stops_coordinates.at(stops.at(*last)->name)});
 
-            db_svg->doc.Add(substrates2);
-            db_svg->doc.Add(text2);
+            doc.Add(substrates2);
+            doc.Add(text2);
         } else {
-            text.SetPoint({db_svg->stops_coordinates.at(stops.at(*beg)->name)});
-            substrates.SetPoint({db_svg->stops_coordinates.at(stops.at(*beg)->name)});
+            text.SetPoint({stops_coordinates.at(stops.at(*beg)->name)});
+            substrates.SetPoint({stops_coordinates.at(stops.at(*beg)->name)});
 
-            db_svg->doc.Add(substrates);
-            db_svg->doc.Add(text);
+            doc.Add(substrates);
+            doc.Add(text);
         }
     }
 }
