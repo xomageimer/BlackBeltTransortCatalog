@@ -20,6 +20,7 @@ namespace Data_Structure {
     struct RenderSettings {
         double width;
         double height;
+        double outer_margin;
         double padding;
         double stop_radius;
         double line_width;
@@ -39,41 +40,35 @@ namespace Data_Structure {
     };
 
     struct ILayersStrategy {
-        virtual void Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document &) = 0;
+        virtual void Draw(struct DataBaseSvgBuilder *) = 0;
     };
 
     struct BusPolylinesDrawer : public ILayersStrategy{
     public:
-        explicit BusPolylinesDrawer(const Dict<struct Stop> & stp_, const Dict<struct Bus> & bus_) : stops(stp_), buses(bus_) {}
-        void Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) override;
+        explicit BusPolylinesDrawer(const std::map<std::string, struct Bus> & bus_) : buses(bus_) {}
+        void Draw(struct DataBaseSvgBuilder *) override;
     private:
-        const Dict<struct Bus> & buses;
-        const Dict<struct Stop> & stops;
+        const std::map<std::string, Bus> & buses;
     };
 
     struct StopsRoundDrawer : public ILayersStrategy{
     public:
-        explicit StopsRoundDrawer(const Dict<Data_Structure::Stop> & stp_) : stops(stp_) {}
-        void Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) override;
-    private:
-        const Dict<struct Stop> & stops;
+        explicit StopsRoundDrawer() {}
+        void Draw(struct DataBaseSvgBuilder *) override;
     };
 
     struct StopsTextDrawer : public ILayersStrategy{
     public:
-        explicit StopsTextDrawer(const Dict<Data_Structure::Stop> & stp_) : stops(stp_) {}
-        void Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) override;
-    private:
-        const Dict<struct Stop> & stops;
+        explicit StopsTextDrawer() {}
+        void Draw(struct DataBaseSvgBuilder *) override;
     };
 
     struct BusTextDrawer : public ILayersStrategy{
     public:
-        explicit BusTextDrawer(const Dict<Data_Structure::Stop> & stps_, const Dict<Data_Structure::Bus> & bus_) : stops(stps_),  buses(bus_) {}
-        void Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) override;
+        explicit BusTextDrawer(const std::map<std::string, Bus> & bus_) : buses(bus_) {}
+        void Draw(struct DataBaseSvgBuilder *) override;
     private:
-        const Dict<struct Bus> & buses;
-        const Dict<struct Stop> & stops;
+        const std::map<std::string, Bus> & buses;
     };
 
     struct DataBaseSvgBuilder {
@@ -81,7 +76,7 @@ namespace Data_Structure {
         explicit DataBaseSvgBuilder(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses,
                                     RenderSettings render_set);
         [[nodiscard]] MapRespType RenderMap() const;
-        [[nodiscard]] MapRespType RenderRoute(std::vector<RouteResponse::ItemPtr> const &) const;
+        [[nodiscard]] MapRespType RenderRoute(std::vector<RouteResponse::ItemPtr> const &);
         static bool IsConnected(std::string const & lhs, std::string const & rhs, std::unordered_map<std::string, std::unordered_set<std::string>> const & db_s);
 
         friend BusPolylinesDrawer;
@@ -89,7 +84,7 @@ namespace Data_Structure {
         friend StopsTextDrawer;
         friend BusTextDrawer;
     private:
-        void Init(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses);
+        void Init(const Dict<struct Bus> &buses);
         void CalculateCoordinates(const Dict<struct Stop> & stops, const Dict<struct Bus> &buses);
 
         std::map<std::string, Svg::Point> CoordinateUniformDistribution(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
@@ -101,8 +96,8 @@ namespace Data_Structure {
         RenderSettings renderSettings;
         Svg::Document doc;
 
+        std::map<std::string, Bus> bus_dict;
         std::map<std::string, Svg::Point> stops_coordinates;
-
         std::map<std::string, std::shared_ptr<ILayersStrategy>> layersStrategy;
 
         std::unordered_map<std::string, std::unordered_set<std::string>> db_connected;

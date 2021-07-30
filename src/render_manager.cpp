@@ -9,11 +9,35 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderMap() cons
     return MapResp;
 }
 
-Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std::vector<RouteResponse::ItemPtr> const &) const {
+Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std::vector<RouteResponse::ItemPtr> const & items) {
     auto route_doc = doc;
-    // рендер маршрута ...
 
+    Svg::Rect rect;
+    auto left_corner = Svg::Point{-renderSettings.outer_margin, -renderSettings.outer_margin};
+    rect.SetFillColor(renderSettings.underlayer_color)
+            .SetPoint(left_corner)
+            .SetWidth(renderSettings.width + renderSettings.outer_margin - left_corner.x)
+            .SetHeight(renderSettings.height + renderSettings.outer_margin - left_corner.y);
+    route_doc.Add(rect);
 
+    // TODO сделать новые draw методы
+    // TODO мб стоит добавить пару в координаты, которые будут значить SVG::Point и bool'ку значащую нужно лл отобразить имя остоновки
+    // TODO тогда новые draw методы не нужны, нужно лишь проверять эти бульки в опр методах, а также выставлять номера автобусов если остановки в этих stop_coordinates конечны
+    // TODO также сохранять цвета маршрутов отдельно для автобуса где-нибудь в конструкторе!
+    // TODO обдумать как отправлять автобусы для вывода конечных (мб нужно как-то сохранять автобусы отдельно и кидать в эти Draw методы)
+    // TODO можно передавать в четвертый параметр указатель на массив используемых автобусов и уже бегая по массиву автобусов внутри юзать только те что в этом списке (по дефолту этот список = nullptr, тогда бегаем по всем автобусам)
+
+    std::map<std::string, Svg::Point> route_coords;
+    std::set<std::string> used_bus;
+    for (auto & item : items) {
+        if (item->type == RouteResponse::Item::ItemType::WAIT)
+            route_coords[item->name] = stops_coordinates.at(item->name);
+        else
+            used_bus.insert(item->name);
+    }
+    for (const auto & layer : renderSettings.layers) {
+//        (layersStrategy[layer])->Draw(route_coords, renderSettings, route_doc, &used_bus);
+    }
 
     MapRespType MapResp = std::make_shared<MapResponse>();
     MapResp->svg_xml_answer = route_doc.Get();
@@ -23,10 +47,10 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std:
 Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure::Stop> &stops,
                                        const Dict<Data_Structure::Bus> &buses,
                                        RenderSettings render_set) : renderSettings(std::move(render_set)){
-    Init(stops, buses);
     CalculateCoordinates(stops, buses);
+    Init(buses);
     for (const auto & layer : renderSettings.layers) {
-        (layersStrategy[layer])->Draw(this->renderSettings, this->stops_coordinates, this->doc);
+        (layersStrategy[layer])->Draw(this);
     }
 
     doc.SimpleRender();
@@ -171,20 +195,22 @@ void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_St
     stops_coordinates = CoordinateCompression(stops, buses);
 }
 
-void Data_Structure::DataBaseSvgBuilder::Init(const Dict<Data_Structure::Stop> &stops,
-                                              const Dict<Data_Structure::Bus> &buses) {
+void Data_Structure::DataBaseSvgBuilder::Init(const Dict<Data_Structure::Bus> &buses) {
+    for (auto & [bus_name, bus] : buses)
+        bus_dict.emplace(bus_name, *bus);
+
     layersStrategy.emplace(std::piecewise_construct,
                            std::forward_as_tuple("bus_lines"),
-                           std::forward_as_tuple(std::make_shared<BusPolylinesDrawer>(stops, buses)));
+                           std::forward_as_tuple(std::make_shared<BusPolylinesDrawer>(bus_dict)));
     layersStrategy.emplace(std::piecewise_construct,
                            std::forward_as_tuple("bus_labels"),
-                           std::forward_as_tuple(std::make_shared<BusTextDrawer>(stops, buses)));
+                           std::forward_as_tuple(std::make_shared<BusTextDrawer>(bus_dict)));
     layersStrategy.emplace(std::piecewise_construct,
                            std::forward_as_tuple("stop_points"),
-                           std::forward_as_tuple(std::make_shared<StopsRoundDrawer>(stops)));
+                           std::forward_as_tuple(std::make_shared<StopsRoundDrawer>()));
     layersStrategy.emplace(std::piecewise_construct,
                            std::forward_as_tuple("stop_labels"),
-                           std::forward_as_tuple(std::make_shared<StopsTextDrawer>(stops)));
+                           std::forward_as_tuple(std::make_shared<StopsTextDrawer>()));
 
 }
 
@@ -207,105 +233,101 @@ bool Data_Structure::DataBaseSvgBuilder::IsConnected(std::string const & lhs, st
         return false;
 }
 
-void Data_Structure::BusPolylinesDrawer::Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) {
-    size_t size = rs.color_palette.size();
+void Data_Structure::BusPolylinesDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
+    size_t size = db_svg->renderSettings.color_palette.size();
     size_t i = 0;
 
     for (auto & bus : buses){
         auto polyline = Svg::Polyline{}
-                .SetStrokeColor(rs.color_palette[i++ % size])
-                .SetStrokeWidth(rs.line_width)
+                .SetStrokeColor(db_svg->renderSettings.color_palette[i++ % size])
+                .SetStrokeWidth(db_svg->renderSettings.line_width)
                 .SetStrokeLineJoin("round")
                 .SetStrokeLineCap("round");
-        for (auto & stop : bus.second->stops){
-            auto & distance = stops.at(stop)->dist;
-            polyline.AddPoint({stops_coordinates.at(stops.at(stop)->name)});
+        for (auto & stop : bus.second.stops){
+            polyline.AddPoint({db_svg->stops_coordinates.at(stop)});
         }
-        doc.Add(std::move(polyline));
+        db_svg->doc.Add(std::move(polyline));
     }
 }
 
-void Data_Structure::StopsRoundDrawer::Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) {
-    for (auto & [_, stop] : stops){
-        auto & distance = stop->dist;
-        doc.Add(Svg::Circle{}
+void Data_Structure::StopsRoundDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
+    for (auto & [_, coord] : db_svg->stops_coordinates){
+        db_svg->doc.Add(Svg::Circle{}
                         .SetFillColor("white")
-                        .SetRadius(rs.stop_radius)
-                        .SetCenter(stops_coordinates.at(stop->name)));
+                        .SetRadius(db_svg->renderSettings.stop_radius)
+                        .SetCenter(coord));
     }
 }
 
-void Data_Structure::StopsTextDrawer::Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) {
-    for (auto & [_, stop] : stops){
-        auto & distance = stop->dist;
-        auto & name = stop->name;
+void Data_Structure::StopsTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
+    for (auto & [stop_name, coord] : db_svg->stops_coordinates){
         Svg::Text text = Svg::Text{}
-                .SetPoint({stops_coordinates.at(name)})
-                .SetOffset({rs.stop_label_offset[0], rs.stop_label_offset[1]})
-                .SetFontSize(rs.stop_label_font_size)
+                .SetPoint(coord)
+                .SetOffset({db_svg->renderSettings.stop_label_offset[0], db_svg->renderSettings.stop_label_offset[1]})
+                .SetFontSize(db_svg->renderSettings.stop_label_font_size)
                 .SetFontFamily("Verdana")
-                .SetData(name);
+                .SetData(stop_name);
 
         Svg::Text substrates = text;
         substrates
-                .SetFillColor(rs.underlayer_color)
-                .SetStrokeColor(rs.underlayer_color)
-                .SetStrokeWidth(rs.underlayer_width)
+                .SetFillColor(db_svg->renderSettings.underlayer_color)
+                .SetStrokeColor(db_svg->renderSettings.underlayer_color)
+                .SetStrokeWidth(db_svg->renderSettings.underlayer_width)
                 .SetStrokeLineCap("round")
                 .SetStrokeLineJoin("round");
 
         text.SetFillColor("black");
 
-        doc.Add(std::move(substrates));
-        doc.Add(std::move(text));
+        db_svg->doc.Add(std::move(substrates));
+        db_svg->doc.Add(std::move(text));
     }
 }
 
-void Data_Structure::BusTextDrawer::Draw(RenderSettings const & rs, std::map<std::string, Svg::Point> const & stops_coordinates, Svg::Document & doc) {
-    size_t size = rs.color_palette.size();
+void Data_Structure::BusTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
+    size_t size = db_svg->renderSettings.color_palette.size();
     size_t i = 0;
     for (auto & [bus_name, bus] : buses){
-        auto beg = bus->stops.begin();
-        auto last = std::prev(Ranges::ToMiddle(Ranges::AsRange(bus->stops)).end());
+        auto beg = bus.stops.begin();
+        auto last = std::prev(Ranges::ToMiddle(Ranges::AsRange(bus.stops)).end());
 
         auto text = Svg::Text{}
-                .SetOffset({rs.bus_label_offset[0],
-                            rs.bus_label_offset[1]})
-                .SetFontSize(rs.bus_label_font_size)
+                .SetOffset({db_svg->renderSettings.bus_label_offset[0],
+                            db_svg->renderSettings.bus_label_offset[1]})
+                .SetFontSize(db_svg->renderSettings.bus_label_font_size)
                 .SetFontFamily("Verdana")
                 .SetFontWeight("bold")
-                .SetData(bus->name);
+                .SetData(bus.name);
 
         Svg::Text substrates = text;
-        substrates.SetFillColor(rs.underlayer_color)
-                .SetStrokeColor(rs.underlayer_color)
-                .SetStrokeWidth(rs.underlayer_width)
+        substrates.SetFillColor(db_svg->renderSettings.underlayer_color)
+                .SetStrokeColor(db_svg->renderSettings.underlayer_color)
+                .SetStrokeWidth(db_svg->renderSettings.underlayer_width)
                 .SetStrokeLineCap("round")
                 .SetStrokeLineJoin("round");
 
-        text.SetFillColor(rs.color_palette[i++ % size]);
+        text.SetFillColor(db_svg->renderSettings.color_palette[i++ % size]);
 
-        if (!bus->is_roundtrip && *last != *beg){
+        if (!bus.is_roundtrip && *last != *beg){
             auto text2 = text;
             auto substrates2 = substrates;
 
-            text.SetPoint({stops_coordinates.at(stops.at(*beg)->name)});
-            substrates.SetPoint({stops_coordinates.at(stops.at(*beg)->name)});
+            text.SetPoint({db_svg->stops_coordinates.at(*beg)});
+            substrates.SetPoint({db_svg->stops_coordinates.at(*beg)});
 
-            doc.Add(substrates);
-            doc.Add(text);
+            db_svg->doc.Add(substrates);
+            db_svg->doc.Add(text);
 
-            text2.SetPoint({stops_coordinates.at(stops.at(*last)->name)});
-            substrates2.SetPoint({stops_coordinates.at(stops.at(*last)->name)});
+            text2.SetPoint({db_svg->stops_coordinates.at(*last)});
+            substrates2.SetPoint({db_svg->stops_coordinates.at(*last)});
 
-            doc.Add(substrates2);
-            doc.Add(text2);
+            db_svg->doc.Add(substrates2);
+            db_svg->doc.Add(text2);
         } else {
-            text.SetPoint({stops_coordinates.at(stops.at(*beg)->name)});
-            substrates.SetPoint({stops_coordinates.at(stops.at(*beg)->name)});
+            text.SetPoint({db_svg->stops_coordinates.at(*beg)});
+            substrates.SetPoint({db_svg->stops_coordinates.at(*beg)});
 
-            doc.Add(substrates);
-            doc.Add(text);
+            db_svg->doc.Add(substrates);
+            db_svg->doc.Add(text);
         }
     }
 }

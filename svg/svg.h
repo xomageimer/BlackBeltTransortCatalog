@@ -134,6 +134,22 @@ namespace Svg {
         double radius {1.0};
     };
 
+    struct Rect : public Primitive<Rect> {
+    public:
+        Rect & SetPoint(Point) &;
+        Rect & SetHeight(double) &;
+        Rect & SetWidth(double) &;
+
+        Rect && SetPoint(Point) &&;
+        Rect && SetHeight(double) &&;
+        Rect && SetWidth(double) &&;
+
+        [[nodiscard]] XML::xml MakeXml() const;
+    private:
+        Point Left_Up_Corner;
+        double w{}, h{};
+    };
+
     struct Text : public Primitive<Text> {
     public:
         Text & SetPoint(Point) &;
@@ -171,7 +187,7 @@ namespace Svg {
         static bool const value = sizeof(check((C*)(nullptr))) == sizeof(TRUE_);
     };
 
-    using sigma_types = std::variant<Polyline, Circle, Text>;
+    using sigma_types = std::variant<Polyline, Circle, Rect, Text>;
 
     struct Document {
     public:

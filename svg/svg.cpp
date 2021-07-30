@@ -73,6 +73,50 @@ XML::xml Svg::Circle::MakeXml() const {
     return xml;
 }
 
+Svg::Rect &Svg::Rect::SetPoint(Svg::Point pnt) &{
+    Left_Up_Corner = pnt;
+    return *this;
+}
+
+Svg::Rect &Svg::Rect::SetHeight(double height) &{
+    h = height;
+    return *this;
+}
+
+Svg::Rect &Svg::Rect::SetWidth(double width) &{
+    w = width;
+    return *this;
+}
+
+Svg::Rect &&Svg::Rect::SetPoint(Svg::Point pnt) &&{
+    Left_Up_Corner = pnt;
+    return std::move(*this);
+}
+
+Svg::Rect &&Svg::Rect::SetHeight(double height) &&{
+    h = height;
+    return std::move(*this);
+}
+
+Svg::Rect &&Svg::Rect::SetWidth(double width) &&{
+    w = width;
+    return std::move(*this);
+}
+
+XML::xml Svg::Rect::MakeXml() const {
+    auto xml = Primitive<Rect>::MakeXml();
+
+    xml.open = "rect";
+    xml.close = "/";
+    xml.data.emplace_back("x", Left_Up_Corner.x);
+    xml.data.emplace_back("y", Left_Up_Corner.y);
+    xml.data.emplace_back("width", w);
+    xml.data.emplace_back("height", h);
+
+    return xml;
+}
+
+
 Svg::Text &Svg::Text::SetPoint(Svg::Point pnt) & {
     point = pnt;
     return *this;
