@@ -20,23 +20,16 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std:
             .SetHeight(renderSettings.height + renderSettings.outer_margin - left_corner.y);
     route_doc.Add(rect);
 
-    // TODO сделать новые draw методы
-    // TODO мб стоит добавить пару в координаты, которые будут значить SVG::Point и bool'ку значащую нужно лл отобразить имя остоновки
-    // TODO тогда новые draw методы не нужны, нужно лишь проверять эти бульки в опр методах, а также выставлять номера автобусов если остановки в этих stop_coordinates конечны
-    // TODO также сохранять цвета маршрутов отдельно для автобуса где-нибудь в конструкторе!
-    // TODO обдумать как отправлять автобусы для вывода конечных (мб нужно как-то сохранять автобусы отдельно и кидать в эти Draw методы)
-    // TODO можно передавать в четвертый параметр указатель на массив используемых автобусов и уже бегая по массиву автобусов внутри юзать только те что в этом списке (по дефолту этот список = nullptr, тогда бегаем по всем автобусам)
-
-    std::map<std::string, Svg::Point> route_coords;
-    std::set<std::string> used_bus;
+    std::vector<std::string> route_coords;
+    std::vector<std::pair<std::string, size_t>> used_bus;
     for (auto & item : items) {
         if (item->type == RouteResponse::Item::ItemType::WAIT)
-            route_coords[item->name] = stops_coordinates.at(item->name);
+            route_coords.push_back(item->name);
         else
-            used_bus.insert(item->name);
+            used_bus.emplace_back(std::pair{item->name, reinterpret_cast<RouteResponse::Bus *>(item.get())->span_count});
     }
     for (const auto & layer : renderSettings.layers) {
-//        (layersStrategy[layer])->Draw(route_coords, renderSettings, route_doc, &used_bus);
+        (layersStrategy[layer])->DrawPartial(this, route_coords, used_bus, route_doc);
     }
 
     MapRespType MapResp = std::make_shared<MapResponse>();
@@ -196,8 +189,11 @@ void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_St
 }
 
 void Data_Structure::DataBaseSvgBuilder::Init(const Dict<Data_Structure::Bus> &buses) {
-    for (auto & [bus_name, bus] : buses)
-        bus_dict.emplace(bus_name, *bus);
+    size_t size = renderSettings.color_palette.size();
+    size_t i = 0;
+    for (auto & [bus_name, bus] : buses) {
+        bus_dict.emplace(bus_name, std::pair{*bus, renderSettings.color_palette[i++ % size]});
+    }
 
     layersStrategy.emplace(std::piecewise_construct,
                            std::forward_as_tuple("bus_lines"),
@@ -234,19 +230,49 @@ bool Data_Structure::DataBaseSvgBuilder::IsConnected(std::string const & lhs, st
 }
 
 void Data_Structure::BusPolylinesDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
-    size_t size = db_svg->renderSettings.color_palette.size();
-    size_t i = 0;
-
-    for (auto & bus : buses){
+    for (auto & bus_info : buses){
+        auto & [bus, color] = bus_info.second;
         auto polyline = Svg::Polyline{}
-                .SetStrokeColor(db_svg->renderSettings.color_palette[i++ % size])
+                .SetStrokeColor(color)
                 .SetStrokeWidth(db_svg->renderSettings.line_width)
                 .SetStrokeLineJoin("round")
                 .SetStrokeLineCap("round");
-        for (auto & stop : bus.second.stops){
+        for (auto & stop : bus.stops){
             polyline.AddPoint({db_svg->stops_coordinates.at(stop)});
         }
         db_svg->doc.Add(std::move(polyline));
+    }
+}
+
+void Data_Structure::BusPolylinesDrawer::DrawPartial(const struct DataBaseSvgBuilder * db_svg,
+                                                     std::vector<std::string> &names_stops,
+                                                     std::vector<std::pair<std::string, size_t>> &used_buses, Svg::Document &doc) {
+    size_t i = 0;
+    for (auto stop_it = names_stops.begin(); stop_it != std::prev(names_stops.end()); stop_it++, i++) {
+        auto &stops = buses.at(used_buses[i].first).first.stops;
+
+        auto beg_it = std::find(stops.begin(), stops.end(), *stop_it);
+        auto end_it = std::find(beg_it, stops.end(), *(std::next(stop_it)));
+        while (true) {
+            if (end_it - beg_it == used_buses[i].second || beg_it == stops.end())
+                break;
+            else {
+                beg_it = std::find(beg_it + 1, stops.end(), *stop_it);
+                end_it = std::find(beg_it, stops.end(), *(std::next(stop_it)));
+            }
+        }
+        if (beg_it == stops.end() || end_it == stops.end())
+            throw std::logic_error("invalid response on route request!");
+
+        auto polyline = Svg::Polyline{}
+                .SetStrokeColor(buses.at(used_buses[i].first).second)
+                .SetStrokeWidth(db_svg->renderSettings.line_width)
+                .SetStrokeLineJoin("round")
+                .SetStrokeLineCap("round");
+        for (auto first = beg_it; first != std::next(end_it); first++){
+            polyline.AddPoint({db_svg->stops_coordinates.at(*first)});
+        }
+        doc.Add(std::move(polyline));
     }
 }
 
@@ -256,6 +282,36 @@ void Data_Structure::StopsRoundDrawer::Draw(struct DataBaseSvgBuilder * db_svg) 
                         .SetFillColor("white")
                         .SetRadius(db_svg->renderSettings.stop_radius)
                         .SetCenter(coord));
+    }
+}
+
+void
+Data_Structure::StopsRoundDrawer::DrawPartial(const struct DataBaseSvgBuilder * db_svg, std::vector<std::string> &names_stops,
+                                              std::vector<std::pair<std::string, size_t>> &used_buses,
+                                              Svg::Document &doc) {
+    size_t i = 0;
+    for (auto stop_it = names_stops.begin(); stop_it != std::prev(names_stops.end()); stop_it++, i++) {
+        auto &stops = db_svg->bus_dict.at(used_buses[i].first).first.stops;
+
+        auto beg_it = std::find(stops.begin(), stops.end(), *stop_it);
+        auto end_it = std::find(beg_it, stops.end(), *(std::next(stop_it)));
+        while (true) {
+            if (end_it - beg_it == used_buses[i].second || beg_it == stops.end())
+                break;
+            else {
+                beg_it = std::find(beg_it + 1, stops.end(), *stop_it);
+                end_it = std::find(beg_it, stops.end(), *(std::next(stop_it)));
+            }
+        }
+        if (beg_it == stops.end() || end_it == stops.end())
+            throw std::logic_error("invalid response on route request!");
+
+        for (auto first = beg_it; first != std::next(end_it); first++) {
+            doc.Add(Svg::Circle{}
+                            .SetFillColor("white")
+                            .SetRadius(db_svg->renderSettings.stop_radius)
+                            .SetCenter(db_svg->stops_coordinates.at(*first)));
+        }
     }
 }
 
@@ -283,10 +339,36 @@ void Data_Structure::StopsTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
     }
 }
 
+void
+Data_Structure::StopsTextDrawer::DrawPartial(const struct DataBaseSvgBuilder * db_svg, std::vector<std::string> &names_stops,
+                                             std::vector<std::pair<std::string, size_t>> &used_buses,
+                                             Svg::Document &doc) {
+    for (auto & stop_name : names_stops){
+        Svg::Text text = Svg::Text{}
+                .SetPoint(db_svg->stops_coordinates.at(stop_name))
+                .SetOffset({db_svg->renderSettings.stop_label_offset[0], db_svg->renderSettings.stop_label_offset[1]})
+                .SetFontSize(db_svg->renderSettings.stop_label_font_size)
+                .SetFontFamily("Verdana")
+                .SetData(stop_name);
+
+        Svg::Text substrates = text;
+        substrates
+                .SetFillColor(db_svg->renderSettings.underlayer_color)
+                .SetStrokeColor(db_svg->renderSettings.underlayer_color)
+                .SetStrokeWidth(db_svg->renderSettings.underlayer_width)
+                .SetStrokeLineCap("round")
+                .SetStrokeLineJoin("round");
+
+        text.SetFillColor("black");
+
+        doc.Add(std::move(substrates));
+        doc.Add(std::move(text));
+    }
+}
+
 void Data_Structure::BusTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
-    size_t size = db_svg->renderSettings.color_palette.size();
-    size_t i = 0;
-    for (auto & [bus_name, bus] : buses){
+    for (auto & [bus_name, bus_info] : buses){
+        auto & [bus, color] = bus_info;
         auto beg = bus.stops.begin();
         auto last = std::prev(Ranges::ToMiddle(Ranges::AsRange(bus.stops)).end());
 
@@ -305,7 +387,7 @@ void Data_Structure::BusTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
                 .SetStrokeLineCap("round")
                 .SetStrokeLineJoin("round");
 
-        text.SetFillColor(db_svg->renderSettings.color_palette[i++ % size]);
+        text.SetFillColor(color);
 
         if (!bus.is_roundtrip && *last != *beg){
             auto text2 = text;
@@ -328,6 +410,49 @@ void Data_Structure::BusTextDrawer::Draw(struct DataBaseSvgBuilder * db_svg) {
 
             db_svg->doc.Add(substrates);
             db_svg->doc.Add(text);
+        }
+    }
+}
+
+void
+Data_Structure::BusTextDrawer::DrawPartial(const struct DataBaseSvgBuilder * db_svg, std::vector<std::string> &names_stops,
+                                           std::vector<std::pair<std::string, size_t>> &used_buses,
+                                           Svg::Document &doc) {
+    for (auto & bus_info : used_buses){
+        auto & bus = buses.at(bus_info.first).first;
+
+        auto text = Svg::Text{}
+                .SetOffset({db_svg->renderSettings.bus_label_offset[0],
+                            db_svg->renderSettings.bus_label_offset[1]})
+                .SetFontSize(db_svg->renderSettings.bus_label_font_size)
+                .SetFontFamily("Verdana")
+                .SetFontWeight("bold")
+                .SetData(bus.name);
+
+        Svg::Text substrates = text;
+        substrates.SetFillColor(db_svg->renderSettings.underlayer_color)
+                .SetStrokeColor(db_svg->renderSettings.underlayer_color)
+                .SetStrokeWidth(db_svg->renderSettings.underlayer_width)
+                .SetStrokeLineCap("round")
+                .SetStrokeLineJoin("round");
+
+        text.SetFillColor(buses.at(bus_info.first).second);
+
+        auto stop_start = std::find(names_stops.begin(), names_stops.end(), bus.stops.front());
+        auto stop_finish = std::find(names_stops.begin(), names_stops.end(), *std::prev(Ranges::ToMiddle(Ranges::AsRange(bus.stops)).end()));
+        if (stop_start != names_stops.end()) {
+            text.SetPoint({db_svg->stops_coordinates.at(*stop_start)});
+            substrates.SetPoint({db_svg->stops_coordinates.at(*stop_start)});
+
+            doc.Add(substrates);
+            doc.Add(text);
+        }
+        if (stop_finish != names_stops.end() && !bus.is_roundtrip){
+            text.SetPoint({db_svg->stops_coordinates.at(*stop_finish)});
+            substrates.SetPoint({db_svg->stops_coordinates.at(*stop_finish)});
+
+            doc.Add(substrates);
+            doc.Add(text);
         }
     }
 }

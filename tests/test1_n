@@ -1,0 +1,189 @@
+{
+    "routing_settings": {
+        "bus_wait_time": 2,
+        "bus_velocity": 30
+    },
+    "render_settings": {
+        "width": 1200,
+        "height": 500,
+        "padding": 50,
+        "stop_radius": 5,
+        "line_width": 14,
+        "bus_label_font_size": 20,
+        "bus_label_offset": [
+            7,
+            15
+        ],
+        "stop_label_font_size": 18,
+        "stop_label_offset": [
+            7,
+            -3
+        ],
+        "underlayer_color": [
+            255,
+            255,
+            255,
+            0.85
+        ],
+        "underlayer_width": 3,
+        "color_palette": [
+            "green",
+            [
+                255,
+                160,
+                0
+            ],
+            "red"
+        ],
+        "layers": [
+            "bus_lines",
+            "bus_labels",
+            "stop_points",
+            "stop_labels"
+        ]
+    },
+    "base_requests": [
+        {
+            "type": "Bus",
+            "name": "14",
+            "stops": [
+                "lisa chaikina street",
+                "electrical networks",
+                "riviera bridge",
+                "sochi hotel",
+                "kubanskaya street",
+                "on demand",
+                "dokuchaeva street",
+                "lisa chaikina street"
+            ],
+            "is_roundtrip": true
+        },
+        {
+            "type": "Bus",
+            "name": "24",
+            "stops": [
+                "dokuchaeva street",
+                "parallel street",
+                "electrical networks",
+                "sanatorium rodina"
+            ],
+            "is_roundtrip": false
+        },
+        {
+            "type": "Bus",
+            "name": "114",
+            "stops": [
+                "sea station",
+                "riviera bridge"
+            ],
+            "is_roundtrip": false
+        },
+        {
+            "type": "Stop",
+            "name": "lisa chaikina street",
+            "latitude": 43.590317,
+            "longitude": 39.746833,
+            "road_distances": {
+                "electrical networks": 4300,
+                "dokuchaeva street": 2000
+            }
+        },
+        {
+            "type": "Stop",
+            "name": "sea station",
+            "latitude": 43.581969,
+            "longitude": 39.719848,
+            "road_distances": {
+                "riviera bridge": 850
+            }
+        },
+        {
+            "type": "Stop",
+            "name": "electrical networks",
+            "latitude": 43.598701,
+            "longitude": 39.730623,
+            "road_distances": {
+                "sanatorium rodina": 4500,
+                "parallel street": 1200,
+                "riviera bridge": 1900
+            }
+        },
+        {
+            "type": "Stop",
+            "name": "riviera bridge",
+            "latitude": 43.587795,
+            "longitude": 39.716901,
+            "road_distances": {
+                "sea station": 850,
+                "sochi hotel": 1740
+            }
+        },
+        {
+            "type": "Stop",
+            "name": "sochi hotel",
+            "latitude": 43.578079,
+            "longitude": 39.728068,
+            "road_distances": {
+                "kubanskaya street": 320
+            }
+        },
+        {
+            "type": "Stop",
+            "name": "kubanskaya street",
+            "latitude": 43.578509,
+            "longitude": 39.730959,
+            "road_distances": {
+                "on demand": 370
+            }
+        },
+        {
+            "type": "Stop",
+            "name": "on demand",
+            "latitude": 43.579285,
+            "longitude": 39.733742,
+            "road_distances": {
+                "dokuchaeva street": 600
+            }
+        },
+        {
+            "type": "Stop",
+            "name": "dokuchaeva street",
+            "latitude": 43.585586,
+            "longitude": 39.733879,
+            "road_distances": {
+                "parallel street": 1100
+            }
+        },
+        {
+            "type": "Stop",
+            "name": "parallel street",
+            "latitude": 43.590041,
+            "longitude": 39.732886,
+            "road_distances": {}
+        },
+        {
+            "type": "Stop",
+            "name": "sanatorium rodina",
+            "latitude": 43.601202,
+            "longitude": 39.715498,
+            "road_distances": {}
+        }
+    ],
+    "stat_requests": [
+        {
+            "id": 826874078,
+            "type": "Bus",
+            "name": "14"
+        },
+        {
+            "id": 1086967114,
+            "type": "Route",
+            "from": "sea station",
+            "to": "parallel street"
+        },
+        {
+            "id": 1218663236,
+            "type": "Map"
+        }
+    ]
+}

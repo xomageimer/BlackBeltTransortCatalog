@@ -85,9 +85,7 @@ ResponseType Data_Structure::DataBase::FindRoute(const std::string &from, const 
     auto ret = router->CreateRoute(from, to);
     if (ret) {
         auto render_items = ret->items;
-        auto start = render_items.insert(render_items.begin(), std::make_shared<RouteResponse::Wait>());
         auto finish = render_items.insert(render_items.end(), std::make_shared<RouteResponse::Wait>());
-        (*start)->name = from;
         (*finish)->name = to;
         ret->route_render = std::move(svg_builder->RenderRoute(render_items)->svg_xml_answer);
 
