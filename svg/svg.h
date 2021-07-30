@@ -205,8 +205,10 @@ namespace Svg {
         void SimpleRender();
 
         [[nodiscard]] XML::xml Get() const;
+        [[nodiscard]] XML::xml GetSafe() const;
     private:
         std::vector<sigma_types> primitives;
+
         std::vector<XML::xml> xml_s;
     };
 }

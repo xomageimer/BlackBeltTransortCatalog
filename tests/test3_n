@@ -1,0 +1,141 @@
+{
+  "base_requests": [
+    {
+      "is_roundtrip": true,
+      "name": "13",
+      "stops": [
+        "Ulitsa Lizy Chaykinoy",
+        "Pionerskaya ulitsa, 111",
+        "Sadovaya",
+        "Teatral'naya",
+        "Morskoy vokzal",
+        "Ulitsa Lizy Chaykinoy"
+      ],
+      "type": "Bus"
+    },
+    {
+      "is_roundtrip": false,
+      "name": "23",
+      "stops": [
+        "Teatral'naya",
+        "Pansionat Svetlana"
+      ],
+      "type": "Bus"
+    },
+    {
+      "latitude": 43.5903,
+      "longitude": 39.7468,
+      "name": "Ulitsa Lizy Chaykinoy",
+      "road_distances": {
+        "Pionerskaya ulitsa, 111": 950
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 43.5873,
+      "longitude": 39.7403,
+      "name": "Pionerskaya ulitsa, 111",
+      "road_distances": {
+        "Sadovaya": 520
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 43.584,
+      "longitude": 39.7369,
+      "name": "Sadovaya",
+      "road_distances": {
+        "Teatral'naya": 1300
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 43.5747,
+      "longitude": 39.732,
+      "name": "Teatral'naya",
+      "road_distances": {},
+      "type": "Stop"
+    },
+    {
+      "latitude": 43.582,
+      "longitude": 39.7198,
+      "name": "Morskoy vokzal",
+      "road_distances": {
+        "Teatral'naya": 1340,
+        "Ulitsa Lizy Chaykinoy": 2100
+      },
+      "type": "Stop"
+    },
+    {
+      "latitude": 43.5718,
+      "longitude": 39.7359,
+      "name": "Pansionat Svetlana",
+      "road_distances": {
+        "Teatral'naya": 390
+      },
+      "type": "Stop"
+    }
+  ],
+  "render_settings": {
+    "bus_label_font_size": 20,
+    "bus_label_offset": [
+      7,
+      15
+    ],
+    "color_palette": [
+      [
+        255,
+        0,
+        255
+      ],
+      "red",
+      "green",
+      "blue"
+    ],
+    "height": 2000,
+    "layers": [
+      "bus_lines",
+      "bus_labels",
+      "stop_points",
+      "stop_labels"
+    ],
+    "line_width": 14,
+    "outer_margin": 150,
+    "padding": 50,
+    "stop_label_font_size": 20,
+    "stop_label_offset": [
+      7,
+      -3
+    ],
+    "stop_radius": 5,
+    "underlayer_color": [
+      255,
+      255,
+      255,
+      0.85
+    ],
+    "underlayer_width": 3,
+    "width": 900
+  },
+  "routing_settings": {
+    "bus_velocity": 30,
+    "bus_wait_time": 2
+  },
+  "stat_requests": [
+    {
+      "id": 290532276,
+      "name": "13",
+      "type": "Bus"
+    },
+    {
+      "from": "Pansionat Svetlana",
+      "id": 1724095748,
+      "to": "Pionerskaya ulitsa, 111",
+      "type": "Route"
+    },
+    {
+      "id": 1296945690,
+      "type": "Map"
+    }
+  ]
+}

@@ -99,6 +99,7 @@ namespace Data_Structure {
         std::map<std::string, Svg::Point> CoordinateCompression(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
 
         RenderSettings renderSettings;
+        Svg::Document prerender_doc;
         Svg::Document doc;
 
         std::map<std::string, std::pair<Bus, Svg::Color>> bus_dict;

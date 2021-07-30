@@ -10,7 +10,7 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderMap() cons
 }
 
 Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std::vector<RouteResponse::ItemPtr> const & items) {
-    auto route_doc = doc;
+    auto route_doc = prerender_doc;
 
     Svg::Rect rect;
     auto left_corner = Svg::Point{-renderSettings.outer_margin, -renderSettings.outer_margin};
@@ -32,6 +32,7 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std:
         (layersStrategy[layer])->DrawPartial(this, route_coords, used_bus, route_doc);
     }
 
+    route_doc.SimpleRender();
     MapRespType MapResp = std::make_shared<MapResponse>();
     MapResp->svg_xml_answer = route_doc.Get();
     return MapResp;
@@ -46,6 +47,7 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
         (layersStrategy[layer])->Draw(this);
     }
 
+    prerender_doc = doc;
     doc.SimpleRender();
 }
 

@@ -1,6 +1,18 @@
 {
     "stat_requests": [
         {
+            "from": "Liza Chaikina Street",
+            "to": "Kraevo-Gretskaya Street",
+            "type": "Route",
+            "id": 822710686
+        },
+        {
+            "from": "Holiday Hotel Neva",
+            "to": "Matsesta Valley",
+            "type": "Route",
+            "id": 299735397
+        },
+        {
             "type": "Map",
             "id": 1821171961
         }

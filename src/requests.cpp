@@ -78,6 +78,7 @@ DS::RenderSettings ReadRenderSettings(const Json::Node &input) {
         METHOD(width, AsNumber<double>());
         METHOD(height, AsNumber<double>());
         METHOD(padding, AsNumber<double>());
+        METHOD(outer_margin, AsNumber<double>());
         METHOD(stop_radius, AsNumber<double>());
         METHOD(line_width, AsNumber<double>());
 
