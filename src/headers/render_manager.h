@@ -40,40 +40,43 @@ namespace Data_Structure {
     };
 
     struct ILayersStrategy {
-        virtual void Draw(struct DataBaseSvgBuilder *) = 0;
-        virtual void DrawPartial(struct DataBaseSvgBuilder const *, std::vector<std::string>& names_stops, std::vector<std::pair<std::string, size_t>> & used_buses, Svg::Document & doc) = 0;
+        explicit ILayersStrategy(struct DataBaseSvgBuilder * myself_svg_builder) : db_svg(myself_svg_builder) {}
+        virtual void Draw() = 0;
+        virtual void DrawPartial(std::vector<std::string>& names_stops, std::vector<std::pair<std::string, size_t>> & used_buses, Svg::Document & doc) const = 0;
+    protected:
+        struct DataBaseSvgBuilder * db_svg;
     };
 
     struct BusPolylinesDrawer : public ILayersStrategy{
     public:
-        explicit BusPolylinesDrawer(const std::map<std::string, std::pair<struct Bus, Svg::Color>> & bus_) : buses(bus_) {}
-        void Draw(struct DataBaseSvgBuilder *) override;
-        void DrawPartial(struct DataBaseSvgBuilder const *, std::vector<std::string>& names_stops, std::vector<std::pair<std::string, size_t>> & used_buses, Svg::Document & doc) override;
-    private:
-        const std::map<std::string, std::pair<Bus, Svg::Color>> & buses;
+        using ILayersStrategy::ILayersStrategy;
+        void Draw() override;
+        void DrawPartial(std::vector<std::string>& names_stops, std::vector<std::pair<std::string, size_t>> & used_buses, Svg::Document & doc) const override;
     };
 
     struct StopsRoundDrawer : public ILayersStrategy{
     public:
-        StopsRoundDrawer() = default;
-        void Draw(struct DataBaseSvgBuilder *) override;
-        void DrawPartial(struct DataBaseSvgBuilder const *, std::vector<std::string>& names_stops, std::vector<std::pair<std::string, size_t>> & used_buses, Svg::Document & doc) override;
+        using ILayersStrategy::ILayersStrategy;
+        void Draw() override;
+        void DrawPartial(std::vector<std::string>& names_stops, std::vector<std::pair<std::string, size_t>> & used_buses, Svg::Document & doc) const override;
     };
 
     struct StopsTextDrawer : public ILayersStrategy{
     public:
-        StopsTextDrawer() = default;
-        void Draw(struct DataBaseSvgBuilder *) override;
-        void DrawPartial(struct DataBaseSvgBuilder const *, std::vector<std::string>& names_stops, std::vector<std::pair<std::string, size_t>> & used_buses, Svg::Document & doc) override;
+        using ILayersStrategy::ILayersStrategy;
+        void Draw() override;
+        void DrawPartial(std::vector<std::string>& names_stops, std::vector<std::pair<std::string, size_t>> & used_buses, Svg::Document & doc) const override;
+    private:
+        void RenderStopLabel(Svg::Document& doc, const std::string& stop_name) const;
     };
 
     struct BusTextDrawer : public ILayersStrategy{
     public:
-        explicit BusTextDrawer(const std::map<std::string, std::pair<Bus, Svg::Color>> & bus_) : buses(bus_) {}
-        void Draw(struct DataBaseSvgBuilder *) override;
-        void DrawPartial(struct DataBaseSvgBuilder const *, std::vector<std::string>& names_stops, std::vector<std::pair<std::string, size_t>> & used_buses, Svg::Document & doc) override;
+        using ILayersStrategy::ILayersStrategy;
+        void Draw() override;
+        void DrawPartial(std::vector<std::string>& names_stops, std::vector<std::pair<std::string, size_t>> & used_buses, Svg::Document & doc) const override;
     private:
-        const std::map<std::string, std::pair<Bus, Svg::Color>> & buses;
+        void RenderBusLabel(Svg::Document& doc, const std::string& bus_name, const std::string& stop_name) const;
     };
 
     struct DataBaseSvgBuilder {
@@ -99,7 +102,6 @@ namespace Data_Structure {
         std::map<std::string, Svg::Point> CoordinateCompression(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
 
         RenderSettings renderSettings;
-        Svg::Document prerender_doc;
         Svg::Document doc;
 
         std::map<std::string, std::pair<Bus, Svg::Color>> bus_dict;

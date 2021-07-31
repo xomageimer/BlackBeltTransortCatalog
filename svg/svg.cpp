@@ -251,3 +251,10 @@ void Svg::Document::SimpleRender() {
 XML::xml Svg::Document::Get() const {
     return xml_s;
 }
+
+Svg::Document::Document(const Svg::Document & other) {
+    primitives = other.primitives;
+    xml_s = other.xml_s;
+    while (xml_s.size() >= 2)
+        xml_s.pop_back();
+}

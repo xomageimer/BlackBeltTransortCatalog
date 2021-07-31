@@ -192,6 +192,7 @@ namespace Svg {
     struct Document {
     public:
         Document();
+        Document(const Document &);
         template <typename T>
         std::enable_if_t<is_inherited<std::decay_t<T>, Primitive<std::decay_t<T>>>::value, void> Add(T && obj) noexcept {
             primitives.emplace_back(std::forward<T>(obj));
@@ -205,10 +206,8 @@ namespace Svg {
         void SimpleRender();
 
         [[nodiscard]] XML::xml Get() const;
-        [[nodiscard]] XML::xml GetSafe() const;
     private:
         std::vector<sigma_types> primitives;
-
         std::vector<XML::xml> xml_s;
     };
 }
