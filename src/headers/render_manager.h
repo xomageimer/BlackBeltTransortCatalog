@@ -59,6 +59,8 @@ namespace Data_Structure {
         using ILayersStrategy::ILayersStrategy;
         void Draw() override;
         void DrawPartial(std::vector<std::string>& names_stops, std::vector<std::pair<std::string, size_t>> & used_buses, Svg::Document & doc) const override;
+    private:
+        void RenderRoundLabel(Svg::Document& doc, const std::string & stop_name) const;
     };
 
     struct StopsTextDrawer : public ILayersStrategy{

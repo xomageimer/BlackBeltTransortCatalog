@@ -279,12 +279,17 @@ void Data_Structure::BusPolylinesDrawer::DrawPartial(std::vector<std::string> &n
     }
 }
 
+void Data_Structure::StopsRoundDrawer::RenderRoundLabel(Svg::Document &doc, const std::string & stop_name) const {
+    doc.Add(Svg::Circle{}
+                    .SetFillColor("white")
+                    .SetRadius(db_svg->renderSettings.stop_radius)
+                    .SetCenter(db_svg->stops_coordinates.at(stop_name)));
+}
+
+
 void Data_Structure::StopsRoundDrawer::Draw() {
-    for (auto & [_, coord] : db_svg->stops_coordinates){
-        db_svg->doc.Add(Svg::Circle{}
-                        .SetFillColor("white")
-                        .SetRadius(db_svg->renderSettings.stop_radius)
-                        .SetCenter(coord));
+    for (auto & [stop_name, _] : db_svg->stops_coordinates){
+        RenderRoundLabel(db_svg->doc, stop_name);
     }
 }
 
@@ -310,10 +315,7 @@ Data_Structure::StopsRoundDrawer::DrawPartial(std::vector<std::string> &names_st
             throw std::logic_error("invalid response on route request!");
 
         for (auto first = beg_it; first != std::next(end_it); first++) {
-            doc.Add(Svg::Circle{}
-                            .SetFillColor("white")
-                            .SetRadius(db_svg->renderSettings.stop_radius)
-                            .SetCenter(db_svg->stops_coordinates.at(*first)));
+            RenderRoundLabel(doc, *first);
         }
     }
 }
