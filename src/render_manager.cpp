@@ -50,7 +50,6 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
         (layersStrategy[layer])->Draw();
     }
 
-    prerender_doc = doc;
     doc.SimpleRender();
 }
 
