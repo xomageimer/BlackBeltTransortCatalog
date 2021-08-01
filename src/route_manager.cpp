@@ -25,8 +25,26 @@ bool Data_Structure::DataBaseRouter::proxy_route::IsValid() const {
 }
 #include <chrono>
 
-Data_Structure::DataBaseRouter::DataBaseRouter(Serialize::Router const & router_mes) : graph_map(0),
+Data_Structure::DataBaseRouter::DataBaseRouter(Serialize::Router const & router_mes) : graph_map(router_mes.graph()),
                                 routing_settings({router_mes.routing_settings().bus_wait_time(), router_mes.routing_settings().bus_velocity()}) {
+    for (auto & el : router_mes.waiting_stops()){
+        this->waiting_stops.emplace(el.name(), vertices_path{el.path().inp(), el.path().out()});
+    }
+
+    for (auto & el : router_mes.items()) {
+        if (el.has_bus()) {
+            auto bus = std::make_shared<RouteResponse::Bus>(el.bus().span_count());
+            bus->name = el.name();
+            bus->time = el.bus().time();
+            this->edge_by_bus.emplace(el.edge().id(), std::move(bus));
+        } else {
+            auto wait = std::make_shared<RouteResponse::Wait>();
+            wait->name = el.name();
+            wait->time = el.stop().time();
+            this->edge_by_bus.emplace(el.edge().id(), std::move(wait));
+        }
+    }
+
     router = std::make_shared<Graph::Router<double>>(graph_map, router_mes);
 }
 
@@ -133,8 +151,46 @@ void Data_Structure::DataBaseRouter::Serialize(Serialize::TransportCatalog & tc)
     rs_mes.set_bus_wait_time(routing_settings.bus_wait_time);
     rs_mes.set_bus_velocity(routing_settings.bus_velocity);
 
+    for (auto & edge : edge_by_bus) {
+        Serialize::EdgeItem item;
+        item.mutable_edge()->set_id(edge.first);
+        item.set_name(edge.second->name);
+
+        if (edge.second->type == RouteResponse::Item::ItemType::WAIT){
+            Serialize::EdgeItemWait etw;
+            etw.set_time(edge.second->time);
+
+            *item.mutable_stop() = std::move(etw);
+        } else {
+            Serialize::EdgeItemBus etb;
+            etb.set_time(edge.second->time);
+            etb.set_span_count(reinterpret_cast<RouteResponse::Bus const *>(edge.second.get())->span_count);
+
+            *item.mutable_bus() = std::move(etb);
+        }
+
+        *router_mes.add_items() = std::move(item);
+    }
+
+    for (auto & [name, vert_path] : waiting_stops){
+        Serialize::WaitingStops ws;
+        ws.set_name(name);
+
+        Serialize::VerticesPath vp;
+        vp.set_inp(vert_path.inp);
+        vp.set_out(vert_path.out);
+
+        *ws.mutable_path() = std::move(vp);
+
+        *router_mes.add_waiting_stops() = std::move(ws);
+    }
+
     *router_mes.mutable_routing_settings() = std::move(rs_mes);
     router->Serialize(router_mes);
+
+    Serialize::Graph gr;
+    graph_map.Serialize(gr);
+    *router_mes.mutable_graph() = std::move(gr);
 
     *tc.mutable_router() = std::move(router_mes);
 }

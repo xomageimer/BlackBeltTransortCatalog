@@ -6,6 +6,8 @@
 
 // TODO сериализовывать/десериализовывать граф тоже
 
+#include "transport_catalog.pb.h"
+
 namespace Graph {
     using VertexID = size_t;
     using EdgeID = size_t;
@@ -24,6 +26,7 @@ namespace Graph {
         using IncidenceEdgesRange = Ranges::Range<typename IncidenceList::const_iterator>;
 
         explicit DirectedWeightedGraph(size_t VertexCount) : incidence_lists(VertexCount) {}
+        explicit DirectedWeightedGraph(const Serialize::Graph &);
 
         EdgeID AddEdge(Edge<Weight> const &);
 
@@ -32,6 +35,8 @@ namespace Graph {
 
         Edge<Weight> const & GetEdge(EdgeID) const;
         [[nodiscard]] IncidenceEdgesRange GetIncidenceList(VertexID) const;
+
+        void Serialize(Serialize::Graph & graph_mes) const;
     private:
         EdgeList edges;
         std::vector<IncidenceList> incidence_lists;
@@ -64,6 +69,25 @@ namespace Graph {
     typename DirectedWeightedGraph<Weight>::IncidenceEdgesRange DirectedWeightedGraph<Weight>::GetIncidenceList(VertexID vertex_id) const {
         const auto & es = incidence_lists[vertex_id];
         return {es.begin(), es.end()};
+    }
+
+    template<typename Weight>
+    DirectedWeightedGraph<Weight>::DirectedWeightedGraph(const Serialize::Graph & graph_mes) {
+        for (auto & edge : graph_mes.edges()){
+            this->edges.emplace_back(Edge<Weight>{edge.from(), edge.to(), edge.weight()});
+        }
+    }
+
+    template<typename Weight>
+    void DirectedWeightedGraph<Weight>::Serialize(Serialize::Graph &graph_mes) const {
+        for (auto & edge : edges) {
+            Serialize::EdgeData ed;
+            ed.set_from(edge.from);
+            ed.set_to(edge.to);
+            ed.set_weight(edge.weight);
+
+            *graph_mes.add_edges() = std::move(ed);
+        }
     }
 }
 

@@ -24,11 +24,51 @@ message Bus {
 message Router {
     repeated RoutesForVertex data = 1;
     RoutingSettings routing_settings = 2;
+    Graph graph = 3;
+    repeated WaitingStops waiting_stops = 4;
+    repeated EdgeItem items = 5;
 }
 
 message RoutesForVertex {
     uint32 vertex_id = 1;
     repeated RouteInternalData routes = 2;
+}
+
+message EdgeItemWait {
+    double time = 1;
+}
+
+message EdgeItemBus {
+    double time = 1;
+    uint32 span_count = 2;
+}
+
+message EdgeItem {
+    Edge edge = 1;
+    string name = 2;
+
+    EdgeItemBus bus = 3;
+    EdgeItemWait stop = 4;
+}
+
+message VerticesPath {
+    uint32 inp = 1;
+    uint32 out = 2;
+}
+
+message WaitingStops {
+    string name = 1;
+    VerticesPath path = 2;
+}
+
+message EdgeData {
+    uint32 from = 1;
+    uint32 to = 2;
+    double weight = 3;
+}
+
+message Graph {
+    repeated EdgeData edges = 1;
 }
 
 message Edge {
