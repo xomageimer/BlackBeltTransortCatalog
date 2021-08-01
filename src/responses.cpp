@@ -39,7 +39,7 @@ void RouteResponse::MakeJson() {
         items_.emplace_back(item);
     }
     valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("items"), std::forward_as_tuple(items_));
-    valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("map"), std::forward_as_tuple(std::move(route_render)));
+//    valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("map"), std::forward_as_tuple(std::move(route_render)));
 }
 
 void MapResponse::MakeJson() {

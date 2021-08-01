@@ -9,6 +9,11 @@
 
 #include "responses.h"
 
+namespace Serialize {
+    struct TransportCatalog;
+    struct Router;
+}
+
 template <typename T>
 using Dict = std::map<std::string, const T *>;
 
@@ -18,8 +23,9 @@ namespace Data_Structure {
     private:
         struct RoutingSettings {
             explicit RoutingSettings(std::pair<double, int> pr) : bus_wait_time(pr.first), bus_velocity(pr.second) {}
-            double bus_wait_time;
-            int bus_velocity;
+
+            double bus_wait_time{};
+            int bus_velocity{};
         };
         const RoutingSettings routing_settings;
         Graph::DirectedWeightedGraph<double> graph_map;
@@ -52,7 +58,10 @@ namespace Data_Structure {
         };
 
         DataBaseRouter(const Dict<struct Stop>& stops, const Dict<struct Bus>& buses, std::pair<double, int> routing_settings_);
+        explicit DataBaseRouter(Serialize::Router const & router_mes);
+
         RouteRespType CreateRoute(std::string const & from, std::string const & to);
+        void Serialize(Serialize::TransportCatalog &) const;
     private:
         void FillGraphWithStops(const Dict<struct Stop>&);
         void FillGraphWithBuses(const Dict<struct Bus>&, const Dict<Data_Structure::Stop> &);

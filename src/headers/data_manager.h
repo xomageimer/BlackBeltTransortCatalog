@@ -48,6 +48,7 @@ namespace Data_Structure {
         std::unique_ptr<DataBaseRouter> router;
         std::unique_ptr<DataBaseSvgBuilder> svg_builder;
     public:
+        DataBase(std::istream & is);
         DataBase(const std::vector<DBItem>&, std::pair<double, int> routing_settings_);
         DataBase(std::vector<DBItem>, std::pair<double, int> routing_settings_, RenderSettings render_settings);
 
@@ -55,7 +56,10 @@ namespace Data_Structure {
         ResponseType FindStop(const std::string & title) const;
         ResponseType FindRoute(const std::string & from, const std::string & to) const;
         ResponseType BuildMap() const;
+
+        void Serialize(std::ostream & os) const;
     private:
+        void Deserialize(std::istream & is);
         static ResponseType GenerateBad() ;
         std::pair<Dict<Stop>, Dict<Bus>> Init(std::vector<DBItem> const &);
     };

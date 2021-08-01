@@ -10,6 +10,8 @@
 #include <unordered_map>
 #include <optional>
 
+#include "transport_catalog.pb.h"
+
 namespace Graph {
     template <typename Weight>
     struct Router{
@@ -18,6 +20,9 @@ namespace Graph {
         using RouteID = uint64_t;
     public:
         explicit Router(const Graph_t &);
+        explicit Router(const Graph_t &, const Serialize::Router & router_mes);
+
+        void Serialize(Serialize::Router & router_mes);
 
         struct RouteInfo {
             RouteID id;
@@ -126,6 +131,61 @@ namespace Graph {
     template<typename Weight>
     bool Router<Weight>::CheckCache(Router::RouteID route_id) {
         return std::end(routes_cache) != routes_cache.find(route_id);
+    }
+
+    template<typename Weight>
+    Router<Weight>::Router(const Graph_t & graph, const Serialize::Router &router_mes) : graph(graph) {
+        this->routes_internal_data.resize(router_mes.data().size());
+        for (auto & r : this->routes_internal_data) {
+            r.resize(router_mes.data().size());
+        }
+
+        for (auto & cur_vertex : router_mes.data()){
+            for (auto & vertexes : cur_vertex.routes()) {
+                RouteInternalData cur_data;
+
+                if (vertexes.has_rd()) {
+                    cur_data.vertex_number = vertexes.rd().vertex_number();
+                    cur_data.weight = vertexes.rd().weight();
+                    if (vertexes.has_edgeid())
+                        cur_data.prev_edge.emplace(vertexes.edgeid().id());
+
+                    this->routes_internal_data[cur_vertex.vertex_id()][vertexes.vertex_id()] = cur_data;
+                } else {
+                    this->routes_internal_data[cur_vertex.vertex_id()][vertexes.vertex_id()] = std::nullopt;
+                }
+            }
+        }
+    }
+
+    template<typename Weight>
+    void Router<Weight>::Serialize(Serialize::Router &router_mes) {
+        size_t j = 0;
+        for (auto & cur_ver : routes_internal_data){
+            Serialize::RoutesForVertex rfv;
+            rfv.set_vertex_id(j++);
+
+            size_t i = 0;
+            for (std::optional<RouteInternalData> & ver : cur_ver) {
+                Serialize::RouteInternalData rout_data;
+                rout_data.set_vertex_id(i++);
+
+                if (ver.has_value()) {
+                    Serialize::RouteInfo rf;
+                    rf.set_vertex_number(ver->vertex_number);
+                    rf.set_weight(ver->weight);
+                    if (ver->prev_edge.has_value()) {
+                        Serialize::Edge edge;
+                        edge.set_id(*(ver->prev_edge));
+                        *rout_data.mutable_edgeid() = edge;
+                    }
+                    *rout_data.mutable_rd() = std::move(rf);
+                }
+
+                *rfv.add_routes() = std::move(rout_data);
+            }
+            *router_mes.add_data() = std::move(rfv);
+        }
     }
 }
 

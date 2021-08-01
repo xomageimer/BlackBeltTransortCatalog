@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package Serialize;
+
+message TransportCatalog {
+    repeated Stop stops = 1;
+    repeated Bus buses = 2;
+    Router router = 3;
+}
+
+message Stop {
+    string name = 1;
+    repeated string buses = 2;
+}
+
+message Bus {
+    string name = 1;
+    int32 length = 2;
+    double curvature = 3;
+    uint32 stop_count = 4;
+    uint32 unique_stop_count = 5;
+}
+
+message Router {
+    repeated RoutesForVertex data = 1;
+    RoutingSettings routing_settings = 2;
+}
+
+message RoutesForVertex {
+    uint32 vertex_id = 1;
+    repeated RouteInternalData routes = 2;
+}
+
+message Edge {
+    uint32 id = 1;
+}
+
+message RouteInfo {
+    double weight = 2;
+    uint32 vertex_number = 3;
+}
+
+message RouteInternalData {
+    uint32 vertex_id = 1;
+    RouteInfo rd = 2;
+    Edge EdgeID = 3;
+}
+
+message RoutingSettings {
+    double bus_wait_time = 1;
+    int32 bus_velocity = 2;
+}

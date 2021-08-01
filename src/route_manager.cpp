@@ -1,6 +1,8 @@
 #include "route_manager.h"
 #include "data_manager.h"
 
+#include "transport_catalog.pb.h"
+
 auto Data_Structure::DataBaseRouter::proxy_route::GetRoute() const {
     if (rf)
         return main_router->GetRouteRangeOfEdges(rf->id);
@@ -22,6 +24,11 @@ bool Data_Structure::DataBaseRouter::proxy_route::IsValid() const {
     return false;
 }
 #include <chrono>
+
+Data_Structure::DataBaseRouter::DataBaseRouter(Serialize::Router const & router_mes) : graph_map(0),
+                                routing_settings({router_mes.routing_settings().bus_wait_time(), router_mes.routing_settings().bus_velocity()}) {
+    router = std::make_shared<Graph::Router<double>>(graph_map, router_mes);
+}
 
 
 Data_Structure::DataBaseRouter::DataBaseRouter(const Dict<Data_Structure::Stop> &stops,
@@ -117,4 +124,17 @@ Data_Structure::RouteRespType Data_Structure::DataBaseRouter::CreateRoute(std::s
     }
     resp->total_time = proxy.GetInfo()->weight;
     return resp;
+}
+
+void Data_Structure::DataBaseRouter::Serialize(Serialize::TransportCatalog & tc) const {
+    Serialize::Router router_mes;
+
+    Serialize::RoutingSettings rs_mes;
+    rs_mes.set_bus_wait_time(routing_settings.bus_wait_time);
+    rs_mes.set_bus_velocity(routing_settings.bus_velocity);
+
+    *router_mes.mutable_routing_settings() = std::move(rs_mes);
+    router->Serialize(router_mes);
+
+    *tc.mutable_router() = std::move(router_mes);
 }

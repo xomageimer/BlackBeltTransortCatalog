@@ -1,6 +1,12 @@
 #include "data_manager.h"
 
+#include "transport_catalog.pb.h"
+
 #include <algorithm>
+
+Data_Structure::DataBase::DataBase(std::istream & is) {
+    Deserialize(is);
+}
 
 Data_Structure::DataBase::DataBase(const std::vector<DBItem>& elems, const std::pair<double, int> routing_settings_) {
     const auto [stops_ptrs, buses_ptrs] = Init(elems);
@@ -21,12 +27,12 @@ Data_Structure::DataBase::DataBase(std::vector<DBItem> items, std::pair<double, 
             buses_ptrs,
             routing_settings_
     );
-
-    svg_builder = std::make_unique<DataBaseSvgBuilder>(
-            stops_ptrs,
-            buses_ptrs,
-            std::move(render_settings)
-    );
+//
+//    svg_builder = std::make_unique<DataBaseSvgBuilder>(
+//            stops_ptrs,
+//            buses_ptrs,
+//            std::move(render_settings)
+//    );
 }
 
 std::pair<Dict<Data_Structure::Stop>, Dict<Data_Structure::Bus>> Data_Structure::DataBase::Init(std::vector<DBItem> const & elems) {
@@ -84,12 +90,12 @@ ResponseType Data_Structure::DataBase::FindStop(const std::string &title) const 
 ResponseType Data_Structure::DataBase::FindRoute(const std::string &from, const std::string &to) const {
     auto ret = router->CreateRoute(from, to);
     if (ret) {
-        auto render_items = ret->items;
-        if (!render_items.empty()) {
-            auto finish = render_items.insert(render_items.end(), std::make_shared<RouteResponse::Wait>());
-            (*finish)->name = to;
-        }
-        ret->route_render = std::move(svg_builder->RenderRoute(render_items)->svg_xml_answer);
+//        auto render_items = ret->items;
+//        if (!render_items.empty()) {
+//            auto finish = render_items.insert(render_items.end(), std::make_shared<RouteResponse::Wait>());
+//            (*finish)->name = to;
+//        }
+//        ret->route_render = std::move(svg_builder->RenderRoute(render_items)->svg_xml_answer);
 
         return ret;
     }
@@ -165,4 +171,55 @@ Data_Structure::GetBearingPoints(const Dict<Data_Structure::Stop> &stops, const 
     }
 
     return res;
+}
+
+void Data_Structure::DataBase::Serialize(std::ostream &os) const {
+    Serialize::TransportCatalog tc;
+
+    for (auto & stop : stops){
+        Serialize::Stop dummy_stop;
+        dummy_stop.set_name(stop.first);
+        for (auto & bus_name : stop.second->buses){
+            dummy_stop.add_buses(bus_name);
+        }
+        *tc.add_stops() = std::move(dummy_stop);
+    }
+
+    for (auto & [bus_name, bus] : buses){
+        Serialize::Bus dummy_bus;
+        dummy_bus.set_name(bus_name);
+        dummy_bus.set_length(bus->length);
+        dummy_bus.set_curvature(bus->curvature);
+        dummy_bus.set_stop_count(bus->stop_count);
+        dummy_bus.set_unique_stop_count(bus->unique_stop_count);
+
+        *tc.add_buses() = std::move(dummy_bus);
+    }
+
+    router->Serialize(tc);
+
+    tc.SerializePartialToOstream(&os);
+}
+
+void Data_Structure::DataBase::Deserialize(std::istream &is) {
+    Serialize::TransportCatalog tc;
+    tc.ParseFromIstream(&is);
+
+    for (auto & stop : tc.stops()){
+        std::set<std::string> s_buses;
+        for (auto & bus_name : stop.buses()){
+            s_buses.insert(bus_name);
+        }
+        StopResponse sr;
+        sr.buses = std::move(s_buses);
+        this->stops.emplace(stop.name(), std::make_shared<StopResponse>(std::move(sr)));
+    }
+
+    for (auto & bus : tc.buses()){
+        BusResponse br;
+        br.length = bus.length(); br.curvature = bus.curvature(); br.stop_count = bus.stop_count(); br.unique_stop_count = bus.unique_stop_count();
+        this->buses.emplace(bus.name(), std::make_shared<BusResponse>(std::move(br)));
+    }
+
+    router = std::make_unique<DataBaseRouter>(tc.router());
 }

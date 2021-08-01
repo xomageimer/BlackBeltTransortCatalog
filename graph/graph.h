@@ -4,6 +4,8 @@
 #include "ranges.h"
 #include <vector>
 
+// TODO сериализовывать/десериализовывать граф тоже
+
 namespace Graph {
     using VertexID = size_t;
     using EdgeID = size_t;

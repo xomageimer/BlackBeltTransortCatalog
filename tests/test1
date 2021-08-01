@@ -1,4 +1,7 @@
 {
+    "serialization_settings": {
+        "file": "/tmp/tmp7f2a431a"
+    },
     "routing_settings": {
         "bus_wait_time": 2,
         "bus_velocity": 30
