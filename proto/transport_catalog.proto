@@ -22,71 +22,37 @@ message Bus {
 }
 
 message Router {
-    repeated RoutesForVertex data = 1;
-    RoutingSettings routing_settings = 2;
-    Graph graph = 3;
-    repeated WaitingStops waiting_stops = 4;
-    repeated EdgeItem items = 5;
-}
-
-message RoutesForVertex {
-    uint32 vertex_id = 1;
-    repeated RouteInternalData routes = 2;
-}
-
-message EdgeItemWait {
-    double time = 1;
-}
-
-message EdgeItemBus {
-    double time = 1;
-    uint32 span_count = 2;
-}
-
-message EdgeItem {
-    Edge edge = 1;
-    string name = 2;
-
-    EdgeItemBus bus = 3;
-    EdgeItemWait stop = 4;
-}
-
-message VerticesPath {
-    uint32 inp = 1;
-    uint32 out = 2;
-}
-
-message WaitingStops {
-    string name = 1;
-    VerticesPath path = 2;
-}
-
-message EdgeData {
-    uint32 from = 1;
-    uint32 to = 2;
-    double weight = 3;
-}
-
-message Graph {
-    repeated EdgeData edges = 1;
-}
-
-message Edge {
-    uint32 id = 1;
-}
-
-message RouteInfo {
-    double weight = 2;
-    uint32 vertex_number = 3;
-}
-
-message RouteInternalData {
-    uint32 vertex_id = 1;
-    RouteInfo rd = 2;
-    Edge EdgeID = 3;
+    repeated Vertex vertexes = 1;
+    repeated Edge edges = 2;
+    RoutingSettings routing_settings = 3;
 }
 
 message RoutingSettings {
     double bus_wait_time = 1;
     int32 bus_velocity = 2;
+}
+
+message Vertex {
+    string name = 1;
+    uint32 vertex_id_in = 2;
+    uint32 vertex_id_out = 3;
+    repeated EdgeByVert route_data = 4;
+}
+
+message EdgeByVert {
+    uint32 vertex_id_in = 1;
+    uint32 edge_id = 2;
+}
+
+message Edge {
+    string name = 1;
+    double weight = 2;
+    uint32 vert_id_from = 3;
+    uint32 vert_id_to = 4;
+    uint32 id = 5;
+    SpanCount count = 6;
+}
+
+message SpanCount {
+    uint32 count = 1;
 }

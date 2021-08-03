@@ -37,7 +37,6 @@ namespace Data_Structure {
             Graph::VertexID out;
         };
         std::unordered_map<std::string, vertices_path> waiting_stops;
-        std::vector<std::string> vertices_by_stop;
     public:
         struct proxy_route {
         private:

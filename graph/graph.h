@@ -26,7 +26,7 @@ namespace Graph {
         using IncidenceEdgesRange = Ranges::Range<typename IncidenceList::const_iterator>;
 
         explicit DirectedWeightedGraph(size_t VertexCount) : incidence_lists(VertexCount) {}
-        explicit DirectedWeightedGraph(const Serialize::Graph &);
+        explicit DirectedWeightedGraph(const Serialize::Router &router_mes);
 
         EdgeID AddEdge(Edge<Weight> const &);
 
@@ -36,7 +36,7 @@ namespace Graph {
         Edge<Weight> const & GetEdge(EdgeID) const;
         [[nodiscard]] IncidenceEdgesRange GetIncidenceList(VertexID) const;
 
-        void Serialize(Serialize::Graph & graph_mes) const;
+        void Serialize(Serialize::Router &router_mes) const;
     private:
         EdgeList edges;
         std::vector<IncidenceList> incidence_lists;
@@ -72,21 +72,17 @@ namespace Graph {
     }
 
     template<typename Weight>
-    DirectedWeightedGraph<Weight>::DirectedWeightedGraph(const Serialize::Graph & graph_mes) {
-        for (auto & edge : graph_mes.edges()){
-            this->edges.emplace_back(Edge<Weight>{edge.from(), edge.to(), edge.weight()});
+    DirectedWeightedGraph<Weight>::DirectedWeightedGraph(const Serialize::Router & router_mes) {
+        for (auto & edge : router_mes.edges()){
+            this->edges.emplace_back(Edge<Weight>{edge.vert_id_from(), edge.vert_id_to(), edge.weight()});
         }
     }
 
     template<typename Weight>
-    void DirectedWeightedGraph<Weight>::Serialize(Serialize::Graph &graph_mes) const {
-        for (auto & edge : edges) {
-            Serialize::EdgeData ed;
-            ed.set_from(edge.from);
-            ed.set_to(edge.to);
-            ed.set_weight(edge.weight);
-
-            *graph_mes.add_edges() = std::move(ed);
+    void DirectedWeightedGraph<Weight>::Serialize(Serialize::Router &router_mes) const {
+        for (auto & edge : *router_mes.mutable_edges()){
+            edge.set_vert_id_from(edges.at(edge.id()).from);
+            edge.set_vert_id_to(edges.at(edge.id()).to);
         }
     }
 }
