@@ -4,8 +4,6 @@
 #include "ranges.h"
 #include <vector>
 
-// TODO сериализовывать/десериализовывать граф тоже
-
 #include "transport_catalog.pb.h"
 
 namespace Graph {
@@ -72,9 +70,10 @@ namespace Graph {
     }
 
     template<typename Weight>
-    DirectedWeightedGraph<Weight>::DirectedWeightedGraph(const Serialize::Router & router_mes) {
+    DirectedWeightedGraph<Weight>::DirectedWeightedGraph(const Serialize::Router & router_mes) : incidence_lists(router_mes.vertexes().size() * 2) {
         for (auto & edge : router_mes.edges()){
             this->edges.emplace_back(Edge<Weight>{edge.vert_id_from(), edge.vert_id_to(), edge.weight()});
+            this->incidence_lists[edge.vert_id_from()].push_back(edge.id());
         }
     }
 

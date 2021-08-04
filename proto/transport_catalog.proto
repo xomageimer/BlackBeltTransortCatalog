@@ -42,6 +42,7 @@ message Vertex {
 message EdgeByVert {
     uint32 vertex_id_in = 1;
     uint32 edge_id = 2;
+    double weight = 3;
 }
 
 message Edge {

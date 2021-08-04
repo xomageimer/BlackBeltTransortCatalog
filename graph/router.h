@@ -135,7 +135,8 @@ namespace Graph {
 
     template<typename Weight>
     Router<Weight>::Router(const Router::Graph_t & graph, const Serialize::Router &router_mes) :
-        graph(graph)
+        graph(graph),
+        routes_internal_data(graph.GetVertexCount(), std::vector<std::optional<RouteInternalData>>(graph.GetVertexCount()))
     {
         for (auto & cur_vertex : router_mes.vertexes()){
             this->routes_internal_data[cur_vertex.vertex_id_out()][cur_vertex.vertex_id_out()] = RouteInternalData {0, cur_vertex.vertex_id_out()};
@@ -145,8 +146,8 @@ namespace Graph {
 
                 cur_data.vertex_number = vertex.vertex_id_in();
                 *cur_data.prev_edge = vertex.edge_id();
-                cur_data.weight = graph.GetEdge(*cur_data.prev_edge).weight;
-                this->routes_internal_data[cur_vertex.vertex_id_in()][vertex.vertex_id_in()] = cur_data;
+                cur_data.weight = vertex.weight();
+                this->routes_internal_data[cur_vertex.vertex_id_in()][vertex.vertex_id_in()] = std::move(cur_data);
             }
         }
     }
@@ -161,8 +162,11 @@ namespace Graph {
 
                 Serialize::EdgeByVert edb;
                 edb.set_vertex_id_in(i++);
-                if (elem->prev_edge)
+                if (elem->prev_edge) {
                     edb.set_edge_id(*elem->prev_edge);
+                    edb.set_weight(elem->weight);
+                }
+
                 *verts.add_route_data() = std::move(edb);
             }
         }
