@@ -2,6 +2,7 @@
 #define SVG_H
 
 #include "xml.h"
+#include "transport_catalog.pb.h"
 
 #include <iostream>
 
@@ -37,6 +38,25 @@ namespace Svg {
             } else {
                 return std::string(std::get<std::string>(color));
             }
+        }
+
+        auto Serialize() const {
+            Serialize::Color color_mes;
+            if (std::holds_alternative<Rgba>(color)) {
+                color_mes.set_red(std::get<Rgba>(color).red);
+                color_mes.set_green(std::get<Rgba>(color).green);
+                color_mes.set_blue(std::get<Rgba>(color).blue);
+
+                if (std::get<Rgba>(color).alpha) {
+                    Serialize::Alpha alpha;
+                    alpha.set_val(*std::get<Rgba>(color).alpha);
+                    *color_mes.mutable_alpha() = std::move(alpha);
+                }
+            } else {
+                Serialize::ColorName cn;
+                *cn.mutable_color_name() = std::get<std::string>(color);
+            }
+            return std::move(color_mes);
         }
 
     private:

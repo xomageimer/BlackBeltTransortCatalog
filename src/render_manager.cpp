@@ -53,6 +53,12 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
     doc.SimpleRender();
 }
 
+Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(Data_Structure::RenderSettings render_set) : renderSettings(std::move(render_set)) {}
+
+Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Serialize::RenderSettings & ren_set) {
+
+}
+
 std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dict<Data_Structure::Stop> &stops,
                                                                        const Dict<Data_Structure::Bus> &buses) {
     auto bearing_points = GetBearingPoints(stops, buses);
@@ -231,6 +237,39 @@ bool Data_Structure::DataBaseSvgBuilder::IsConnected(std::string const & lhs, st
         return it->second.count(rhs);
     else
         return false;
+}
+
+void Data_Structure::DataBaseSvgBuilder::Serialize(Serialize::TransportCatalog & tc) const{
+    Serialize::RenderSettings ser_render_sets;
+
+    ser_render_sets.set_width(renderSettings.width);
+    ser_render_sets.set_height(renderSettings.height);
+    ser_render_sets.set_outer_margin(renderSettings.outer_margin);
+    ser_render_sets.set_padding(renderSettings.padding);
+    ser_render_sets.set_stop_radius(renderSettings.stop_radius);
+    ser_render_sets.set_line_width(renderSettings.line_width);
+
+    ser_render_sets.set_stop_label_font_size(renderSettings.stop_label_font_size);
+
+    ser_render_sets.add_stop_label_offset(renderSettings.stop_label_offset[0]);
+    ser_render_sets.add_stop_label_offset(renderSettings.stop_label_offset[1]);
+
+    ser_render_sets.set_bus_label_font_size(renderSettings.bus_label_font_size);
+
+    ser_render_sets.add_bus_label_offset(renderSettings.bus_label_offset[0]);
+    ser_render_sets.add_bus_label_offset(renderSettings.bus_label_offset[1]);
+
+    *ser_render_sets.mutable_color() = renderSettings.underlayer_color.Serialize();
+    ser_render_sets.set_underlayer_width(renderSettings.underlayer_width);
+
+    for (auto & color : renderSettings.color_palette){
+        *ser_render_sets.add_color_palette() = color.Serialize();
+    }
+    for (auto & layer : renderSettings.layers){
+        ser_render_sets.add_layers(layer);
+    }
+
+    *tc.mutable_render() = std::move(ser_render_sets);
 }
 
 void Data_Structure::BusPolylinesDrawer::Draw() {

@@ -18,6 +18,10 @@
             "type": "Route",
             "from": "sea station",
             "to": "parallel street"
+        },
+        {
+            "id": 1359372752,
+            "type": "Map"
         }
     ]
 }

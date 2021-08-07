@@ -27,12 +27,10 @@ Data_Structure::DataBase::DataBase(std::vector<DBItem> items, std::pair<double, 
             buses_ptrs,
             routing_settings_
     );
-//
-//    svg_builder = std::make_unique<DataBaseSvgBuilder>(
-//            stops_ptrs,
-//            buses_ptrs,
-//            std::move(render_settings)
-//    );
+
+    svg_builder = std::make_unique<DataBaseSvgBuilder>(
+            std::move(render_settings)
+    );
 }
 
 std::pair<Dict<Data_Structure::Stop>, Dict<Data_Structure::Bus>> Data_Structure::DataBase::Init(std::vector<DBItem> const & elems) {
@@ -90,12 +88,12 @@ ResponseType Data_Structure::DataBase::FindStop(const std::string &title) const 
 ResponseType Data_Structure::DataBase::FindRoute(const std::string &from, const std::string &to) const {
     auto ret = router->CreateRoute(from, to);
     if (ret) {
-//        auto render_items = ret->items;
-//        if (!render_items.empty()) {
-//            auto finish = render_items.insert(render_items.end(), std::make_shared<RouteResponse::Wait>());
-//            (*finish)->name = to;
-//        }
-//        ret->route_render = std::move(svg_builder->RenderRoute(render_items)->svg_xml_answer);
+        auto render_items = ret->items;
+        if (!render_items.empty()) {
+            auto finish = render_items.insert(render_items.end(), std::make_shared<RouteResponse::Wait>());
+            (*finish)->name = to;
+        }
+        ret->route_render = std::move(svg_builder->RenderRoute(render_items)->svg_xml_answer);
 
         return ret;
     }
@@ -197,6 +195,7 @@ void Data_Structure::DataBase::Serialize(std::ostream &os) const {
     }
 
     router->Serialize(tc);
+    svg_builder->Serialize(tc);
 
     tc.SerializePartialToOstream(&os);
 }
@@ -222,4 +221,5 @@ void Data_Structure::DataBase::Deserialize(std::istream &is) {
     }
 
     router = std::make_unique<DataBaseRouter>(tc.router());
+    svg_builder = std::make_unique<DataBaseSvgBuilder>(tc.render());
 }

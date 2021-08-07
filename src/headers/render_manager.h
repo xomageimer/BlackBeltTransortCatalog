@@ -12,6 +12,11 @@
 #include "xml.h"
 #include "svg.h"
 
+namespace Serialize {
+    struct TransportCatalog;
+    struct RenderSettings;
+}
+
 template <typename T>
 using Dict = std::map<std::string, const T *>;
 
@@ -85,8 +90,11 @@ namespace Data_Structure {
     public:
         explicit DataBaseSvgBuilder(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses,
                                     RenderSettings render_set);
+        explicit DataBaseSvgBuilder(RenderSettings render_set);
+        explicit DataBaseSvgBuilder(Serialize::RenderSettings const &);
         [[nodiscard]] MapRespType RenderMap() const;
         [[nodiscard]] MapRespType RenderRoute(std::vector<RouteResponse::ItemPtr> const &);
+        void Serialize(Serialize::TransportCatalog & tc) const;
         static bool IsConnected(std::string const & lhs, std::string const & rhs, std::unordered_map<std::string, std::unordered_set<std::string>> const & db_s);
 
         friend BusPolylinesDrawer;
