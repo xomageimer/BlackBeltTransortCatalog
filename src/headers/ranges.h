@@ -44,6 +44,11 @@ namespace Ranges {
     Range<Iter> FromMiddle(Range<Iter> range){
         return Range{range.begin() + std::distance(range.begin(), range.end()) / 2, range.end()};
     }
+
+    template <typename Iter>
+    Range<Iter> FromId(Range<Iter> range, size_t i) {
+        return Range{range.begin() + i, range.end()};
+    }
 }
 
 

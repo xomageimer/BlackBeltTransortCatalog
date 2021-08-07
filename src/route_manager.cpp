@@ -24,10 +24,9 @@ bool Data_Structure::DataBaseRouter::proxy_route::IsValid() const {
     return false;
 }
 
-Data_Structure::DataBaseRouter::DataBaseRouter(Serialize::Router const & router_mes) : graph_map(router_mes),
-                                routing_settings({router_mes.routing_settings().bus_wait_time(), router_mes.routing_settings().bus_velocity()}) {
+Data_Structure::DataBaseRouter::DataBaseRouter(Serialize::Router const & router_mes) : routing_settings({router_mes.routing_settings().bus_wait_time(), router_mes.routing_settings().bus_velocity()}),  graph_map(router_mes) {
     for (auto & vert : router_mes.vertexes()){
-        waiting_stops.emplace(vert.name(), vertices_path{vert.vertex_id_in(), vert.vertex_id_out()});
+        waiting_stops.emplace(vert.name(), vertices_path{vert.route_data_in(0).vertex_id(), vert.route_data_out(0).vertex_id()});
     }
 
     for (auto & edge : router_mes.edges()){
@@ -149,27 +148,34 @@ void Data_Structure::DataBaseRouter::Serialize(Serialize::TransportCatalog & tc)
     for (auto & [stop_name, verts] : waiting_stops){
         Serialize::Vertex vert;
         vert.set_name(stop_name);
-        vert.set_vertex_id_in(verts.inp);
-        vert.set_vertex_id_out(verts.out);
+
+        Serialize::VertInfo vi1;
+        vi1.set_vertex_id(verts.inp);
+        vi1.set_weight(0);
+        *vert.add_route_data_in() = vi1;
+
+        Serialize::VertInfo vi2;
+        vi2.set_vertex_id(verts.out);
+        vi2.set_weight(0);
+        *vert.add_route_data_out() = vi2;
 
         *router_mes.add_vertexes() = std::move(vert);
     }
-    for (auto & [edge_id, item] : edge_by_bus){
-        Serialize::Edge edge;
-        edge.set_id(edge_id);
+
+    graph_map.Serialize(router_mes);
+
+    for (auto & edge : *router_mes.mutable_edges()){
+        auto & item = edge_by_bus.at(edge.id());
 
         edge.set_name(item->name);
-        edge.set_weight(item->time);
-        if (item->type == RouteResponse::Item::ItemType::BUS) {
+        if (item->type == RouteResponse::Item::ItemType::BUS){
             Serialize::SpanCount sc;
             sc.set_count(reinterpret_cast<RouteResponse::Bus const *>(item.get())->span_count);
             *edge.mutable_count() = std::move(sc);
         }
-        *router_mes.add_edges() = std::move(edge);
     }
 
     router->Serialize(router_mes);
-    graph_map.Serialize(router_mes);
 
     *tc.mutable_router() = std::move(router_mes);
 }

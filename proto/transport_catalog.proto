@@ -34,14 +34,17 @@ message RoutingSettings {
 
 message Vertex {
     string name = 1;
-    uint32 vertex_id_in = 2;
-    uint32 vertex_id_out = 3;
-    repeated EdgeByVert route_data = 4;
+    repeated VertInfo route_data_out = 2;
+    repeated VertInfo route_data_in = 3;
 }
 
-message EdgeByVert {
-    uint32 vertex_id_in = 1;
-    uint32 edge_id = 2;
+message EdgeID {
+    uint32 id = 1;
+}
+
+message VertInfo {
+    uint32 vertex_id = 1;
+    EdgeID edge_id = 2;
     double weight = 3;
 }
 

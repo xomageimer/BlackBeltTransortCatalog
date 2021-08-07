@@ -139,35 +139,68 @@ namespace Graph {
         routes_internal_data(graph.GetVertexCount(), std::vector<std::optional<RouteInternalData>>(graph.GetVertexCount()))
     {
         for (auto & cur_vertex : router_mes.vertexes()){
-            this->routes_internal_data[cur_vertex.vertex_id_out()][cur_vertex.vertex_id_out()] = RouteInternalData {0, cur_vertex.vertex_id_out()};
-            this->routes_internal_data[cur_vertex.vertex_id_out()][cur_vertex.vertex_id_in()] = RouteInternalData {router_mes.routing_settings().bus_wait_time(), cur_vertex.vertex_id_in()};
-            for (auto & vertex : cur_vertex.route_data()) {
+            auto & out_vert = cur_vertex.route_data_out();
+            auto & in_vert = cur_vertex.route_data_in();
+
+            for (auto & vertex : out_vert) {
                 RouteInternalData cur_data;
 
-                cur_data.vertex_number = vertex.vertex_id_in();
-                *cur_data.prev_edge = vertex.edge_id();
+                cur_data.vertex_number = vertex.vertex_id();
+                if (vertex.has_edge_id()) {
+                    cur_data.prev_edge.emplace(vertex.edge_id().id());
+                }
                 cur_data.weight = vertex.weight();
-                this->routes_internal_data[cur_vertex.vertex_id_in()][vertex.vertex_id_in()] = std::move(cur_data);
+                this->routes_internal_data[out_vert[0].vertex_id()][cur_data.vertex_number] = std::move(cur_data);
+            }
+            for (auto & vertex : in_vert) {
+                RouteInternalData cur_data;
+
+                cur_data.vertex_number = vertex.vertex_id();
+                if (vertex.has_edge_id()) {
+                    cur_data.prev_edge.emplace(vertex.edge_id().id());
+                }
+                cur_data.weight = vertex.weight();
+                this->routes_internal_data[in_vert[0].vertex_id()][cur_data.vertex_number] = std::move(cur_data);
             }
         }
     }
+
+    // TODO вынести в отдельные 2 рипитед месседжа in / out вершины
 
     template<typename Weight>
     void Router<Weight>::Serialize(Serialize::Router &router_mes) {
         for (auto & verts : *router_mes.mutable_vertexes()){
             size_t i = 0;
-            for (auto & elem : routes_internal_data[verts.vertex_id_out()]){
-                if (!elem)
+            for (auto & elem : routes_internal_data[verts.route_data_out(0).vertex_id()]){
+                if (!elem || i == verts.route_data_out(0).vertex_id()) {
+                    i++;
                     continue;
+                }
 
-                Serialize::EdgeByVert edb;
-                edb.set_vertex_id_in(i++);
+                Serialize::VertInfo edb;
+                edb.set_vertex_id(i++);
                 if (elem->prev_edge) {
-                    edb.set_edge_id(*elem->prev_edge);
+                    edb.mutable_edge_id()->set_id(*elem->prev_edge);
                     edb.set_weight(elem->weight);
                 }
 
-                *verts.add_route_data() = std::move(edb);
+                *verts.add_route_data_out() = std::move(edb);
+            }
+            i = 0;
+            for (auto & elem : routes_internal_data[verts.route_data_in(0).vertex_id()]){
+                if (!elem || i == verts.route_data_in(0).vertex_id()) {
+                    i++;
+                    continue;
+                }
+
+                Serialize::VertInfo edb;
+                edb.set_vertex_id(i++);
+                if (elem->prev_edge) {
+                    edb.mutable_edge_id()->set_id(*elem->prev_edge);
+                    edb.set_weight(elem->weight);
+                }
+
+                *verts.add_route_data_in() = std::move(edb);
             }
         }
     }

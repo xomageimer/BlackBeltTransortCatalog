@@ -79,9 +79,15 @@ namespace Graph {
 
     template<typename Weight>
     void DirectedWeightedGraph<Weight>::Serialize(Serialize::Router &router_mes) const {
-        for (auto & edge : *router_mes.mutable_edges()){
-            edge.set_vert_id_from(edges.at(edge.id()).from);
-            edge.set_vert_id_to(edges.at(edge.id()).to);
+        size_t i = 0;
+        for (auto & edge : edges){
+            Serialize::Edge ser_edge;
+
+            ser_edge.set_vert_id_from(edge.from);
+            ser_edge.set_vert_id_to(edge.to);
+            ser_edge.set_weight(edge.weight);
+            ser_edge.set_id(i++);
+            *router_mes.add_edges() = std::move(ser_edge);
         }
     }
 }
