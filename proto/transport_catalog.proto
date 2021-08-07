@@ -9,13 +9,18 @@ message TransportCatalog {
     RenderSettings render = 4;
 }
 
+message AdjacentStops {
+    string name = 1;
+    int32 dist = 2;
+}
+
 message Stop {
     string name = 1;
     repeated string buses = 2;
 
     double longitude = 3;
     double latitude = 4;
-    repeated string adjacent_stops = 5;
+    repeated AdjacentStops adjacent_stops = 5;
 }
 
 message Bus {

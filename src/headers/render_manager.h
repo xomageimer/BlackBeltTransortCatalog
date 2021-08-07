@@ -91,7 +91,7 @@ namespace Data_Structure {
         explicit DataBaseSvgBuilder(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses,
                                     RenderSettings render_set);
         explicit DataBaseSvgBuilder(RenderSettings render_set);
-        explicit DataBaseSvgBuilder(Serialize::RenderSettings const &);
+        explicit DataBaseSvgBuilder(Serialize::RenderSettings const &, const Dict<struct Stop> &stops, const Dict<struct Bus> &buses);
         [[nodiscard]] MapRespType RenderMap() const;
         [[nodiscard]] MapRespType RenderRoute(std::vector<RouteResponse::ItemPtr> const &);
         void Serialize(Serialize::TransportCatalog & tc) const;
@@ -119,6 +119,8 @@ namespace Data_Structure {
         std::map<std::string, std::shared_ptr<ILayersStrategy>> layersStrategy;
 
         std::unordered_map<std::string, std::unordered_set<std::string>> db_connected;
+
+        void Deserialize(const Serialize::RenderSettings &);
     };
 }
 

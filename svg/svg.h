@@ -20,6 +20,16 @@ namespace Svg {
         Color(std::string const & color_str) : color(color_str) {};
         Color(const char * color_str) : color(color_str) {};
         Color(Svg::Rgba const & color_rgb) : color(color_rgb) {}
+        Color(Serialize::Color const & col_mes) {
+            if (!col_mes.has_cn()) {
+                auto rgb = Svg::Rgba{(uint8_t)col_mes.red(), (uint8_t)col_mes.green(), (uint8_t)col_mes.blue()};
+                if (col_mes.has_alpha())
+                    rgb.alpha.emplace(col_mes.alpha().val());
+                color.emplace<Rgba>(rgb);
+            } else {
+                color.emplace<std::string>(col_mes.cn().color_name());
+            }
+        }
 
         inline bool IsNone() const {
             return std::holds_alternative<std::monostate>(color);
@@ -55,6 +65,7 @@ namespace Svg {
             } else {
                 Serialize::ColorName cn;
                 *cn.mutable_color_name() = std::get<std::string>(color);
+                *color_mes.mutable_cn() = std::move(cn);
             }
             return std::move(color_mes);
         }

@@ -42,6 +42,9 @@ namespace Data_Structure {
 
     struct DataBase{
     private:
+        std::unordered_map<std::string, Bus> pure_buses;
+        std::unordered_map<std::string, Stop> pure_stops;
+
         std::unordered_map<std::string, StopRespType> stops;
         std::unordered_map<std::string, BusRespType> buses;
 

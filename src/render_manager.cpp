@@ -55,8 +55,15 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
 
 Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(Data_Structure::RenderSettings render_set) : renderSettings(std::move(render_set)) {}
 
-Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Serialize::RenderSettings & ren_set) {
+Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Serialize::RenderSettings & ren_set, const Dict<struct Stop> &stops, const Dict<struct Bus> &buses) {
+    Deserialize(ren_set);
+    CalculateCoordinates(stops, buses);
+    Init(buses);
+    for (const auto & layer : renderSettings.layers) {
+        (layersStrategy[layer])->Draw();
+    }
 
+    doc.SimpleRender();
 }
 
 std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dict<Data_Structure::Stop> &stops,
@@ -270,6 +277,33 @@ void Data_Structure::DataBaseSvgBuilder::Serialize(Serialize::TransportCatalog &
     }
 
     *tc.mutable_render() = std::move(ser_render_sets);
+}
+
+void Data_Structure::DataBaseSvgBuilder::Deserialize(const Serialize::RenderSettings & ren_mes) {
+    renderSettings.width = ren_mes.width();
+    renderSettings.height = ren_mes.height();
+    renderSettings.outer_margin = ren_mes.outer_margin();
+    renderSettings.padding = ren_mes.padding();
+    renderSettings.stop_radius = ren_mes.stop_radius();
+    renderSettings.line_width = ren_mes.line_width();
+
+    renderSettings.stop_label_font_size = ren_mes.stop_label_font_size();
+    renderSettings.stop_label_offset[0] = ren_mes.stop_label_offset(0);
+    renderSettings.stop_label_offset[1] = ren_mes.stop_label_offset(1);
+
+    renderSettings.bus_label_font_size = ren_mes.bus_label_font_size();
+    renderSettings.bus_label_offset[0] = ren_mes.bus_label_offset(0);
+    renderSettings.bus_label_offset[1] = ren_mes.bus_label_offset(1);
+
+    renderSettings.underlayer_color = Svg::Color(ren_mes.color());
+    renderSettings.underlayer_width = ren_mes.underlayer_width();
+
+    for (auto & color : ren_mes.color_palette()){
+        renderSettings.color_palette.emplace_back(color);
+    }
+    for (auto & layer : ren_mes.layers()){
+        renderSettings.layers.emplace_back(layer);
+    }
 }
 
 void Data_Structure::BusPolylinesDrawer::Draw() {

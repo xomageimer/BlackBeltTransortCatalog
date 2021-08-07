@@ -8,7 +8,7 @@ Data_Structure::DataBase::DataBase(std::istream & is) {
     Deserialize(is);
 }
 
-Data_Structure::DataBase::DataBase(const std::vector<DBItem>& elems, const std::pair<double, int> routing_settings_) {
+[[deprecated]] Data_Structure::DataBase::DataBase(const std::vector<DBItem>& elems, const std::pair<double, int> routing_settings_) {
     const auto [stops_ptrs, buses_ptrs] = Init(elems);
 
     router = std::make_unique<DataBaseRouter>(
@@ -19,7 +19,7 @@ Data_Structure::DataBase::DataBase(const std::vector<DBItem>& elems, const std::
 }
 
 Data_Structure::DataBase::DataBase(std::vector<DBItem> items, std::pair<double, int> routing_settings_,
-                                   RenderSettings render_settings) {
+                                   RenderSettings render_settings){
     const auto [stops_ptrs, buses_ptrs] = Init(items);
 
     router = std::make_unique<DataBaseRouter>(
@@ -39,9 +39,11 @@ std::pair<Dict<Data_Structure::Stop>, Dict<Data_Structure::Bus>> Data_Structure:
     for (auto & el : elems){
         if (std::holds_alternative<Bus>(el)){
             const auto & bus = std::get<Bus>(el);
+            pure_buses.emplace(bus.name, bus);
             buses_ptrs[bus.name] = &bus;
         } else {
             const auto & stop = std::get<Stop>(el);
+            pure_stops.emplace(stop.name, stop);
             stops_ptrs.emplace(stop.name, &stop);
             stops.emplace(stop.name, std::make_shared<StopResponse>());
         }
@@ -180,6 +182,17 @@ void Data_Structure::DataBase::Serialize(std::ostream &os) const {
         for (auto & bus_name : stop.second->buses){
             dummy_stop.add_buses(bus_name);
         }
+
+        auto & pure_stop = pure_stops.at(stop.first);
+        dummy_stop.set_latitude(pure_stop.dist.GetLatitude());
+        dummy_stop.set_longitude(pure_stop.dist.GetLongitude());
+        for (auto & el : pure_stop.adjacent_stops){
+            Serialize::AdjacentStops as;
+            as.set_name(el.first);
+            as.set_dist(el.second);
+            *dummy_stop.add_adjacent_stops() = std::move(as);
+        }
+
         *tc.add_stops() = std::move(dummy_stop);
     }
 
@@ -190,6 +203,12 @@ void Data_Structure::DataBase::Serialize(std::ostream &os) const {
         dummy_bus.set_curvature(bus->curvature);
         dummy_bus.set_stop_count(bus->stop_count);
         dummy_bus.set_unique_stop_count(bus->unique_stop_count);
+
+        auto & pure_bus = pure_buses.at(bus_name);
+        dummy_bus.set_is_roundtrip(pure_bus.is_roundtrip);
+        for (auto & el : pure_bus.stops){
+            dummy_bus.add_stops(el);
+        }
 
         *tc.add_buses() = std::move(dummy_bus);
     }
@@ -212,14 +231,39 @@ void Data_Structure::DataBase::Deserialize(std::istream &is) {
         StopResponse sr;
         sr.buses = std::move(s_buses);
         this->stops.emplace(stop.name(), std::make_shared<StopResponse>(std::move(sr)));
+
+        Stop pure_stop;
+        pure_stop.name = stop.name();
+        pure_stop.dist = Distance{stop.longitude(), stop.latitude()};
+        for (auto & as : stop.adjacent_stops()){
+            pure_stop.adjacent_stops.emplace(as.name(), as.dist());
+        }
+        pure_stops.emplace(pure_stop.name, pure_stop);
     }
 
     for (auto & bus : tc.buses()){
         BusResponse br;
         br.length = bus.length(); br.curvature = bus.curvature(); br.stop_count = bus.stop_count(); br.unique_stop_count = bus.unique_stop_count();
         this->buses.emplace(bus.name(), std::make_shared<BusResponse>(std::move(br)));
+
+        Bus pure_bus;
+        pure_bus.name = bus.name();
+        pure_bus.is_roundtrip = bus.is_roundtrip();
+        for (auto & stop : bus.stops()){
+            pure_bus.stops.emplace_back(stop);
+        }
+        pure_buses.emplace(pure_bus.name, pure_bus);
+    }
+
+    Dict<Stop> stops_ptrs;
+    Dict<Bus> buses_ptrs;
+    for (auto & bus : pure_buses){
+        buses_ptrs[bus.first] = &bus.second;
+    }
+    for (auto & stop : pure_stops){
+        stops_ptrs[stop.first] = &stop.second;
     }
 
     router = std::make_unique<DataBaseRouter>(tc.router());
-    svg_builder = std::make_unique<DataBaseSvgBuilder>(tc.render());
+    svg_builder = std::make_unique<DataBaseSvgBuilder>(tc.render(), stops_ptrs, buses_ptrs);
 }
