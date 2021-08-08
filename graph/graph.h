@@ -4,7 +4,7 @@
 #include "ranges.h"
 #include <vector>
 
-#include "transport_catalog.pb.h"
+#include "transport_router.pb.h"
 
 namespace Graph {
     using VertexID = size_t;
@@ -24,7 +24,7 @@ namespace Graph {
         using IncidenceEdgesRange = Ranges::Range<typename IncidenceList::const_iterator>;
 
         explicit DirectedWeightedGraph(size_t VertexCount) : incidence_lists(VertexCount) {}
-        explicit DirectedWeightedGraph(const Serialize::Router &router_mes);
+        explicit DirectedWeightedGraph(const RouterProto::Router &router_mes);
 
         EdgeID AddEdge(Edge<Weight> const &);
 
@@ -34,7 +34,7 @@ namespace Graph {
         Edge<Weight> const & GetEdge(EdgeID) const;
         [[nodiscard]] IncidenceEdgesRange GetIncidenceList(VertexID) const;
 
-        void Serialize(Serialize::Router &router_mes) const;
+        void Serialize(RouterProto::Router &router_mes) const;
     private:
         EdgeList edges;
         std::vector<IncidenceList> incidence_lists;
@@ -70,7 +70,7 @@ namespace Graph {
     }
 
     template<typename Weight>
-    DirectedWeightedGraph<Weight>::DirectedWeightedGraph(const Serialize::Router & router_mes) : incidence_lists(router_mes.vertexes().size() * 2) {
+    DirectedWeightedGraph<Weight>::DirectedWeightedGraph(const RouterProto::Router & router_mes) : incidence_lists(router_mes.vertexes().size() * 2) {
         for (auto & edge : router_mes.edges()){
             this->edges.emplace_back(Edge<Weight>{edge.vert_id_from(), edge.vert_id_to(), edge.weight()});
             this->incidence_lists[edge.vert_id_from()].push_back(edge.id());
@@ -78,10 +78,10 @@ namespace Graph {
     }
 
     template<typename Weight>
-    void DirectedWeightedGraph<Weight>::Serialize(Serialize::Router &router_mes) const {
+    void DirectedWeightedGraph<Weight>::Serialize(RouterProto::Router &router_mes) const {
         size_t i = 0;
         for (auto & edge : edges){
-            Serialize::Edge ser_edge;
+            RouterProto::Edge ser_edge;
 
             ser_edge.set_vert_id_from(edge.from);
             ser_edge.set_vert_id_to(edge.to);

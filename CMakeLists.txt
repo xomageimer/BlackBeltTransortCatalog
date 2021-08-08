@@ -14,7 +14,10 @@ set(PROJECT_HEADERS json/json.h src/headers/ranges.h src/headers/responses.h src
 protobuf_generate_cpp(
     PROTO_SRCS
     PROTO_HDRS
-    proto/transport_catalog.proto
+
+    proto/transport/transport_catalog.proto
+    proto/transport/transport_render.proto
+    proto/transport/transport_router.proto
 )
 
 add_executable(TransportCatalog ${PROTO_SRCS} ${PROTO_HDRS} src/main.cpp ${PROJECT_SOURCES} ${PROJECT_HEADERS})

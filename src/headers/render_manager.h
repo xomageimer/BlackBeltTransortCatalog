@@ -12,13 +12,8 @@
 #include "xml.h"
 #include "svg.h"
 
-namespace Serialize {
-    struct TransportCatalog;
-    struct RenderSettings;
-}
-
-template <typename T>
-using Dict = std::map<std::string, const T *>;
+#include "transport_catalog.pb.h"
+#include "transport_render.pb.h"
 
 namespace Data_Structure {
     using MapRespType = std::shared_ptr<MapResponse>;
@@ -88,13 +83,13 @@ namespace Data_Structure {
 
     struct DataBaseSvgBuilder {
     public:
-        explicit DataBaseSvgBuilder(const Dict<struct Stop> &stops, const Dict<struct Bus> &buses,
+        explicit DataBaseSvgBuilder(const std::unordered_map<std::string, struct Stop> &, const std::unordered_map<std::string, struct Bus> &,
                                     RenderSettings render_set);
         explicit DataBaseSvgBuilder(RenderSettings render_set);
-        explicit DataBaseSvgBuilder(Serialize::RenderSettings const &, const Dict<struct Stop> &stops, const Dict<struct Bus> &buses);
+        explicit DataBaseSvgBuilder(RenderProto::RenderSettings const &, const std::unordered_map<std::string, Stop> &, const std::unordered_map<std::string, Bus> &);
         [[nodiscard]] MapRespType RenderMap() const;
         [[nodiscard]] MapRespType RenderRoute(std::vector<RouteResponse::ItemPtr> const &);
-        void Serialize(Serialize::TransportCatalog & tc) const;
+        void Serialize(TCProto::TransportCatalog & tc) const;
         static bool IsConnected(std::string const & lhs, std::string const & rhs, std::unordered_map<std::string, std::unordered_set<std::string>> const & db_s);
 
         friend BusPolylinesDrawer;
@@ -102,14 +97,14 @@ namespace Data_Structure {
         friend StopsTextDrawer;
         friend BusTextDrawer;
     private:
-        void Init(const Dict<struct Bus> &buses);
-        void CalculateCoordinates(const Dict<struct Stop> & stops, const Dict<struct Bus> &buses);
+        void Init(const std::unordered_map<std::string, Bus> &);
+        void CalculateCoordinates(const std::unordered_map<std::string, Stop> &, const std::unordered_map<std::string, Bus> &);
 
-        std::map<std::string, Svg::Point> CoordinateUniformDistribution(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
-        void BuildNeighborhoodConnections( std::map<std::string, Svg::Point> const & new_coords, const Dict<struct Bus> &buses);
-        static auto SortingByCoordinates(std::map<std::string, Svg::Point> const & uniform, const Dict<struct Stop> &stops);
+        std::map<std::string, Svg::Point> CoordinateUniformDistribution(const std::unordered_map<std::string, Stop> &, const std::unordered_map<std::string, Bus> &);
+        void BuildNeighborhoodConnections( std::map<std::string, Svg::Point> const & new_coords, const std::unordered_map<std::string, Bus> & buses);
+        static auto SortingByCoordinates(std::map<std::string, Svg::Point> const & uniform, const std::unordered_map<std::string, Stop> &);
         std::pair<std::map<std::string, int>, int> GluingCoordinates(std::vector<std::pair<double, std::string>> const & sorted_by_coord);
-        std::map<std::string, Svg::Point> CoordinateCompression(const Dict<struct Stop> &stops, const Dict<struct Bus> & buses);
+        std::map<std::string, Svg::Point> CoordinateCompression(const std::unordered_map<std::string, Stop> &, const std::unordered_map<std::string, Bus> &);
 
         RenderSettings renderSettings;
         Svg::Document doc;
@@ -118,9 +113,9 @@ namespace Data_Structure {
         std::map<std::string, Svg::Point> stops_coordinates;
         std::map<std::string, std::shared_ptr<ILayersStrategy>> layersStrategy;
 
-        std::unordered_map<std::string, std::unordered_set<std::string>> db_connected;
+        std::map<std::string, std::unordered_set<std::string>> db_connected;
 
-        void Deserialize(const Serialize::RenderSettings &);
+        void Deserialize(const RenderProto::RenderSettings &);
     };
 }
 

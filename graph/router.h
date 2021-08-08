@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <optional>
 
-#include "transport_catalog.pb.h"
+#include "transport_router.pb.h"
 
 namespace Graph {
     template <typename Weight>
@@ -20,9 +20,9 @@ namespace Graph {
         using RouteID = uint64_t;
     public:
         explicit Router(const Graph_t &);
-        explicit Router(const Graph_t &, const Serialize::Router & router_mes);
+        explicit Router(const Graph_t &, const RouterProto::Router & router_mes);
 
-        void Serialize(Serialize::Router & router_mes);
+        void Serialize(RouterProto::Router & router_mes);
 
         struct RouteInfo {
             RouteID id;
@@ -134,7 +134,7 @@ namespace Graph {
     }
 
     template<typename Weight>
-    Router<Weight>::Router(const Router::Graph_t & graph, const Serialize::Router &router_mes) :
+    Router<Weight>::Router(const Router::Graph_t & graph, const RouterProto::Router &router_mes) :
         graph(graph),
         routes_internal_data(graph.GetVertexCount(), std::vector<std::optional<RouteInternalData>>(graph.GetVertexCount()))
     {
@@ -165,10 +165,8 @@ namespace Graph {
         }
     }
 
-    // TODO вынести в отдельные 2 рипитед месседжа in / out вершины
-
     template<typename Weight>
-    void Router<Weight>::Serialize(Serialize::Router &router_mes) {
+    void Router<Weight>::Serialize(RouterProto::Router &router_mes) {
         for (auto & verts : *router_mes.mutable_vertexes()){
             size_t i = 0;
             for (auto & elem : routes_internal_data[verts.route_data_out(0).vertex_id()]){
@@ -177,7 +175,7 @@ namespace Graph {
                     continue;
                 }
 
-                Serialize::VertInfo edb;
+                RouterProto::VertInfo edb;
                 edb.set_vertex_id(i++);
                 if (elem->prev_edge) {
                     edb.mutable_edge_id()->set_id(*elem->prev_edge);
@@ -193,7 +191,7 @@ namespace Graph {
                     continue;
                 }
 
-                Serialize::VertInfo edb;
+                RouterProto::VertInfo edb;
                 edb.set_vertex_id(i++);
                 if (elem->prev_edge) {
                     edb.mutable_edge_id()->set_id(*elem->prev_edge);

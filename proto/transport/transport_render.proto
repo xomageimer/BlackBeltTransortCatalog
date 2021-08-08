@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package RenderProto;
+
+message Alpha {
+    double val = 1;
+}
+
+message ColorName {
+    string color_name = 1;
+}
+
+message Color {
+    uint32 red = 1;
+    uint32 green = 2;
+    uint32 blue = 3;
+
+    Alpha alpha = 4;
+    ColorName cn = 5;
+}
+
+message RenderSettings {
+    double width = 1;
+    double height = 2;
+    double outer_margin = 3;
+    double padding = 4;
+    double stop_radius = 5;
+    double line_width = 6;
+
+    int32 stop_label_font_size = 7;
+    repeated double stop_label_offset = 8;
+
+    int32 bus_label_font_size = 9;
+    repeated double bus_label_offset = 10;
+
+    Color color = 11;
+    double underlayer_width = 12;
+
+    repeated Color color_palette = 13;
+    repeated string layers = 14;
+}

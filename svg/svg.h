@@ -2,7 +2,7 @@
 #define SVG_H
 
 #include "xml.h"
-#include "transport_catalog.pb.h"
+#include "transport_render.pb.h"
 
 #include <iostream>
 
@@ -20,7 +20,7 @@ namespace Svg {
         Color(std::string const & color_str) : color(color_str) {};
         Color(const char * color_str) : color(color_str) {};
         Color(Svg::Rgba const & color_rgb) : color(color_rgb) {}
-        Color(Serialize::Color const & col_mes) {
+        Color(RenderProto::Color const & col_mes) {
             if (!col_mes.has_cn()) {
                 auto rgb = Svg::Rgba{(uint8_t)col_mes.red(), (uint8_t)col_mes.green(), (uint8_t)col_mes.blue()};
                 if (col_mes.has_alpha())
@@ -51,19 +51,19 @@ namespace Svg {
         }
 
         auto Serialize() const {
-            Serialize::Color color_mes;
+            RenderProto::Color color_mes;
             if (std::holds_alternative<Rgba>(color)) {
                 color_mes.set_red(std::get<Rgba>(color).red);
                 color_mes.set_green(std::get<Rgba>(color).green);
                 color_mes.set_blue(std::get<Rgba>(color).blue);
 
                 if (std::get<Rgba>(color).alpha) {
-                    Serialize::Alpha alpha;
+                    RenderProto::Alpha alpha;
                     alpha.set_val(*std::get<Rgba>(color).alpha);
                     *color_mes.mutable_alpha() = std::move(alpha);
                 }
             } else {
-                Serialize::ColorName cn;
+                RenderProto::ColorName cn;
                 *cn.mutable_color_name() = std::get<std::string>(color);
                 *color_mes.mutable_cn() = std::move(cn);
             }

@@ -31,9 +31,9 @@ namespace Data_Structure {
         std::map<std::string, int> adjacent_stops;
     };
     int ComputeStopsDistance(const Stop& lhs, const Stop& rhs);
-    int ComputeRouteDistance(std::vector<std::string> const & stops, Dict<Stop> const &);
-    double ComputeGeoDistance(std::vector<std::string> const & stops, Dict<Stop> const &);
-    std::set<std::string> GetBearingPoints(Dict<Stop> const & stops, Dict<Bus> const & buses);
+    int ComputeRouteDistance(std::vector<std::string> const & stops, const std::unordered_map<std::string, Stop> &);
+    double ComputeGeoDistance(std::vector<std::string> const & stops, const std::unordered_map<std::string, Stop> &);
+    std::set<std::string> GetBearingPoints(const std::unordered_map<std::string, Stop> &, const std::unordered_map<std::string, Bus> &);
 
     using DBItem = std::variant<Stop, Bus>;
     using StopRespType = std::shared_ptr<StopResponse>;
@@ -64,7 +64,7 @@ namespace Data_Structure {
     private:
         void Deserialize(std::istream & is);
         static ResponseType GenerateBad() ;
-        std::pair<Dict<Stop>, Dict<Bus>> Init(std::vector<DBItem> const &);
+        void Init(std::vector<DBItem> const &);
     };
 }
 

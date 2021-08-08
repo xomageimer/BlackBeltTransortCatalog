@@ -9,10 +9,8 @@
 
 #include "responses.h"
 
-namespace Serialize {
-    struct TransportCatalog;
-    struct Router;
-}
+#include "transport_catalog.pb.h"
+#include "transport_router.pb.h"
 
 template <typename T>
 using Dict = std::map<std::string, const T *>;
@@ -56,14 +54,14 @@ namespace Data_Structure {
             ~proxy_route();
         };
 
-        DataBaseRouter(const Dict<struct Stop>& stops, const Dict<struct Bus>& buses, std::pair<double, int> routing_settings_);
-        explicit DataBaseRouter(Serialize::Router const & router_mes);
+        DataBaseRouter(const std::unordered_map<std::string, struct Stop> &, const std::unordered_map<std::string, struct Bus> &, std::pair<double, int> routing_settings_);
+        explicit DataBaseRouter(RouterProto::Router const & router_mes);
 
         RouteRespType CreateRoute(std::string const & from, std::string const & to);
-        void Serialize(Serialize::TransportCatalog &) const;
+        void Serialize(TCProto::TransportCatalog &) const;
     private:
-        void FillGraphWithStops(const Dict<struct Stop>&);
-        void FillGraphWithBuses(const Dict<struct Bus>&, const Dict<Data_Structure::Stop> &);
+        void FillGraphWithStops(const std::unordered_map<std::string, Stop> &);
+        void FillGraphWithBuses(const std::unordered_map<std::string, Bus> &, const std::unordered_map<std::string, Stop> &);
     };
 }
 

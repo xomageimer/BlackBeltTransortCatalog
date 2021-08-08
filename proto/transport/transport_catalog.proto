@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+import "transport_render.proto";
+import "transport_router.proto";
+
+package TCProto;
+
+message TransportCatalog {
+    repeated Stop stops = 1;
+    repeated Bus buses = 2;
+    RouterProto.Router router = 3;
+    RenderProto.RenderSettings render = 4;
+}
+
+message AdjacentStops {
+    string name = 1;
+    int32 dist = 2;
+}
+
+message Stop {
+    string name = 1;
+    repeated string buses = 2;
+
+    double longitude = 3;
+    double latitude = 4;
+    repeated AdjacentStops adjacent_stops = 5;
+}
+
+message Bus {
+    string name = 1;
+    int32 length = 2;
+    double curvature = 3;
+    uint32 stop_count = 4;
+    uint32 unique_stop_count = 5;
+
+    bool is_roundtrip = 6;
+    repeated string stops = 7;
+}

@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package RouterProto;
+
+message Router {
+    repeated Vertex vertexes = 1;
+    repeated Edge edges = 2;
+    RoutingSettings routing_settings = 3;
+}
+
+message RoutingSettings {
+    double bus_wait_time = 1;
+    int32 bus_velocity = 2;
+}
+
+message Vertex {
+    string name = 1;
+    repeated VertInfo route_data_out = 2;
+    repeated VertInfo route_data_in = 3;
+}
+
+message EdgeID {
+    uint32 id = 1;
+}
+
+message VertInfo {
+    uint32 vertex_id = 1;
+    EdgeID edge_id = 2;
+    double weight = 3;
+}
+
+message Edge {
+    string name = 1;
+    double weight = 2;
+    uint32 vert_id_from = 3;
+    uint32 vert_id_to = 4;
+    uint32 id = 5;
+    SpanCount count = 6;
+}
+
+message SpanCount {
+    uint32 count = 1;
+}

@@ -41,8 +41,8 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std:
     return MapResp;
 }
 
-Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure::Stop> &stops,
-                                       const Dict<Data_Structure::Bus> &buses,
+[[deprecated]] Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const std::unordered_map<std::string, Stop> & stops,
+                                       const std::unordered_map<std::string, Bus> & buses,
                                        RenderSettings render_set) : renderSettings(std::move(render_set)){
     CalculateCoordinates(stops, buses);
     Init(buses);
@@ -55,7 +55,7 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Dict<Data_Structure
 
 Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(Data_Structure::RenderSettings render_set) : renderSettings(std::move(render_set)) {}
 
-Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Serialize::RenderSettings & ren_set, const Dict<struct Stop> &stops, const Dict<struct Bus> &buses) {
+Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const RenderProto::RenderSettings & ren_set, const std::unordered_map<std::string, Stop> & stops, const std::unordered_map<std::string, Bus> & buses) {
     Deserialize(ren_set);
     CalculateCoordinates(stops, buses);
     Init(buses);
@@ -66,8 +66,8 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const Serialize::RenderSe
     doc.SimpleRender();
 }
 
-std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const Dict<Data_Structure::Stop> &stops,
-                                                                       const Dict<Data_Structure::Bus> &buses) {
+std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const std::unordered_map<std::string, Stop> &stops,
+                                                                                                    const std::unordered_map<std::string, Bus> &buses) {
     auto bearing_points = GetBearingPoints(stops, buses);
 
     auto step = [](double left, double right, size_t count) {
@@ -76,13 +76,13 @@ std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::Coordinate
 
     std::map<std::string, Svg::Point> uniform;
     for (auto & [_, bus] : buses) {
-        if (bus->stops.empty()) continue;
-        auto left_bearing_point = bus->stops.begin();
+        if (bus.stops.empty()) continue;
+        auto left_bearing_point = bus.stops.begin();
         size_t l = 0;
         size_t k = l;
         auto right_bearing_point = left_bearing_point;
         size_t count;
-        auto bus_range = bus->is_roundtrip ? Ranges::AsRange(bus->stops) : Ranges::ToMiddle(Ranges::AsRange(bus->stops));
+        auto bus_range = bus.is_roundtrip ? Ranges::AsRange(bus.stops) : Ranges::ToMiddle(Ranges::AsRange(bus.stops));
         for (auto stop_iter = bus_range.begin(); stop_iter != bus_range.end(); stop_iter++) {
             count = std::distance(left_bearing_point, right_bearing_point);
             if (stop_iter == right_bearing_point) {
@@ -91,14 +91,14 @@ std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::Coordinate
                 right_bearing_point = std::find_if(std::next(left_bearing_point), bus_range.end(), [&bearing_points](auto const & cur) {
                     return bearing_points.find(cur) != bearing_points.end();
                 });
-                auto left_bearing_distance = stops.at(*left_bearing_point)->dist;
+                auto left_bearing_distance = stops.at(*left_bearing_point).dist;
                 uniform.insert_or_assign(*left_bearing_point, Svg::Point{left_bearing_distance.GetLongitude(), left_bearing_distance.GetLatitude()});
             } else {
                 if (right_bearing_point == bus_range.end())
                     throw std::logic_error("bad right point!");
 
-                auto left_bearing_distance = stops.at(*left_bearing_point)->dist;
-                auto right_bearing_distance = stops.at(*right_bearing_point)->dist;
+                auto left_bearing_distance = stops.at(*left_bearing_point).dist;
+                auto right_bearing_distance = stops.at(*right_bearing_point).dist;
 
                 double x = left_bearing_distance.GetLongitude()
                            + step(left_bearing_distance.GetLongitude(),
@@ -119,7 +119,7 @@ std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::Coordinate
 }
 
 auto Data_Structure::DataBaseSvgBuilder::SortingByCoordinates(const std::map<std::string, Svg::Point> &uniform,
-                                                              const Dict<Data_Structure::Stop> &stops) {
+                                                              const std::unordered_map<std::string, Stop> &stops) {
     std::pair<std::vector<std::pair<double, std::string>>, std::vector<std::pair<double, std::string>>> sorted_xy;
     auto & sorted_x = sorted_xy.first;
     auto & sorted_y = sorted_xy.second;
@@ -131,8 +131,8 @@ auto Data_Structure::DataBaseSvgBuilder::SortingByCoordinates(const std::map<std
             sorted_x.emplace_back(new_coord.x, stop_name);
             sorted_y.emplace_back(new_coord.y, stop_name);
         } else {
-            sorted_x.emplace_back(stop->dist.GetLongitude(), stop_name);
-            sorted_y.emplace_back(stop->dist.GetLatitude(), stop_name);
+            sorted_x.emplace_back(stop.dist.GetLongitude(), stop_name);
+            sorted_y.emplace_back(stop.dist.GetLatitude(), stop_name);
         }
     }
     std::sort(sorted_x.begin(), sorted_x.end());
@@ -176,7 +176,8 @@ std::pair<std::map<std::string, int>, int> Data_Structure::DataBaseSvgBuilder::G
 
 }
 
-std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const Dict<Data_Structure::Stop> &stops, const Dict<Data_Structure::Bus> & buses) {
+std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const std::unordered_map<std::string, Stop> & stops,
+                                                                                            const std::unordered_map<std::string, Bus> & buses) {
     auto [sorted_x, sorted_y] = SortingByCoordinates(CoordinateUniformDistribution(stops, buses), stops);
 
     auto [gluing_y, yid] = GluingCoordinates(sorted_y);
@@ -200,16 +201,19 @@ std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::Coordinate
     return CompressCoord;
 }
 
-void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const Dict<Data_Structure::Stop> &stops,
-                                                              const Dict<Data_Structure::Bus> & buses) {
+void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const std::unordered_map<std::string, Stop> & stops,
+                                                              const std::unordered_map<std::string, Bus> & buses) {
     stops_coordinates = CoordinateCompression(stops, buses);
 }
 
-void Data_Structure::DataBaseSvgBuilder::Init(const Dict<Data_Structure::Bus> &buses) {
+void Data_Structure::DataBaseSvgBuilder::Init(const std::unordered_map<std::string, Bus> & buses) {
+    for (auto & [bus_name, bus] : buses) {
+        bus_dict.emplace(bus_name, std::pair{bus, Svg::NoneColor});
+    }
     size_t size = renderSettings.color_palette.size();
     size_t i = 0;
-    for (auto & [bus_name, bus] : buses) {
-        bus_dict.emplace(bus_name, std::pair{*bus, renderSettings.color_palette[i++ % size]});
+    for (auto & [bus_name, bus] : bus_dict){
+        bus.second = renderSettings.color_palette[i++ % size];
     }
 
     layersStrategy.emplace(std::piecewise_construct,
@@ -227,9 +231,9 @@ void Data_Structure::DataBaseSvgBuilder::Init(const Dict<Data_Structure::Bus> &b
 
 }
 
-void Data_Structure::DataBaseSvgBuilder::BuildNeighborhoodConnections( std::map<std::string, Svg::Point> const & new_coords, const Dict<struct Bus> &buses) {
+void Data_Structure::DataBaseSvgBuilder::BuildNeighborhoodConnections( std::map<std::string, Svg::Point> const & new_coords, const std::unordered_map<std::string, Bus> &buses) {
     for (auto & [_, bus] : buses) {
-        auto & stops_ = bus->stops;
+        auto & stops_ = bus.stops;
         if (stops_.empty()) continue;
         for (auto stops_it = stops_.begin(); stops_it != std::prev(stops_.end()); stops_it++) {
             db_connected[*stops_it].insert(*std::next(stops_it));
@@ -246,8 +250,8 @@ bool Data_Structure::DataBaseSvgBuilder::IsConnected(std::string const & lhs, st
         return false;
 }
 
-void Data_Structure::DataBaseSvgBuilder::Serialize(Serialize::TransportCatalog & tc) const{
-    Serialize::RenderSettings ser_render_sets;
+void Data_Structure::DataBaseSvgBuilder::Serialize(TCProto::TransportCatalog & tc) const{
+    RenderProto::RenderSettings ser_render_sets;
 
     ser_render_sets.set_width(renderSettings.width);
     ser_render_sets.set_height(renderSettings.height);
@@ -279,7 +283,7 @@ void Data_Structure::DataBaseSvgBuilder::Serialize(Serialize::TransportCatalog &
     *tc.mutable_render() = std::move(ser_render_sets);
 }
 
-void Data_Structure::DataBaseSvgBuilder::Deserialize(const Serialize::RenderSettings & ren_mes) {
+void Data_Structure::DataBaseSvgBuilder::Deserialize(const RenderProto::RenderSettings & ren_mes) {
     renderSettings.width = ren_mes.width();
     renderSettings.height = ren_mes.height();
     renderSettings.outer_margin = ren_mes.outer_margin();
