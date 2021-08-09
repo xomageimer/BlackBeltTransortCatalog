@@ -8,7 +8,7 @@ Data_Structure::DataBase::DataBase(std::istream & is) {
     Deserialize(is);
 }
 
-[[deprecated]] Data_Structure::DataBase::DataBase(const std::vector<DBItem>& elems, const std::pair<double, int> routing_settings_) {
+Data_Structure::DataBase::DataBase(const std::vector<DBItem>& elems, const std::pair<double, int> routing_settings_) {
     Init(elems);
 
     router = std::make_unique<DataBaseRouter>(

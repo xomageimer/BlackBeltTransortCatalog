@@ -37,7 +37,8 @@ int main(int argc, const char* argv[]) {
         const auto &input_map = doc.GetRoot();
 
         ifstream inp(input_map["serialization_settings"]["file"].AsString().substr(1), std::ios::in | std::ios::binary);
-
+        if (!inp.is_open())
+            throw std::logic_error("can't open file " + input_map["serialization_settings"]["file"].AsString());
         const DS::DataBase db (inp);
         inp.close();
 

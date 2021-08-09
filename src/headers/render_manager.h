@@ -83,7 +83,7 @@ namespace Data_Structure {
 
     struct DataBaseSvgBuilder {
     public:
-        explicit DataBaseSvgBuilder(const std::unordered_map<std::string, struct Stop> &, const std::unordered_map<std::string, struct Bus> &,
+        [[deprecated]] explicit DataBaseSvgBuilder(const std::unordered_map<std::string, struct Stop> &, const std::unordered_map<std::string, struct Bus> &,
                                     RenderSettings render_set);
         explicit DataBaseSvgBuilder(RenderSettings render_set);
         explicit DataBaseSvgBuilder(RenderProto::RenderSettings const &, const std::unordered_map<std::string, Stop> &, const std::unordered_map<std::string, Bus> &);

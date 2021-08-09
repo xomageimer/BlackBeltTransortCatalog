@@ -52,7 +52,7 @@ namespace Data_Structure {
         std::unique_ptr<DataBaseSvgBuilder> svg_builder;
     public:
         DataBase(std::istream & is);
-        DataBase(const std::vector<DBItem>&, std::pair<double, int> routing_settings_);
+        [[deprecated]] DataBase(const std::vector<DBItem>&, std::pair<double, int> routing_settings_);
         DataBase(std::vector<DBItem>, std::pair<double, int> routing_settings_, RenderSettings render_settings);
 
         ResponseType FindBus(const std::string & title) const;

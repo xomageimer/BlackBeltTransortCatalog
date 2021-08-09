@@ -41,7 +41,7 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std:
     return MapResp;
 }
 
-[[deprecated]] Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const std::unordered_map<std::string, Stop> & stops,
+Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const std::unordered_map<std::string, Stop> & stops,
                                        const std::unordered_map<std::string, Bus> & buses,
                                        RenderSettings render_set) : renderSettings(std::move(render_set)){
     CalculateCoordinates(stops, buses);
