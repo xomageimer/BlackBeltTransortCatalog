@@ -26,16 +26,17 @@ int main(int argc, const char* argv[]) {
                 ReadRenderSettings(input_map["render_settings"])
         };
 
-        ofstream out(input_map["serialization_settings"]["file"].AsString(),  std::ios::out | std::ios::binary);
+        ofstream out(input_map["serialization_settings"]["file"].AsString().substr(1),  std::ios::out | std::ios::binary);
         if (!out.is_open())
             throw std::logic_error("can't open file " + input_map["serialization_settings"]["file"].AsString());
         db.Serialize(out);
         out.close();
+
     } else if (mode == "process_requests") {
         const auto doc = Json::Load(std::cin);
         const auto &input_map = doc.GetRoot();
 
-        ifstream inp(input_map["serialization_settings"]["file"].AsString(), std::ios::in | std::ios::binary);
+        ifstream inp(input_map["serialization_settings"]["file"].AsString().substr(1), std::ios::in | std::ios::binary);
 
         const DS::DataBase db (inp);
         inp.close();

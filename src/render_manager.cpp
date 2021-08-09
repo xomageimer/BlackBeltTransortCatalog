@@ -483,8 +483,7 @@ Data_Structure::BusTextDrawer::DrawPartial(std::vector<std::string> &names_stops
     for (auto stop_it = names_stops.begin(); stop_it != std::prev(names_stops.end()); stop_it++, i++) {
         auto &bus = db_svg->bus_dict.at(used_buses[i].first).first;
 
-        if ((bus.stops.front() == *stop_it) || (!bus.is_roundtrip && *std::prev(Ranges::ToMiddle(Ranges::AsRange(bus.stops)).end()) == *stop_it))
-        {
+        if ((bus.stops.front() == *stop_it) || (!bus.is_roundtrip && *std::prev(Ranges::ToMiddle(Ranges::AsRange(bus.stops)).end()) == *stop_it)){
             RenderBusLabel(doc, bus.name, *stop_it);
         }
         if ((bus.stops.front() == *std::next(stop_it)) || (!bus.is_roundtrip && *std::prev(Ranges::ToMiddle(Ranges::AsRange(bus.stops)).end()) == *std::next(stop_it))){

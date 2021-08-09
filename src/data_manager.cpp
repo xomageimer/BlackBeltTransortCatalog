@@ -44,7 +44,6 @@ void Data_Structure::DataBase::Init(std::vector<DBItem> const & elems) {
             stops.emplace(stop.name, std::make_shared<StopResponse>());
         }
     }
-
     try {
         for (auto[_, bus] : pure_buses) {
             BusRespType bus_resp = std::make_shared<BusResponse>();

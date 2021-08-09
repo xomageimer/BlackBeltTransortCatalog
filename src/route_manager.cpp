@@ -73,8 +73,6 @@ void Data_Structure::DataBaseRouter::FillGraphWithStops(const std::unordered_map
     }
 }
 
-// TODO убрать копипасту
-
 void Data_Structure::DataBaseRouter::FillGraphWithBuses(const std::unordered_map<std::string, Bus> & buses, const std::unordered_map<std::string, Stop> & stops) {
     for (auto & [_, bus] : buses){
         size_t stop_count = bus.stops.size();
