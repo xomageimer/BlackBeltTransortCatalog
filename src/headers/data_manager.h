@@ -12,12 +12,10 @@
 
 #include "route_manager.h"
 #include "render_manager.h"
+#include "yellow_pages_manager.h"
 
 #include "distance.h"
 #include "responses.h"
-
-template <typename T>
-using Dict = std::map<std::string, const T *>;
 
 namespace Data_Structure {
     struct Bus {
@@ -50,15 +48,18 @@ namespace Data_Structure {
 
         std::unique_ptr<DataBaseRouter> router;
         std::unique_ptr<DataBaseSvgBuilder> svg_builder;
+        std::unique_ptr<DataBaseYellowPages> yellow_pages_db;
     public:
-        DataBase(std::istream & is);
+        explicit DataBase(std::istream & is);
         [[deprecated]] DataBase(const std::vector<DBItem>&, std::pair<double, int> routing_settings_);
         DataBase(std::vector<DBItem>, std::pair<double, int> routing_settings_, RenderSettings render_settings);
+        DataBase(std::vector<DBItem>, YellowPages::Database, std::pair<double, int> routing_settings_, RenderSettings render_settings);
 
-        ResponseType FindBus(const std::string & title) const;
-        ResponseType FindStop(const std::string & title) const;
-        ResponseType FindRoute(const std::string & from, const std::string & to) const;
-        ResponseType BuildMap() const;
+        [[nodiscard]] ResponseType FindBus(const std::string & title) const;
+        [[nodiscard]] ResponseType FindStop(const std::string & title) const;
+        [[nodiscard]] ResponseType FindRoute(const std::string & from, const std::string & to) const;
+        [[nodiscard]] ResponseType BuildMap() const;
+        [[nodiscard]] ResponseType FindCompanies(const std::vector<std::shared_ptr<Query>> & querys) const;
 
         void Serialize(std::ostream & os) const;
     private:

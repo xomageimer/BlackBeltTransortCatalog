@@ -1,5 +1,7 @@
 #include "responses.h"
 
+#include "company.pb.h"
+
 Response::Dict const & Response::GetJson() const {
     return valid_data;
 }
@@ -45,6 +47,20 @@ void RouteResponse::MakeJson() {
 void MapResponse::MakeJson() {
     valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("request_id"), std::forward_as_tuple(id));
     valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("map"), std::forward_as_tuple(std::move(svg_xml_answer)));
+}
+
+void CompaniesResponse::MakeJson() {
+    valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("request_id"), std::forward_as_tuple(id));
+    std::vector<Json::Node> items;
+    for (auto & company : companies) {
+        for (auto & name : company->names()) {
+            if (name.type() == YellowPages::Name_Type_MAIN) {
+                items.emplace_back(name.value());
+                break;
+            }
+        }
+    }
+    valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("companies"), std::forward_as_tuple(items));
 }
 
 void BadResponse::MakeJson() {

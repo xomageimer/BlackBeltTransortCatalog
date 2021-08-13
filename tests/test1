@@ -189,4 +189,36 @@
             "type": "Map"
         }
     ]
+    "yellow_pages": {
+        "rubrics": {
+            "1": {
+                "name": "Square"
+            },
+            "2": {
+                "name": "Station"
+            }
+        },
+        "companies": [
+            {
+                "names": [
+                    {
+                        "value": "Komsomolsky"
+                    }
+                ],
+                "rubrics": [
+                    1
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "value": "Cooperative"
+                    }
+                ],
+                "rubrics": [
+                    1
+                ]
+            }
+        ]
+    }
 }

@@ -33,6 +33,23 @@ Data_Structure::DataBase::DataBase(std::vector<DBItem> items, std::pair<double, 
     );
 }
 
+Data_Structure::DataBase::DataBase(std::vector<DBItem> items, YellowPages::Database yellow_pages, std::pair<double, int> routing_settings_,
+                                   Data_Structure::RenderSettings render_settings) {
+    Init(items);
+
+    yellow_pages_db = std::make_unique<DataBaseYellowPages>(std::move(yellow_pages));
+
+    router = std::make_unique<DataBaseRouter>(
+            pure_stops,
+            pure_buses,
+            routing_settings_
+    );
+
+    svg_builder = std::make_unique<DataBaseSvgBuilder>(
+            std::move(render_settings)
+    );
+}
+
 void Data_Structure::DataBase::Init(std::vector<DBItem> const & elems) {
     for (auto & el : elems){
         if (std::holds_alternative<Bus>(el)){
@@ -99,6 +116,16 @@ ResponseType Data_Structure::DataBase::BuildMap() const {
     if (!svg_builder)
         return GenerateBad();
     return svg_builder->RenderMap();
+}
+
+ResponseType Data_Structure::DataBase::FindCompanies(const std::vector<std::shared_ptr<Query>> & querys) const {
+    if (!yellow_pages_db)
+        return GenerateBad();
+    auto ret = yellow_pages_db->FindCompanies(querys);
+    if (!ret)
+        return GenerateBad();
+
+    return ret;
 }
 
 ResponseType Data_Structure::DataBase::GenerateBad() {
@@ -206,6 +233,7 @@ void Data_Structure::DataBase::Serialize(std::ostream &os) const {
         *tc.add_buses() = std::move(dummy_bus);
     }
 
+    *tc.mutable_yellow_pages() = yellow_pages_db->Serialize();
     router->Serialize(tc);
     svg_builder->Serialize(tc);
 
@@ -249,6 +277,7 @@ void Data_Structure::DataBase::Deserialize(std::istream &is) {
     }
 
 
+    yellow_pages_db = std::make_unique<DataBaseYellowPages>(tc.yellow_pages());
     router = std::make_unique<DataBaseRouter>(tc.router());
     svg_builder = std::make_unique<DataBaseSvgBuilder>(tc.render(), pure_stops, pure_buses);
 }

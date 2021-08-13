@@ -18,7 +18,8 @@ public:
         FIND_STOP,
         FIND_BUS,
         FIND_ROUTE,
-        BUILD_MAP
+        BUILD_MAP,
+        FIND_COMPANIES
     };
     virtual void ParseFrom(Json::Node const & json_node) = 0;
     virtual ~IRequest() = default;
@@ -30,7 +31,8 @@ public:
             {"Bus", Type::FIND_BUS},
             {"Stop", Type::FIND_STOP},
             {"Route", Type::FIND_ROUTE},
-            {"Map", Type::BUILD_MAP}
+            {"Map", Type::BUILD_MAP},
+            {"FindCompanies", Type::FIND_COMPANIES}
     };
     inline static int requests_count = 0;
     void ParseFrom(Json::Node const & json_node) override {
@@ -41,7 +43,7 @@ public:
 
     template <typename F, typename ... Args>
     JsonResponse ProcessResponse(F&& func, Args&& ...args){
-        auto resp = std::bind(std::forward<F>(func), args...)();
+        auto resp = std::bind(std::forward<F>(func), std::forward<Args>(args)...)();
         resp->id = id;
         resp->MakeJson();
         return resp->GetJson();
@@ -89,6 +91,40 @@ public:
     void ParseFrom(Json::Node const & json_node) override {
         ExecuteRequest::ParseFrom(json_node);
     }
+};
+
+
+YellowPages::Rubric ParseRubric(Json::Node const & json_node);
+YellowPages::Name ParseName(Json::Node const & json_node);
+YellowPages::Phone ParsePhone(Json::Node const & json_node);
+YellowPages::Url ParseUrl(Json::Node const & json_node);
+struct FindCompaniesRequest final : public ExecuteRequest {
+
+    #define ParseLike(struct_name, type_name)                                                        \
+        {                                                                                            \
+            std::vector<YellowPages::struct_name> objects;                                           \
+            if (json_node.AsMap().count(#type_name)) {                                               \
+                for (auto & object : json_node[#type_name].AsArray()) {                              \
+                    objects.emplace_back(Parse ## struct_name(object));                              \
+                }                                                                                    \
+            }                                                                                        \
+            if (!objects.empty())                                                                    \
+                querys.emplace_back(std::make_shared<DS::struct_name ## Query>(std::move(objects))); \
+        }
+
+    JsonResponse Process(const DS::DataBase &) override;
+    void ParseFrom(Json::Node const & json_node) override {
+        ExecuteRequest::ParseFrom(json_node);
+
+        ParseLike(Rubric, rubrics);
+        ParseLike(Phone, phones);
+        ParseLike(Url, urls);
+        ParseLike(Name, names);
+    }
+
+    #undef ParseLike
+private:
+    std::vector<std::shared_ptr<DS::Query>> querys;
 };
 
 struct ModifyRequest : public IRequest {
@@ -159,5 +195,6 @@ std::vector<DS::DBItem> ReadBaseRequests(Json::Node const & input);
 std::pair<double, int> ReadRoutingSettings(Json::Node const & input);
 std::vector<JsonResponse> ReadStatRequests(const DS::DataBase & db, Json::Node const & input);
 DS::RenderSettings ReadRenderSettings(Json::Node const & input);
+YellowPages::Database ReadYellowPagesData(Json::Node const & input);
 
 #endif //REQUESTS_H

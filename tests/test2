@@ -465,4 +465,84 @@
         "bus_wait_time": 2,
         "bus_velocity": 30
     }
+    "yellow_pages": {
+        "rubrics": {
+            "1": {
+                "name": "Парк"
+            }
+        },
+        "companies": [
+            {
+                "names": [
+                    {
+                        "value": "Дендрарий"
+                    }
+                ],
+                "urls": [
+                    {
+                        "value": "http://dendrarium.ru"
+                    }
+                ],
+                "rubrics": [
+                    1
+                ],
+                "address": {
+                    "coords": {
+                        "lat": 43.573226,
+                        "lon": 39.742947
+                    }
+                },
+                "nearby_stops": [
+                    {
+                        "name": "Цирк",
+                        "meters": 180
+                    }
+                ],
+                "phones": [
+                    {
+                        "type": "PHONE",
+                        "country_code": "7",
+                        "local_code": "862",
+                        "number": "2671646"
+                    },
+                    {
+                        "type": "PHONE",
+                        "country_code": "7",
+                        "local_code": "862",
+                        "number": "2671842"
+                    }
+                ]
+            },
+            {
+                "names": [
+                    {
+                        "value": "им. Фрунзе"
+                    }
+                ],
+                "rubrics": [
+                    1
+                ],
+                "address": {
+                    "coords": {
+                        "lat": 43.567998,
+                        "lon": 39.734131
+                    }
+                },
+                "nearby_stops": [
+                    {
+                        "name": "Пансионат Светлана",
+                        "meters": 580
+                    },
+                    {
+                        "name": "Цирк",
+                        "meters": 700
+                    },
+                    {
+                        "name": "Театральная",
+                        "meters": 1000
+                    }
+                ]
+            }
+        ]
+    }
 }

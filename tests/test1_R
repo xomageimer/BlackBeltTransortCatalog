@@ -1,0 +1,55 @@
+{
+    "serialization_settings": {
+        "file": "/tmp/tmp7f2a431a"
+    },
+    "stat_requests": [
+        {
+            "id": 1297727706,
+            "type": "Bus",
+            "name": "13"
+        },
+        {
+            "id": 749458699,
+            "type": "Stop",
+            "name": "sea station"
+        },
+        {
+            "id": 2053647165,
+            "type": "FindCompanies",
+            "rubrics": [
+                "Square"
+            ]
+        },
+        {
+            "id": 866281987,
+            "type": "FindCompanies",
+            "rubrics": [
+                "Square"
+            ],
+            "phones": [
+                {
+                    "number": "2671646"
+                }
+            ]
+        },
+        {
+            "id": 1306125210,
+            "type": "FindCompanies",
+            "phones": [
+                {
+                    "type": "PHONE",
+                    "number": "2671646"
+                }
+            ]
+        },
+        {
+            "id": 589984419,
+            "type": "FindCompanies",
+            "phones": [
+                {
+                    "type": "PHONE"
+                }
+            ]
+        }
+    ]
+}

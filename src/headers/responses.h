@@ -75,6 +75,16 @@ public:
     XML::xml svg_xml_answer;
 };
 
+namespace YellowPages{
+    struct Company;
+}
+struct CompaniesResponse : public Response {
+    void MakeJson() override;
+    explicit CompaniesResponse (std::vector<YellowPages::Company const *> vec) : companies(vec) {};
+
+    std::vector<YellowPages::Company const *> companies;
+};
+
 struct BadResponse : public Response {
     void MakeJson() override;
 

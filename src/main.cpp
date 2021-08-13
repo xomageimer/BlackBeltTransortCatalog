@@ -22,6 +22,7 @@ int main(int argc, const char* argv[]) {
 
         const DS::DataBase db{
                 ReadBaseRequests(input_map["base_requests"]),
+                ReadYellowPagesData(input_map["yellow_pages"]),
                 ReadRoutingSettings(input_map["routing_settings"]),
                 ReadRenderSettings(input_map["render_settings"])
         };
