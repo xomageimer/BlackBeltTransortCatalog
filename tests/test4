@@ -468,112 +468,418 @@
         "bus_wait_time": 2,
         "bus_velocity": 30
     }
-    "yellow_pages": {
-        "rubrics": {
-            "1": {
-                "name": "Square"
+    "yellow_pages":  {
+      "companies": [
+        {
+          "names": [
+            {
+              "type": "SHORT",
+              "value": "CLVZ5GDUffsVf1 EzrUt5N"
             },
-            "2": {
-                "name": "Club"
+            {
+              "type": "SHORT",
+              "value": "1jA"
+            },
+            {
+              "type": "MAIN",
+              "value": "DwW27ezwjz"
+            },
+            {
+              "type": "SYNONYM",
+              "value": "nhotlChnFNTv3s6n3uJrm"
+            },
+            {
+              "type": "MAIN",
+              "value": "a529IczEq57I"
+            },
+            {
+              "type": "MAIN",
+              "value": "w4"
+            },
+            {
+              "type": "MAIN",
+              "value": "a5R"
+            },
+            {
+              "type": "SHORT",
+              "value": "cnwHmfOHXTlz4aQjJ1"
+            },
+            {
+              "type": "MAIN",
+              "value": "rQx2"
+            },
+            {
+              "type": "SYNONYM",
+              "value": "SK9jTsH3fMwknLePIiYkT"
             }
+          ],
+          "phones": [],
+          "rubrics": [],
+          "urls": [
+            {
+              "value": "sL 1ya"
+            },
+            {
+              "value": "lmHuH4PeGysdKh30MsKZoIcE"
+            },
+            {
+              "value": "48D"
+            }
+          ]
         },
-        "companies": [
+        {
+          "names": [
             {
-                "names": [
-                    {
-                        "value": "Arboretum"
-                    }
-                ],
-                "urls": [
-                    {
-                        "value": "http://dendrarium.ru"
-                    }
-                ],
-                "rubrics": [
-                    1
-                ],
-                "address": {
-                    "coords": {
-                        "lat": "43.573226",
-                        "lon": "39.742947"
-                    }
-                },
-                "nearby_stops": [
-                    {
-                        "name": "Circus",
-                        "meters": 180
-                    }
-                ],
-                "phones": [
-                    {
-                        "type": "PHONE",
-                        "country_code": "7",
-                        "local_code": "862",
-                        "number": "2671646"
-                    },
-                    {
-                        "type": "PHONE",
-                        "country_code": "7",
-                        "local_code": "862",
-                        "number": "2671842"
-                    }
-                ]
+              "type": "MAIN",
+              "value": "J29emf9xbVQLkAV4"
             },
             {
-              "names": [
-                  {
-                      "value": "Aboba"
-                  }
-              ],
-              "rubrics": [
-                  2
-              ],
-              "phones": [
-                      {
-                          "country_code": "7",
-                          "local_code": "862",
-                          "number": "12345"
-                      }
-              ],
-              "urls": [
-                    {
-                        "value": "nigas.com"
-                    },
-                    {
-                        "value": "xvideos.com"
-                    }
-              ]
+              "type": "MAIN",
+              "value": "O8Nc"
             },
             {
-                "names": [
-                    {
-                        "value": "Frunze"
-                    }
-                ],
-                "rubrics": [
-                    1
-                ],
-                "address": {
-                    "coords": {
-                        "lat": "43.567998",
-                        "lon": "39.734131"
-                    }
-                },
-                "nearby_stops": [
-                    {
-                        "name": "Boarding house Svetlana",
-                        "meters": 580
-                    },
-                    {
-                        "name": "Circus",
-                        "meters": 700
-                    },
-                    {
-                        "name": "Theater",
-                        "meters": 1000
-                    }
-                ]
+              "type": "SHORT",
+              "value": "kXHew9"
             }
-        ]
+          ],
+          "phones": [
+            {},
+            {
+              "extension": "uNZYolYQONbVPliHJXTK3",
+              "local_code": "GgZ",
+              "type": "PHONE"
+            },
+            {
+              "local_code": "y51ke0 3PZYk4GDg",
+              "type": "FAX"
+            },
+            {
+              "country_code": "lZGvvlfgRCgwRjdEL",
+              "extension": "rqq7H7JfmJL2go",
+              "local_code": "vqLKIljKPNux 1AFp2QEQ uWO"
+            },
+            {
+              "country_code": "uQxPiIphHnSnNLYvSaWrXDc",
+              "type": "FAX"
+            },
+            {
+              "country_code": "lKQ TObToD1GZxQPyY8Blty51",
+              "extension": "IUJlo5G l8jGZxM6Zt1Mjuvr",
+              "local_code": "HRThOp9NyNb6KSQowtyG"
+            },
+            {
+              "country_code": "b0wA6LxRhWKkz26EI",
+              "local_code": "QePJY",
+              "type": "PHONE"
+            },
+            {
+              "country_code": "v9l8PAcGt",
+              "number": "fe1 z7i32",
+              "type": "PHONE"
+            },
+            {
+              "extension": "AmWvHKm",
+              "number": "OF0C6RMWubH"
+            },
+            {
+              "extension": "Zyql5bFjqixCxXLQq",
+              "local_code": "v SRy1ZfDEwfK40L5",
+              "number": "cMhQ5MDJUPfoFW"
+            }
+          ],
+          "rubrics": [
+            99,
+            51,
+            80,
+            52
+          ],
+          "urls": [
+            {
+              "value": "zF7vrS22qwUxBDzM2SP6wS"
+            },
+            {
+              "value": "yh566zOCbCyVAoBWM9vOJ7euv"
+            },
+            {
+              "value": "bV2YHGRXiOLynAMqwj"
+            },
+            {
+              "value": "yrmWinKTdW0kdNjLHbBNtT"
+            },
+            {
+              "value": "MIEavS9JVlC66eznCu"
+            },
+            {
+              "value": "utRIW"
+            }
+          ]
+        },
+        {
+          "names": [
+            {
+              "type": "SHORT",
+              "value": "Mj7d CX61PLt6i0RX6i2U5B"
+            },
+            {
+              "type": "SYNONYM",
+              "value": "Eer3gAEF3vfQ"
+            },
+            {
+              "type": "SHORT",
+              "value": "NK9JJ CgJCcZiX6coLb"
+            },
+            {
+              "type": "SYNONYM",
+              "value": "oBD"
+            },
+            {
+              "type": "SHORT",
+              "value": "B5mR0SsK724SpJ"
+            },
+            {
+              "type": "MAIN",
+              "value": "g"
+            },
+            {
+              "type": "MAIN",
+              "value": "6zo3YDzoq1rS956vJXzP"
+            },
+            {
+              "type": "SHORT",
+              "value": "VM9tgSHAPvTZ7wqosM3lU"
+            }
+          ],
+          "phones": [],
+          "rubrics": [
+            99, 54, 61
+          ],
+          "urls": [
+            {
+              "value": "pUV24QE2oQVJlPzAEUnP4C6N"
+            },
+            {
+              "value": "ulESn1Tk7f2Fo2wCAp1"
+            },
+            {
+              "value": "tFFr"
+            },
+            {
+              "value": "NIGGERS"
+            }
+          ]
+        }
+      ],
+      "rubrics": {
+        "4": {
+          "name": "JX03AJl"
+        },
+        "5": {
+          "name": "TAfTB7s"
+        },
+        "6": {
+          "name": "S60GoIlAcVYAt ReQQ"
+        },
+        "7": {
+          "name": "4sprHkIHYrjqGk5RlpI"
+        },
+        "8": {
+          "name": "8EpS9OL"
+        },
+        "9": {
+          "name": "N9"
+        },
+        "36": {
+          "name": "n7NoBeio1pemovTx6"
+        },
+        "37": {
+          "name": "jXdWktOQRHq2"
+        },
+        "38": {
+          "name": "dRsbWl1FHINHeT3V"
+        },
+        "39": {
+          "name": "o9XlHoA6AX27Ipz4mHhSQ"
+        },
+        "40": {
+          "name": "zc68hrlM5"
+        },
+        "41": {
+          "name": "SM5"
+        },
+        "42": {
+          "name": "MH"
+        },
+        "43": {
+          "name": "nzPYdJEhsAgHoC"
+        },
+        "44": {
+          "name": "2p4iRl"
+        },
+        "45": {
+          "name": "uvfBQyPQfejmLxFA6Mrf0"
+        },
+        "46": {
+          "name": "Q7g GBIkoNj6aSEwLXHAXR"
+        },
+        "47": {
+          "name": "wIN"
+        },
+        "48": {
+          "name": "Da"
+        },
+        "49": {
+          "name": "oL8bEtFp94VL1Bc2X"
+        },
+        "50": {
+          "name": "X4umiPSo"
+        },
+        "51": {
+          "name": "N7151vBM0YISHPv"
+        },
+        "52": {
+          "name": "nYQofWP38"
+        },
+        "53": {
+          "name": "RWN9ZdnvB6Hkuu"
+        },
+        "54": {
+          "name": "hBHHD0xJVTG9P m"
+        },
+        "55": {
+          "name": "soiwbq5aM59fOA"
+        },
+        "56": {
+          "name": "7tXDLVpyFj6g8nhO"
+        },
+        "57": {
+          "name": "F1"
+        },
+        "58": {
+          "name": "ED74tudKS1z15PZK"
+        },
+        "59": {
+          "name": "yOUQHN7pt"
+        },
+        "60": {
+          "name": "8gOgfnONeTiqY0mZ9t"
+        },
+        "61": {
+          "name": "L1sxpCuV1CHfCVEzR8sMgdQh8"
+        },
+        "62": {
+          "name": "lLjRzUdZlit9"
+        },
+        "63": {
+          "name": "RO"
+        },
+        "64": {
+          "name": "ploIUqkBfX9xDxfAVdTdUGx"
+        },
+        "65": {
+          "name": "gJP4aP"
+        },
+        "66": {
+          "name": "OEr"
+        },
+        "67": {
+          "name": "v"
+        },
+        "68": {
+          "name": "IvI"
+        },
+        "69": {
+          "name": "pAfjiEbh4EJ"
+        },
+        "70": {
+          "name": "E9H5SVZuBWKe"
+        },
+        "71": {
+          "name": "GT"
+        },
+        "72": {
+          "name": "VCIswO0RVyM0a6gDt"
+        },
+        "73": {
+          "name": "e90hHHjpYBo"
+        },
+        "74": {
+          "name": "f7k50iXr7cv07S"
+        },
+        "75": {
+          "name": "5VDA7QiKRP2etNrGSRHZG34eU"
+        },
+        "76": {
+          "name": "BMMr9"
+        },
+        "77": {
+          "name": "NbCt3YXC8zYTFL"
+        },
+        "78": {
+          "name": "ngHgcCsO Vh"
+        },
+        "79": {
+          "name": "d2N 4Vk7iXu2tvl4zztwKG"
+        },
+        "80": {
+          "name": "YXMqSkpur9bwrx6pmWPkX"
+        },
+        "81": {
+          "name": "UShqBLv4x3C"
+        },
+        "82": {
+          "name": "FxTTYvFNAHfQB"
+        },
+        "83": {
+          "name": "8YyBbmfuxTPMsgysCwW"
+        },
+        "84": {
+          "name": "WPqgILhHPvWbwt79pt"
+        },
+        "85": {
+          "name": "8Yh3oZzXv6xG"
+        },
+        "86": {
+          "name": "Vvb8"
+        },
+        "87": {
+          "name": "HJkIw vB0eHRp02"
+        },
+        "88": {
+          "name": "651mekbUJECUtEe0OPR"
+        },
+        "89": {
+          "name": "YsxUWR3jXJWCyeGFZbHoe"
+        },
+        "90": {
+          "name": "m"
+        },
+        "91": {
+          "name": "3Hk"
+        },
+        "92": {
+          "name": "kVo"
+        },
+        "93": {
+          "name": "Fl"
+        },
+        "94": {
+          "name": "ttF"
+        },
+        "95": {
+          "name": "jtgN1PWyOyuA7OdD9oor"
+        },
+        "96": {
+          "name": "GLSkXF"
+        },
+        "97": {
+          "name": "BYtFiJPfeLlZ0OCi5Fg"
+        },
+        "98": {
+          "name": "por0GQXtk"
+        },
+        "99": {
+          "name": "m2xCb2nwwLDpi3aReqO"
+        }
+      }
     }
 }

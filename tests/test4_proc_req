@@ -1,0 +1,17 @@
+{
+  "serialization_settings": {
+    "file": "/tmp/tmp7f2a431a"
+  },
+  "stat_requests": [
+    {
+      "id": 1415980586,
+      "type": "FindCompanies",
+      "phones": [
+         {
+             "type": "PHONE",
+             "number": "OF0C6RMWubH"
+         }
+      ]
+    }
+  ]
+}

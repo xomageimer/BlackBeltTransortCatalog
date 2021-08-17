@@ -57,8 +57,8 @@ YellowPages::Database ReadYellowPagesData(const Json::Node &input) {
                     }
                 } else if (address.first == "coords") {
                     SphereProto::Coords coords;
-                    coords.set_lat(address.second["lat"].AsNumber<double>());
-                    coords.set_lon(address.second["lon"].AsNumber<double>());
+                    coords.set_lat(std::stod(address.second["lat"].AsString()));
+                    coords.set_lon(std::stod(address.second["lon"].AsString()));
                     *address_mes.mutable_coords() = std::move(coords);
                 } else if (address.first == "comment") {
                     address_mes.set_comment(address.second.AsString());
@@ -93,15 +93,18 @@ YellowPages::Database ReadYellowPagesData(const Json::Node &input) {
                 }
                 if (phone.AsMap().count("type")) {
                     YellowPages::Phone_Type pt_mes;
-                    if (phone["type"].AsString() == "PHONE") {
+                    phone_mes.set_has_type(true);
+                    if (phone["type"].AsString() == "FAX") {
+                        pt_mes = YellowPages::Phone_Type_FAX;
+                    } else if (phone["type"].AsString() == "PHONE") {
                         pt_mes = YellowPages::Phone_Type_PHONE;
                     } else {
-                        pt_mes = YellowPages::Phone_Type_FAX;
+                        phone_mes.set_has_type(false);
                     }
                     phone_mes.set_type(pt_mes);
                 }
                 if (phone.AsMap().count("country_code")) {
-                    phone_mes.set_country_code(phone["county_code"].AsString());
+                    phone_mes.set_country_code(phone["country_code"].AsString());
                 }
                 if (phone.AsMap().count("local_code")) {
                     phone_mes.set_local_code(phone["local_code"].AsString());
@@ -207,15 +210,18 @@ YellowPages::Phone ParsePhone(const Json::Node &json_node) {
 
     if (json_node.AsMap().count("type")){
         YellowPages::Phone_Type pt_mes;
+        phone_mes.set_has_type(true);
         if (json_node["type"].AsString() == "PHONE") {
             pt_mes = YellowPages::Phone_Type_PHONE;
-        } else {
+        } else if (json_node["type"].AsString() == "FAX") {
             pt_mes = YellowPages::Phone_Type_FAX;
+        } else {
+            phone_mes.set_has_type(false);
         }
         phone_mes.set_type(pt_mes);
     }
     if (json_node.AsMap().count("country_code")) {
-        phone_mes.set_country_code(json_node["county_code"].AsString());
+        phone_mes.set_country_code(json_node["country_code"].AsString());
     }
     if (json_node.AsMap().count("local_code")){
         phone_mes.set_local_code(json_node["local_code"].AsString());

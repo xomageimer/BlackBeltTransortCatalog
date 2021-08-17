@@ -14,4 +14,5 @@ message Phone {
   string number = 5;
   string extension = 6;
   string description = 7;
+  bool has_type = 8;
 }

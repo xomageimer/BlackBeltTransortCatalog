@@ -1,0 +1,332 @@
+{
+  "serialization_settings": {
+    "file": "/tmp/tmpl74x3f4o"
+  },
+  "routing_settings": {
+    "bus_wait_time": 2,
+    "bus_velocity": 30
+  },
+  "render_settings": {
+    "width": 1500,
+    "height": 950,
+    "padding": 50,
+    "outer_margin": 150,
+    "stop_radius": 3,
+    "line_width": 10,
+    "bus_label_font_size": 18,
+    "bus_label_offset": [
+      7,
+      15
+    ],
+    "stop_label_font_size": 13,
+    "stop_label_offset": [
+      7,
+      -3
+    ],
+    "underlayer_color": [
+      255,
+      255,
+      255,
+      0.85
+    ],
+    "underlayer_width": 3,
+    "color_palette": [
+      "red",
+      "green",
+      "blue",
+      "brown",
+      "orange"
+    ],
+    "layers": [
+      "bus_lines",
+      "bus_labels",
+      "stop_points",
+      "stop_labels"
+    ]
+  },
+  "base_requests": [
+    {
+      "type": "Bus",
+      "name": "23",
+      "stops": [
+        "Sanatoriy Salyut",
+        "Sanatornaya ulitsa",
+        "Pansionat Neva",
+        "Sanatoriy Raduga",
+        "Sanatoriy Rodina",
+        "Sportivnaya",
+        "Park Riv'era",
+        "Morskoy vokzal",
+        "Organnyy zal",
+        "Teatral'naya",
+        "Pansionat Svetlana",
+        "Tsirk",
+        "Stadion",
+        "Sanatoriy Metallurg",
+        "Ulitsa Bytkha"
+      ],
+      "is_roundtrip": false
+    },
+    {
+      "type": "Bus",
+      "name": "13",
+      "stops": [
+        "Ulitsa Lizy Chaykinoy",
+        "Pionerskaya ulitsa, 111",
+        "Sadovaya",
+        "Teatral'naya"
+      ],
+      "is_roundtrip": false
+    },
+    {
+      "type": "Bus",
+      "name": "36",
+      "stops": [
+        "Morskoy vokzal",
+        "Sberbank",
+        "Avtovokzal",
+        "Otel' Zvyozdnyy",
+        "Magazin Byt",
+        "Khlebozavod",
+        "Kinoteatr Yubileynyy",
+        "Novaya Zarya",
+        "Derevoobr. kombinat",
+        "Tselinnaya ulitsa, 5",
+        "Tselinnaya ulitsa, 57",
+        "Tselinnaya ulitsa"
+      ],
+      "is_roundtrip": false
+    },
+    {
+      "type": "Bus",
+      "name": "44k",
+      "stops": [
+        "Pansionat Svetlana",
+        "Ulitsa Lysaya Gora",
+        "Ulitsa V. Lysaya Gora"
+      ],
+      "is_roundtrip": false
+    },
+    {
+      "type": "Bus",
+      "name": "90",
+      "stops": [
+        "Kraevo-Grecheskaya ulitsa",
+        "Ulitsa Bytkha",
+        "Sanatoriy im. Voroshilova",
+        "Sanatoriy Primor'e",
+        "Sanatoriy Zarya",
+        "Matsesta",
+        "Matsestinskaya dolina"
+      ],
+      "is_roundtrip": false
+    },
+    {
+      "type": "Stop",
+      "name": "Kraevo-Grecheskaya ulitsa",
+      "latitude": 43.565551,
+      "longitude": 39.776858,
+      "road_distances": {
+        "Ulitsa Bytkha": 1780
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Sanatoriy im. Voroshilova",
+      "latitude": 43.557935,
+      "longitude": 39.764452,
+      "road_distances": {
+        "Sanatoriy Primor'e": 950
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Sanatoriy Primor'e",
+      "latitude": 43.554202,
+      "longitude": 39.77256,
+      "road_distances": {
+        "Sanatoriy Zarya": 2350
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Sanatoriy Zarya",
+      "latitude": 43.549618,
+      "longitude": 39.780908,
+      "road_distances": {
+        "Matsesta": 800
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Organnyy zal",
+      "latitude": 43.57926,
+      "longitude": 39.725574,
+      "road_distances": {
+        "Teatral'naya": 770
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Pansionat Svetlana",
+      "latitude": 43.571807,
+      "longitude": 39.735866,
+      "road_distances": {
+        "Tsirk": 520,
+        "Ulitsa Lysaya Gora": 1070
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Tsirk",
+      "latitude": 43.569207,
+      "longitude": 39.739869,
+      "road_distances": {
+        "Stadion": 860
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Stadion",
+      "latitude": 43.565301,
+      "longitude": 39.749485,
+      "road_distances": {
+        "Sanatoriy Metallurg": 950
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Sanatoriy Metallurg",
+      "latitude": 43.561005,
+      "longitude": 39.760511,
+      "road_distances": {
+        "Ulitsa Bytkha": 900
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Ulitsa Bytkha",
+      "latitude": 43.566135,
+      "longitude": 39.762109,
+      "road_distances": {
+        "Sanatoriy im. Voroshilova": 1160
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Ulitsa Lizy Chaykinoy",
+      "latitude": 43.590317,
+      "longitude": 39.746833,
+      "road_distances": {
+        "Pionerskaya ulitsa, 111": 950
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Pionerskaya ulitsa, 111",
+      "latitude": 43.587257,
+      "longitude": 39.740325,
+      "road_distances": {
+        "Sadovaya": 520
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Sadovaya",
+      "latitude": 43.58395,
+      "longitude": 39.736938,
+      "road_distances": {
+        "Teatral'naya": 1300
+      }
+    },
+    {
+      "type": "Stop",
+      "name": "Teatral'naya",
+      "latitude": 43.57471,
+      "longitude": 39.731954,
+      "road_distances": {
+        "Pansionat Svetlana": 390
+      }
+    }
+  ],
+  "yellow_pages": {
+    "rubrics": {
+      "1": {
+        "name": "Park"
+      }
+    },
+    "companies": [
+      {
+        "names": [
+          {
+            "value": "Dendrariy"
+          }
+        ],
+        "urls": [
+          {
+            "value": "http://dendrarium.ru"
+          }
+        ],
+        "rubrics": [
+          1
+        ],
+        "address": {
+          "coords": {
+            "lat": "43.573226",
+            "lon": "39.742947"
+          }
+        },
+        "nearby_stops": [
+          {
+            "name": "Tsirk",
+            "meters": 180
+          }
+        ],
+        "phones": [
+          {
+            "type": "PHONE",
+            "country_code": "7",
+            "local_code": "862",
+            "number": "2671646"
+          },
+          {
+            "type": "PHONE",
+            "country_code": "7",
+            "local_code": "862",
+            "number": "2671842"
+          }
+        ]
+      },
+      {
+        "names": [
+          {
+            "value": "im. Frunze"
+          }
+        ],
+        "rubrics": [
+          1
+        ],
+        "address": {
+          "coords": {
+            "lat": "43.567998",
+            "lon": "39.734131"
+          }
+        },
+        "nearby_stops": [
+          {
+            "name": "Pansionat Svetlana",
+            "meters": 580
+          },
+          {
+            "name": "Tsirk",
+            "meters": 700
+          },
+          {
+            "name": "Teatral'naya",
+            "meters": 1000
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -2,11 +2,6 @@
 
 #include <list>
 
-#include <google/protobuf/message.h>
-#include <google/protobuf/util/message_differencer.h>
-using namespace google::protobuf;
-using namespace google::protobuf::util;
-
 Data_Structure::DataBaseYellowPages::DataBaseYellowPages(YellowPages::Database new_db) : db(std::move(new_db)) {}
 
 ResponseType Data_Structure::DataBaseYellowPages::FindCompanies(const std::vector<std::shared_ptr<Query>> &querys) {
@@ -22,11 +17,15 @@ ResponseType Data_Structure::DataBaseYellowPages::FindCompanies(const std::vecto
 }
 
 void Data_Structure::NameQuery::Compare(std::list<const YellowPages::Company *> & companies, struct DataBaseYellowPages *) {
+    if (names.empty())
+        return;
+
     auto find_one_of = [&](auto & company) {
-        if (names.empty() || std::any_of(names.begin(), names.end(), [&](auto & name) { return std::any_of((*company)->names().begin(), (*company)->names().end(),
-                                                                                          [&](auto & company_name){ return company_name.value() == name.value();
-                                                                                                                  });
-                                                                              }))
+        if (std::any_of(names.begin(), names.end(), [&](auto & name) {
+            return std::any_of((*company)->names().begin(), (*company)->names().end(), [&](auto & company_name){
+                return company_name.value() == name.value();
+            });
+        }))
             return true;
         return false;
     };
@@ -39,13 +38,14 @@ void Data_Structure::NameQuery::Compare(std::list<const YellowPages::Company *> 
 }
 
 void Data_Structure::UrlQuery::Compare(std::list<const YellowPages::Company *> & companies, struct DataBaseYellowPages *) {
+    if (urls.empty())
+        return;
+
     auto find_one_of = [&](auto & company) {
-        if (urls.empty() || std::any_of(urls.begin(), urls.end(), [&](auto & url) {
-            for (auto & url_obj : (*company)->urls()) {
-                if (url_obj.value() == url.value())
-                    return true;
-            }
-            return false;
+        if (std::any_of(urls.begin(), urls.end(), [&](auto & url) {
+            return std::any_of((*company)->urls().begin(), (*company)->urls().end(), [&](auto & url_obj) {
+                return url.value() == url_obj.value();
+            });
         }))
             return true;
         return false;
@@ -59,8 +59,11 @@ void Data_Structure::UrlQuery::Compare(std::list<const YellowPages::Company *> &
 }
 
 void Data_Structure::RubricQuery::Compare(std::list<const YellowPages::Company *> & companies, struct DataBaseYellowPages * db) {
+    if (rubrics.empty())
+        return;
+
     auto find_one_of = [&](auto & company) {
-        if (rubrics.empty() || std::any_of(rubrics.begin(), rubrics.end(), [&](auto & rubric) {
+        if (std::any_of(rubrics.begin(), rubrics.end(), [&](auto & rubric) {
            return std::any_of((*company)->rubrics().begin(), (*company)->rubrics().end(), [&](auto rubric_id){
                 return DoesRubricMatch(rubric, db->GetRubric(rubric_id));
             });
@@ -78,15 +81,16 @@ void Data_Structure::RubricQuery::Compare(std::list<const YellowPages::Company *
 
 bool Data_Structure::RubricQuery::DoesRubricMatch(const YellowPages::Rubric &query, const YellowPages::Rubric &object) {
     return std::any_of(query.keywords().begin(), query.keywords().end(), [&](auto & query_key) {
-          for (auto & keyword : object.keywords()){
-              if (keyword == query_key)
-                  return true;
-          }
-          return false;
+        return std::any_of(object.keywords().begin(), object.keywords().end(), [&](auto & keyword){
+            return keyword == query_key;
+        });
     });
 }
 
 void Data_Structure::PhoneQuery::Compare(std::list<const YellowPages::Company *> & companies, struct DataBaseYellowPages *) {
+    if (phones.empty())
+        return;
+
     auto find_one_of = [&](auto & company) {
         if (phones.empty() || std::any_of(phones.begin(), phones.end(), [&](auto & phone) {
             return std::any_of((*company)->phones().begin(), (*company)->phones().end(), [&](auto & object) {
@@ -110,10 +114,7 @@ Data_Structure::PhoneQuery::DoesPhoneMatch(const YellowPages::Phone &query, cons
         return false;
     }
 
-    auto reflection = query.GetReflection();
-    auto description = query.GetDescriptor();
-    auto fd = description->field(1);
-    if (reflection->HasField(query, fd) && query.type() != object.type()) {
+    if (query.has_type() && query.type() != object.type()) {
         return false;
     }
     if (!query.country_code().empty() && query.country_code() != object.country_code()) {
