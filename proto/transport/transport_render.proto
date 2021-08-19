@@ -26,16 +26,18 @@ message RenderSettings {
     double padding = 4;
     double stop_radius = 5;
     double line_width = 6;
+    double company_radius = 7;
+    double company_line_width = 8;
 
-    int32 stop_label_font_size = 7;
-    repeated double stop_label_offset = 8;
+    int32 stop_label_font_size = 9;
+    repeated double stop_label_offset = 10;
 
-    int32 bus_label_font_size = 9;
-    repeated double bus_label_offset = 10;
+    int32 bus_label_font_size = 11;
+    repeated double bus_label_offset = 12;
 
-    Color color = 11;
-    double underlayer_width = 12;
+    Color color = 13;
+    double underlayer_width = 14;
 
-    repeated Color color_palette = 13;
-    repeated string layers = 14;
+    repeated Color color_palette = 15;
+    repeated string layers = 16;
 }

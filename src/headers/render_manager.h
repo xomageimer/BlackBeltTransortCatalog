@@ -15,7 +15,6 @@
 #include "transport_catalog.pb.h"
 #include "transport_render.pb.h"
 
-// TODO должен быть конструктор с набором организаций
 namespace Data_Structure {
     using MapRespType = std::shared_ptr<MapResponse>;
     using stop_n_companies = std::variant<struct Stop, YellowPages::Company>;

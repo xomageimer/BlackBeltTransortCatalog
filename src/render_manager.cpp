@@ -331,6 +331,8 @@ void Data_Structure::DataBaseSvgBuilder::Serialize(TCProto::TransportCatalog & t
     ser_render_sets.set_padding(renderSettings.padding);
     ser_render_sets.set_stop_radius(renderSettings.stop_radius);
     ser_render_sets.set_line_width(renderSettings.line_width);
+    ser_render_sets.set_company_radius(renderSettings.company_radius);
+    ser_render_sets.set_company_line_width(renderSettings.company_line_width);
 
     ser_render_sets.set_stop_label_font_size(renderSettings.stop_label_font_size);
 
@@ -362,6 +364,8 @@ void Data_Structure::DataBaseSvgBuilder::Deserialize(const RenderProto::RenderSe
     renderSettings.padding = ren_mes.padding();
     renderSettings.stop_radius = ren_mes.stop_radius();
     renderSettings.line_width = ren_mes.line_width();
+    renderSettings.company_radius = ren_mes.company_radius();
+    renderSettings.company_line_width = ren_mes.company_line_width();
 
     renderSettings.stop_label_font_size = ren_mes.stop_label_font_size();
     renderSettings.stop_label_offset[0] = ren_mes.stop_label_offset(0);
