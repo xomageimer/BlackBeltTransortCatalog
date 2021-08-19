@@ -140,10 +140,6 @@ std::optional<double> Data_Structure::DataBaseRouter::GetRouteWeight(std::string
     return router->GetRouteWeight(waiting_stops.at(from).inp, waiting_stops.at(to).inp);
 }
 
-Data_Structure::DataBaseRouter::proxy_route Data_Structure::DataBaseRouter::GetRoute(std::string const & from, std::string const & to) {
-    return proxy_route {router, router->BuildRoute(waiting_stops.at(from).inp, waiting_stops.at(to).inp)};
-}
-
 void Data_Structure::DataBaseRouter::Serialize(TCProto::TransportCatalog & tc) const {
     RouterProto::Router router_mes;
 

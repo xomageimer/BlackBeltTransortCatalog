@@ -9,6 +9,8 @@
         "padding": 50,
         "stop_radius": 5,
         "line_width": 14,
+        "company_radius": 6,
+        "company_line_width": 4,
         "bus_label_font_size": 20,
         "bus_label_offset": [
             7,
@@ -37,9 +39,12 @@
         ],
         "layers": [
             "bus_lines",
+            "company_lines",
             "bus_labels",
             "stop_points",
-            "stop_labels"
+            "company_points",
+            "stop_labels",
+            "company_labels"
         ]
     },
     "base_requests": [

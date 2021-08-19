@@ -54,6 +54,9 @@ namespace Data_Structure {
         inline YellowPages::Database Serialize() {
             return db;
         };
+        const YellowPages::Database & GetOrigin() const {
+            return db;
+        };
         [[nodiscard]] YellowPages::Rubric const & GetRubric(size_t id) const{
             return db.rubrics().at(id);
         }

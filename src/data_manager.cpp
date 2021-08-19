@@ -136,7 +136,7 @@ ResponseType Data_Structure::DataBase::FindRouteToCompanies(const std::string &f
 
     double route_time = 0;
     double time_from_stop = 0;
-    YellowPages::Company const * company;
+    YellowPages::Company const * company = nullptr;
     std::string nearby_stop;
     for (auto company_ptr : reinterpret_cast<CompaniesResponse const *>(resp.get())->companies){
         for (auto & stop : company_ptr->nearby_stops()){
@@ -336,7 +336,7 @@ void Data_Structure::DataBase::Deserialize(std::istream &is) {
     router = std::make_unique<DataBaseRouter>(tc.router());
 
     std::unordered_map<std::string, const YellowPages::Company *> companies_map;
-    for (auto & company : yellow_pages_db->Serialize().companies()){
+    for (auto & company : yellow_pages_db->GetOrigin().companies()){
         std::string company_name;
         for (auto & name : company.names()){
             if (name.type() == YellowPages::Name_Type_MAIN) {

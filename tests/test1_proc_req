@@ -4,24 +4,46 @@
     },
     "stat_requests": [
         {
-            "id": 1415477150,
-            "type": "Bus",
-            "name": "14"
+            "id": 463508520,
+            "type": "FindCompanies",
+            "rubrics": [
+                "Square"
+            ]
         },
         {
-            "id": 477534717,
-            "type": "Stop",
-            "name": "electrical networks"
+            "id": 1457284289,
+            "type": "FindCompanies",
+            "names": [
+                "Komsomolsky",
+                "Cooperativniy"
+            ],
+            "rubrics": [
+                "Square"
+            ]
+        },
+         {
+            "id": 638533243,
+            "type": "RouteToCompany",
+            "from": "parallel street",
+            "companies": {
+                "rubrics": [
+                    "Square"
+                ]
+            }
         },
         {
-            "id": 1641382366,
-            "type": "Route",
+            "id": 774281590,
+            "type": "RouteToCompany",
             "from": "sea station",
-            "to": "parallel street"
-        },
-        {
-            "id": 1359372752,
-            "type": "Map"
+            "companies": {
+                "names": [
+                    "Komsomolsky",
+                    "Cooperativniy"
+                ],
+                "rubrics": [
+                    "Square"
+                ]
+            }
         }
     ]
 }

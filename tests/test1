@@ -4,7 +4,8 @@
     },
     "routing_settings": {
         "bus_wait_time": 2,
-        "bus_velocity": 30
+        "bus_velocity": 30,
+        "pedestrian_velocity": 5
     },
     "render_settings": {
         "width": 1200,
@@ -12,6 +13,8 @@
         "padding": 50,
         "stop_radius": 5,
         "line_width": 14,
+        "company_radius": 6,
+        "company_line_width": 4,
         "bus_label_font_size": 20,
         "bus_label_offset": [
             7,
@@ -40,9 +43,12 @@
         ],
         "layers": [
             "bus_lines",
+            "company_lines",
             "bus_labels",
             "stop_points",
-            "stop_labels"
+            "company_points",
+            "stop_labels",
+            "company_labels"
         ]
     },
     "base_requests": [
@@ -172,53 +178,60 @@
             "road_distances": {}
         }
     ],
-    "stat_requests": [
-        {
-            "id": 826874078,
-            "type": "Bus",
-            "name": "14"
-        },
-        {
-            "id": 1086967114,
-            "type": "Route",
-            "from": "sea station",
-            "to": "parallel street"
-        },
-        {
-            "id": 1218663236,
-            "type": "Map"
-        }
-    ]
     "yellow_pages": {
-        "rubrics": {
-            "1": {
-                "name": "Square"
+            "rubrics": {
+                "1": {
+                    "name": "Square"
+                },
+                "2": {
+                    "name": "Station"
+                }
             },
-            "2": {
-                "name": "Station"
-            }
-        },
-        "companies": [
-            {
-                "names": [
-                    {
-                        "value": "Komsomolsky"
-                    }
-                ],
-                "rubrics": [
-                    1
-                ]
-            },
-            {
-                "names": [
-                    {
-                        "value": "Cooperative"
-                    }
-                ],
-                "rubrics": [
-                    1
-                ]
-            }
-        ]
-    }
+            "companies": [
+                {
+                    "names": [
+                        {
+                            "value": "Komsomolsky"
+                        }
+                    ],
+                    "rubrics": [
+                        1
+                    ],
+                    "address": {
+                        "coords": {
+                            "lat": "43.585745",
+                            "lon": "39.716931"
+                        }
+                    },
+                    "nearby_stops": [
+                        {
+                            "name": "riviera bridge",
+                            "meters": 150
+                        }
+                    ]
+                },
+                {
+                    "names": [
+                        {
+                            "value": "Cooperativniy"
+                        }
+                    ],
+                    "rubrics": [
+                        1
+                    ],
+                    "address": {
+                        "coords": {
+                            "lat": "43.581303",
+                            "lon": "39.720118"
+                        }
+                    },
+                    "nearby_stops": [
+                        {
+                            "name": "sea station",
+                            "meters": 15
+                        }
+                    ]
+                }
+            ]
+        }
 }

@@ -173,7 +173,7 @@ namespace Graph {
 #define SerializeVert(verts, type)  {                                                      \
     size_t i = 0;                                                                          \
     for (auto & elem : routes_internal_data[(verts).route_data_ ## type(0).vertex_id()]){  \
-        if (!elem || i == (verts).route_data_out(0).vertex_id()) {                         \
+        if (!elem || i == (verts).route_data_ ## type(0).vertex_id()) {                    \
             i++;                                                                           \
             continue;                                                                      \
         }                                                                                  \
@@ -183,7 +183,7 @@ namespace Graph {
             edb.mutable_edge_id()->set_id(*elem->prev_edge);                               \
             edb.set_weight(elem->weight);                                                  \
         }                                                                                  \
-            *(verts).add_route_data_out() = std::move(edb);                                \
+            *(verts).add_route_data_ ## type() = std::move(edb);                                \
     }                                                                                      \
 }
     template<typename Weight>

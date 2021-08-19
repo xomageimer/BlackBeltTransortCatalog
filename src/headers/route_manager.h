@@ -36,8 +36,6 @@ namespace Data_Structure {
         private:
             std::shared_ptr<Graph::Router<double>> main_router;
             std::optional<Graph::Router<double>::RouteInfo> rf;
-
-            double extra_time = 0.f;
         public:
             proxy_route(std::shared_ptr<Graph::Router<double>> router, std::optional<Graph::Router<double>::RouteInfo> rinf) : main_router(std::move(router)),
                                                                                                 rf(rinf) {}
@@ -58,7 +56,6 @@ namespace Data_Structure {
 
         RouteRespType CreateRoute(std::string const & from, std::string const & to);
         std::optional<double> GetRouteWeight(std::string const & from, std::string const & to);
-        proxy_route GetRoute(std::string const & from, std::string const & to);
         RoutingSettings GetSettings() const;
         void Serialize(TCProto::TransportCatalog &) const;
     private:

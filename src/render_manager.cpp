@@ -37,7 +37,8 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std:
                         std::pair{item->name, reinterpret_cast<RouteResponse::Bus *>(item.get())->span_count});
         }
         for (const auto &layer : renderSettings.layers) {
-            (layersStrategy[layer])->DrawPartial(route_coords, used_bus, route_doc);
+            if (layersStrategy.count(layer))
+                (layersStrategy[layer])->DrawPartial(route_coords, used_bus, route_doc);
         }
     }
 
@@ -91,7 +92,8 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const RenderProto::Render
     CalculateCoordinates(points, buses);
     Init(buses);
     for (const auto & layer : renderSettings.layers) {
-        (layersStrategy[layer])->Draw();
+        if (layersStrategy.count(layer))
+            (layersStrategy[layer])->Draw();
     }
 
     doc.SimpleRender();
@@ -321,7 +323,6 @@ bool Data_Structure::DataBaseSvgBuilder::IsConnected(std::string const & lhs, st
         return false;
 }
 
-// TODO сериализовывать новые данные + координаты организаций
 void Data_Structure::DataBaseSvgBuilder::Serialize(TCProto::TransportCatalog & tc) const{
     RenderProto::RenderSettings ser_render_sets;
 
