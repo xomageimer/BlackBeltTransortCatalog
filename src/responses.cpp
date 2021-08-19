@@ -32,11 +32,11 @@ void RouteResponse::MakeJson() {
         item.emplace(std::piecewise_construct, std::forward_as_tuple("time"), std::forward_as_tuple(static_cast<double>(el->time)));
         if (el->type == Item::ItemType::BUS){
             item.emplace(std::piecewise_construct, std::forward_as_tuple("bus"), std::forward_as_tuple(el->name));
-            item.emplace(std::piecewise_construct, std::forward_as_tuple("type"), std::forward_as_tuple(std::string("Bus")));
+            item.emplace(std::piecewise_construct, std::forward_as_tuple("type"), std::forward_as_tuple(std::string("RideBus")));
             item.emplace(std::piecewise_construct, std::forward_as_tuple("span_count"), std::forward_as_tuple(static_cast<int>(reinterpret_cast<Bus*>(el.get())->span_count)));
         } else {
             item.emplace(std::piecewise_construct, std::forward_as_tuple("stop_name"), std::forward_as_tuple(el->name));
-            item.emplace(std::piecewise_construct, std::forward_as_tuple("type"), std::forward_as_tuple(std::string("Wait")));
+            item.emplace(std::piecewise_construct, std::forward_as_tuple("type"), std::forward_as_tuple(std::string("WaitBus")));
         }
         items_.emplace_back(item);
     }
@@ -66,6 +66,18 @@ void CompaniesResponse::MakeJson() {
 void BadResponse::MakeJson() {
     valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("request_id"), std::forward_as_tuple(id));
     valid_data.emplace(std::piecewise_construct, std::forward_as_tuple("error_message"), std::forward_as_tuple(error_message));
+}
+
+void RouteToCompaniesResponse::MakeJson() {
+    RouteResponse::MakeJson();
+
+    Dict last_item;
+    last_item.emplace(std::piecewise_construct, std::forward_as_tuple("type"), std::forward_as_tuple("WalkToCompany"));
+    last_item.emplace(std::piecewise_construct, std::forward_as_tuple("stop_name"), std::forward_as_tuple(nearby_stop_name));
+    last_item.emplace(std::piecewise_construct, std::forward_as_tuple("time"), std::forward_as_tuple(time_to_walk));
+    last_item.emplace(std::piecewise_construct, std::forward_as_tuple("company"), std::forward_as_tuple(company_full_name));
+
+    const_cast<std::vector<Json::Node> *>(&(valid_data["items"].AsArray()))->emplace_back(std::move(last_item));
 }
 
 void PrintResponses(std::vector<JsonResponse> responses, std::ostream & os) {

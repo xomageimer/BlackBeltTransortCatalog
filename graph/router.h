@@ -31,6 +31,7 @@ namespace Graph {
         };
 
         std::optional<RouteInfo> BuildRoute(VertexID from, VertexID to) const;
+        std::optional<double> GetRouteWeight(VertexID from, VertexID to) const;
         [[nodiscard]] EdgeID GetRouteEdge(RouteID route_id, size_t edge_idx) const;
         auto GetRouteRangeOfEdges(RouteID route_id) const;
         void ReleaseRoute(RouteID route_id);
@@ -108,6 +109,17 @@ namespace Graph {
             RouteID new_route_id = routes_index++;
             routes_cache[new_route_id] = std::move(edges);
             return RouteInfo{new_route_id, router[to]->weight, routes_cache[new_route_id].size()};
+        } else {
+            return std::nullopt;
+        }
+    }
+
+    template<typename Weight>
+    std::optional<double> Router<Weight>::GetRouteWeight(VertexID from, VertexID to) const {
+        auto const & router = routes_internal_data[from];
+        auto finish = router[to];
+        if (finish) {
+            return router[to]->weight;
         } else {
             return std::nullopt;
         }

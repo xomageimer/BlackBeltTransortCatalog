@@ -258,3 +258,10 @@ Svg::Document::Document(const Svg::Document & other) {
     while (xml_s.size() >= 2)
         xml_s.pop_back();
 }
+
+Svg::Document::Document(Svg::Document && other) {
+    primitives = std::move(other.primitives);
+    xml_s = std::move(other.xml_s);
+    while (xml_s.size() >= 2)
+        xml_s.pop_back();
+}

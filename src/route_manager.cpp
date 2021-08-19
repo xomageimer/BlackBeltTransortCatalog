@@ -47,7 +47,7 @@ Data_Structure::DataBaseRouter::DataBaseRouter(RouterProto::Router const & route
 
 
 Data_Structure::DataBaseRouter::DataBaseRouter(const std::unordered_map<std::string, Stop> & stops, const std::unordered_map<std::string, Bus> & buses,
-                                               std::pair<double, int> routing_settings_) : graph_map(stops.size() * 2), routing_settings(routing_settings_) {
+                                               RoutingSettings routing_settings_) : graph_map(stops.size() * 2), routing_settings(routing_settings_) {
     FillGraphWithStops(stops);
     FillGraphWithBuses(buses, stops);
 
@@ -136,6 +136,14 @@ Data_Structure::RouteRespType Data_Structure::DataBaseRouter::CreateRoute(std::s
     return resp;
 }
 
+std::optional<double> Data_Structure::DataBaseRouter::GetRouteWeight(std::string const & from, std::string const & to) {
+    return router->GetRouteWeight(waiting_stops.at(from).inp, waiting_stops.at(to).inp);
+}
+
+Data_Structure::DataBaseRouter::proxy_route Data_Structure::DataBaseRouter::GetRoute(std::string const & from, std::string const & to) {
+    return proxy_route {router, router->BuildRoute(waiting_stops.at(from).inp, waiting_stops.at(to).inp)};
+}
+
 void Data_Structure::DataBaseRouter::Serialize(TCProto::TransportCatalog & tc) const {
     RouterProto::Router router_mes;
 
@@ -177,4 +185,8 @@ void Data_Structure::DataBaseRouter::Serialize(TCProto::TransportCatalog & tc) c
     router->Serialize(router_mes);
 
     *tc.mutable_router() = std::move(router_mes);
+}
+
+Data_Structure::RoutingSettings Data_Structure::DataBaseRouter::GetSettings() const {
+    return routing_settings;
 }

@@ -30,13 +30,16 @@ namespace Data_Structure {
     };
     int ComputeStopsDistance(const Stop& lhs, const Stop& rhs);
     int ComputeRouteDistance(std::vector<std::string> const & stops, const std::unordered_map<std::string, Stop> &);
+    double ComputeTimeToWalking(double meters, double walk_speed);
     double ComputeGeoDistance(std::vector<std::string> const & stops, const std::unordered_map<std::string, Stop> &);
-    std::set<std::string> GetBearingPoints(const std::unordered_map<std::string, Stop> &, const std::unordered_map<std::string, Bus> &);
+    std::set<std::string> GetBearingPoints(const std::unordered_map<std::string, stop_n_companies> &, const std::unordered_map<std::string, Bus> &);
 
     using DBItem = std::variant<Stop, Bus>;
     using StopRespType = std::shared_ptr<StopResponse>;
     using BusRespType = std::shared_ptr<BusResponse>;
     using MapRespType = std::shared_ptr<MapResponse>;
+
+    using stop_n_companies = std::variant<Stop, YellowPages::Company>;
 
     struct DataBase{
     private:
@@ -51,15 +54,16 @@ namespace Data_Structure {
         std::unique_ptr<DataBaseYellowPages> yellow_pages_db;
     public:
         explicit DataBase(std::istream & is);
-        [[deprecated]] DataBase(const std::vector<DBItem>&, std::pair<double, int> routing_settings_);
-        DataBase(std::vector<DBItem>, std::pair<double, int> routing_settings_, RenderSettings render_settings);
-        DataBase(std::vector<DBItem>, YellowPages::Database, std::pair<double, int> routing_settings_, RenderSettings render_settings);
+        [[deprecated]] DataBase(const std::vector<DBItem>&, RoutingSettings routing_settings_);
+        DataBase(std::vector<DBItem>, RoutingSettings routing_settings_, RenderSettings render_settings);
+        DataBase(std::vector<DBItem>, YellowPages::Database, RoutingSettings routing_settings_, RenderSettings render_settings);
 
         [[nodiscard]] ResponseType FindBus(const std::string & title) const;
         [[nodiscard]] ResponseType FindStop(const std::string & title) const;
         [[nodiscard]] ResponseType FindRoute(const std::string & from, const std::string & to) const;
         [[nodiscard]] ResponseType BuildMap() const;
         [[nodiscard]] ResponseType FindCompanies(const std::vector<std::shared_ptr<Query>> & querys) const;
+        [[nodiscard]] ResponseType FindRouteToCompanies(const std::string & from, const std::vector<std::shared_ptr<Query>> & querys) const;
 
         void Serialize(std::ostream & os) const;
     private:

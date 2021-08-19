@@ -19,7 +19,8 @@ public:
         FIND_BUS,
         FIND_ROUTE,
         BUILD_MAP,
-        FIND_COMPANIES
+        FIND_COMPANIES,
+        FIND_ROUTE_COMPANY
     };
     virtual void ParseFrom(Json::Node const & json_node) = 0;
     virtual ~IRequest() = default;
@@ -32,7 +33,8 @@ public:
             {"Stop", Type::FIND_STOP},
             {"Route", Type::FIND_ROUTE},
             {"Map", Type::BUILD_MAP},
-            {"FindCompanies", Type::FIND_COMPANIES}
+            {"FindCompanies", Type::FIND_COMPANIES},
+            {"RouteToCompany", Type::FIND_ROUTE_COMPANY}
     };
     inline static int requests_count = 0;
     void ParseFrom(Json::Node const & json_node) override {
@@ -98,20 +100,18 @@ YellowPages::Rubric ParseRubric(Json::Node const & json_node);
 YellowPages::Name ParseName(Json::Node const & json_node);
 YellowPages::Phone ParsePhone(Json::Node const & json_node);
 YellowPages::Url ParseUrl(Json::Node const & json_node);
+#define ParseLike(struct_name, type_name)                                                        \
+{                                                                                            \
+    std::vector<YellowPages::struct_name> objects;                                           \
+    if (json_node.AsMap().count(#type_name)) {                                               \
+        for (auto & object : json_node[#type_name].AsArray()) {                              \
+            objects.emplace_back(Parse ## struct_name(object));                              \
+        }                                                                                    \
+    }                                                                                        \
+    if (!objects.empty())                                                                    \
+        querys.emplace_back(std::make_shared<DS::struct_name ## Query>(std::move(objects))); \
+}
 struct FindCompaniesRequest final : public ExecuteRequest {
-
-    #define ParseLike(struct_name, type_name)                                                        \
-        {                                                                                            \
-            std::vector<YellowPages::struct_name> objects;                                           \
-            if (json_node.AsMap().count(#type_name)) {                                               \
-                for (auto & object : json_node[#type_name].AsArray()) {                              \
-                    objects.emplace_back(Parse ## struct_name(object));                              \
-                }                                                                                    \
-            }                                                                                        \
-            if (!objects.empty())                                                                    \
-                querys.emplace_back(std::make_shared<DS::struct_name ## Query>(std::move(objects))); \
-        }
-
     JsonResponse Process(const DS::DataBase &) override;
     void ParseFrom(Json::Node const & json_node) override {
         ExecuteRequest::ParseFrom(json_node);
@@ -122,10 +122,27 @@ struct FindCompaniesRequest final : public ExecuteRequest {
         ParseLike(Name, names);
     }
 
-    #undef ParseLike
 private:
     std::vector<std::shared_ptr<DS::Query>> querys;
 };
+
+struct FindRouteToCompaniesRequest final : public ExecuteRequest {
+    JsonResponse Process(const DS::DataBase &) override;
+    void ParseFrom(Json::Node const & json_node) override {
+        ExecuteRequest::ParseFrom(json_node);
+
+        from = json_node["from"].AsString();
+
+        ParseLike(Rubric, rubrics);
+        ParseLike(Phone, phones);
+        ParseLike(Url, urls);
+        ParseLike(Name, names);
+    }
+private:
+    std::string from;
+    std::vector<std::shared_ptr<DS::Query>> querys;
+};
+#undef ParseLike
 
 struct ModifyRequest : public IRequest {
 public:
@@ -192,7 +209,7 @@ private:
 RequestType CreateRequest(IRequest::Type type);
 
 std::vector<DS::DBItem> ReadBaseRequests(Json::Node const & input);
-std::pair<double, int> ReadRoutingSettings(Json::Node const & input);
+DS::RoutingSettings ReadRoutingSettings(Json::Node const & input);
 std::vector<JsonResponse> ReadStatRequests(const DS::DataBase & db, Json::Node const & input);
 DS::RenderSettings ReadRenderSettings(Json::Node const & input);
 YellowPages::Database ReadYellowPagesData(Json::Node const & input);

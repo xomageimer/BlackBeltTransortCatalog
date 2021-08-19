@@ -85,6 +85,14 @@ struct CompaniesResponse : public Response {
     std::vector<YellowPages::Company const *> companies;
 };
 
+struct RouteToCompaniesResponse : public RouteResponse {
+    void MakeJson() override;
+
+    double time_to_walk;
+    std::string nearby_stop_name;
+    std::string company_full_name;
+};
+
 struct BadResponse : public Response {
     void MakeJson() override;
 

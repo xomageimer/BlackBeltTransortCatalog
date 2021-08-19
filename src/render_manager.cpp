@@ -9,7 +9,7 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderMap() cons
     return MapResp;
 }
 
-Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std::vector<RouteResponse::ItemPtr> const & items) {
+Svg::Document Data_Structure::DataBaseSvgBuilder::GenerateRouteSVG(std::vector<RouteResponse::ItemPtr> const & items) {
     Svg::Document route_doc (doc);
 
     Svg::Rect rect;
@@ -19,6 +19,12 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std:
             .SetWidth(renderSettings.width + renderSettings.outer_margin - left_corner.x)
             .SetHeight(renderSettings.height + renderSettings.outer_margin - left_corner.y);
     route_doc.Add(rect);
+
+    return std::move(route_doc);
+}
+
+Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std::vector<RouteResponse::ItemPtr> const & items) {
+    Svg::Document route_doc = GenerateRouteSVG(items);
 
     if (!items.empty()) {
         std::vector<std::string> route_coords;
@@ -41,23 +47,48 @@ Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderRoute(std:
     return MapResp;
 }
 
-Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const std::unordered_map<std::string, Stop> & stops,
-                                       const std::unordered_map<std::string, Bus> & buses,
-                                       RenderSettings render_set) : renderSettings(std::move(render_set)){
-    CalculateCoordinates(stops, buses);
-    Init(buses);
-    for (const auto & layer : renderSettings.layers) {
-        (layersStrategy[layer])->Draw();
+Data_Structure::MapRespType Data_Structure::DataBaseSvgBuilder::RenderPathToCompany(std::vector<RouteResponse::ItemPtr> const & items,
+                                                                                    const std::string & company) {
+    Svg::Document route_doc = GenerateRouteSVG(items);
+
+    if (!items.empty()) {
+        std::vector<std::string> route_coords;
+        std::vector<std::pair<std::string, size_t>> used_bus;
+        for (auto &item : items) {
+            if (item->type == RouteResponse::Item::ItemType::WAIT)
+                route_coords.push_back(item->name);
+            else
+                used_bus.emplace_back(
+                        std::pair{item->name, reinterpret_cast<RouteResponse::Bus *>(item.get())->span_count});
+        }
+        for (const auto &layer : renderSettings.layers) {
+            if (layer.find("company") != std::string::npos)
+                (CompanyRouteLayersStrategy[layer])->DrawPartial(items.back()->name, company, route_doc);
+            else
+                (CompanyRouteLayersStrategy[layer])->DrawPartial(route_coords, used_bus, route_doc);
+        }
     }
 
-    doc.SimpleRender();
+    route_doc.SimpleRender();
+    MapRespType MapResp = std::make_shared<MapResponse>();
+    MapResp->svg_xml_answer = route_doc.Get();
+    return MapResp;
 }
 
 Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(Data_Structure::RenderSettings render_set) : renderSettings(std::move(render_set)) {}
 
-Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const RenderProto::RenderSettings & ren_set, const std::unordered_map<std::string, Stop> & stops, const std::unordered_map<std::string, Bus> & buses) {
+Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const RenderProto::RenderSettings & ren_set, const std::unordered_map<std::string, Stop> & stops, const std::unordered_map<std::string, Bus> & buses,
+                                                       const std::unordered_map<std::string, const YellowPages::Company *> & companies) {
+    std::unordered_map<std::string, stop_n_companies> points;
+    stop_n_companies var;
+    for (auto& stop : stops)
+        points.emplace(std::piecewise_construct, std::forward_as_tuple(stop.first), std::forward_as_tuple(stop.second));
+    for (auto& company : companies) {
+        points.emplace(std::piecewise_construct, std::forward_as_tuple(company.first), std::forward_as_tuple(*company.second));
+    }
+
     Deserialize(ren_set);
-    CalculateCoordinates(stops, buses);
+    CalculateCoordinates(points, buses);
     Init(buses);
     for (const auto & layer : renderSettings.layers) {
         (layersStrategy[layer])->Draw();
@@ -66,7 +97,7 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const RenderProto::Render
     doc.SimpleRender();
 }
 
-std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const std::unordered_map<std::string, Stop> &stops,
+std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateUniformDistribution(const std::unordered_map<std::string, stop_n_companies> &stops,
                                                                                                     const std::unordered_map<std::string, Bus> &buses) {
     auto bearing_points = GetBearingPoints(stops, buses);
 
@@ -91,14 +122,30 @@ std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::Coordinate
                 right_bearing_point = std::find_if(std::next(left_bearing_point), bus_range.end(), [&bearing_points](auto const & cur) {
                     return bearing_points.find(cur) != bearing_points.end();
                 });
-                auto left_bearing_distance = stops.at(*left_bearing_point).dist;
+                Distance left_bearing_distance;
+                if (std::holds_alternative<Stop>(stops.at(*left_bearing_point))) {
+                    left_bearing_distance = std::get<Stop>(stops.at(*left_bearing_point)).dist;
+                } else {
+                    auto & address = std::get<YellowPages::Company>(stops.at(*left_bearing_point)).address();
+                    left_bearing_distance = Distance{address.coords().lon(), address.coords().lat()};
+                }
                 uniform.insert_or_assign(*left_bearing_point, Svg::Point{left_bearing_distance.GetLongitude(), left_bearing_distance.GetLatitude()});
             } else {
                 if (right_bearing_point == bus_range.end())
                     throw std::logic_error("bad right point!");
 
-                auto left_bearing_distance = stops.at(*left_bearing_point).dist;
-                auto right_bearing_distance = stops.at(*right_bearing_point).dist;
+                Distance left_bearing_distance;
+                Distance right_bearing_distance;
+                if (std::holds_alternative<Stop>(stops.at(*left_bearing_point))) {
+                    left_bearing_distance = std::get<Stop>(stops.at(*left_bearing_point)).dist;
+                    right_bearing_distance  = std::get<Stop>(stops.at(*right_bearing_point)).dist;
+                } else {
+                    auto & left_address = std::get<YellowPages::Company>(stops.at(*left_bearing_point)).address();
+                    auto & right_address = std::get<YellowPages::Company>(stops.at(*right_bearing_point)).address();
+
+                    left_bearing_distance = Distance{left_address.coords().lon(), left_address.coords().lat()};
+                    right_bearing_distance = Distance{right_address.coords().lon(), right_address.coords().lat()};
+                }
 
                 double x = left_bearing_distance.GetLongitude()
                            + step(left_bearing_distance.GetLongitude(),
@@ -119,20 +166,26 @@ std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::Coordinate
 }
 
 auto Data_Structure::DataBaseSvgBuilder::SortingByCoordinates(const std::map<std::string, Svg::Point> &uniform,
-                                                              const std::unordered_map<std::string, Stop> &stops) {
+                                                              const std::unordered_map<std::string, stop_n_companies> &stops) {
     std::pair<std::vector<std::pair<double, std::string>>, std::vector<std::pair<double, std::string>>> sorted_xy;
     auto & sorted_x = sorted_xy.first;
     auto & sorted_y = sorted_xy.second;
-    for (auto & [stop_name, stop] : stops)
+    for (auto & [name, point] : stops)
     {
-        auto it = uniform.find(stop_name);
+        auto it = uniform.find(name);
         if (it != uniform.end()) {
             auto &[name, new_coord] = *it;
-            sorted_x.emplace_back(new_coord.x, stop_name);
-            sorted_y.emplace_back(new_coord.y, stop_name);
+            sorted_x.emplace_back(new_coord.x, name);
+            sorted_y.emplace_back(new_coord.y, name);
         } else {
-            sorted_x.emplace_back(stop.dist.GetLongitude(), stop_name);
-            sorted_y.emplace_back(stop.dist.GetLatitude(), stop_name);
+            if (std::holds_alternative<Stop>(point)) {
+                sorted_x.emplace_back(std::get<Stop>(point).dist.GetLongitude(), name);
+                sorted_y.emplace_back(std::get<Stop>(point).dist.GetLatitude(), name);
+            } else {
+                auto address = std::get<YellowPages::Company>(point).address();
+                sorted_x.emplace_back(address.coords().lon(), name);
+                sorted_y.emplace_back(address.coords().lat(), name);
+            }
         }
     }
     std::sort(sorted_x.begin(), sorted_x.end());
@@ -176,7 +229,8 @@ std::pair<std::map<std::string, int>, int> Data_Structure::DataBaseSvgBuilder::G
 
 }
 
-std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const std::unordered_map<std::string, Stop> & stops,
+std::pair<std::map<std::string, Svg::Point>, std::map<std::string, Svg::Point>>
+Data_Structure::DataBaseSvgBuilder::CoordinateCompression(const std::unordered_map<std::string, stop_n_companies> & stops,
                                                                                             const std::unordered_map<std::string, Bus> & buses) {
     auto [sorted_x, sorted_y] = SortingByCoordinates(CoordinateUniformDistribution(stops, buses), stops);
 
@@ -187,23 +241,30 @@ std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::Coordinate
 
     std::map<std::string, double> new_x;
     std::map<std::string, double> new_y;
-    for (auto [coord, stop_name] : sorted_y) {
-        new_y.emplace(stop_name, renderSettings.height - renderSettings.padding - (gluing_y.at(stop_name)) * y_step);
+    for (auto [coord, name] : sorted_y) {
+        new_y.emplace(name, renderSettings.height - renderSettings.padding - (gluing_y.at(name)) * y_step);
     }
-    for (auto [coord, stop_name]: sorted_x) {
-        new_x.emplace(stop_name, (gluing_x.at(stop_name)) * x_step + renderSettings.padding);
+    for (auto [coord, name]: sorted_x) {
+        new_x.emplace(name, (gluing_x.at(name)) * x_step + renderSettings.padding);
     }
 
-    std::map<std::string, Svg::Point> CompressCoord;
-    for (auto & [stop_name, _] : stops){
-        CompressCoord.emplace(stop_name, Svg::Point{new_x.at(stop_name), new_y.at(stop_name)});
+    std::map<std::string, Svg::Point> CompressCoordStops;
+    std::map<std::string, Svg::Point> CompressCoordCompanies;
+    for (auto & [name, obj] : stops){
+        if (std::holds_alternative<Stop>(obj)) {
+            CompressCoordStops.emplace(name, Svg::Point{new_x.at(name), new_y.at(name)});
+        } else {
+            CompressCoordCompanies.emplace(name, Svg::Point{new_x.at(name), new_y.at(name)});
+        }
     }
-    return CompressCoord;
+    return {CompressCoordStops, CompressCoordCompanies};
 }
 
-void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const std::unordered_map<std::string, Stop> & stops,
+void Data_Structure::DataBaseSvgBuilder::CalculateCoordinates(const std::unordered_map<std::string, stop_n_companies> & stops,
                                                               const std::unordered_map<std::string, Bus> & buses) {
-    stops_coordinates = CoordinateCompression(stops, buses);
+   auto coords = CoordinateCompression(stops, buses);
+   stops_coordinates = coords.first;
+   company_coordinates = coords.second;
 }
 
 void Data_Structure::DataBaseSvgBuilder::Init(const std::unordered_map<std::string, Bus> & buses) {
@@ -228,6 +289,16 @@ void Data_Structure::DataBaseSvgBuilder::Init(const std::unordered_map<std::stri
     layersStrategy.emplace(std::piecewise_construct,
                            std::forward_as_tuple("stop_labels"),
                            std::forward_as_tuple(std::make_shared<StopsTextDrawer>(this)));
+    CompanyRouteLayersStrategy = layersStrategy;
+    CompanyRouteLayersStrategy.emplace(std::piecewise_construct,
+                           std::forward_as_tuple("company_lines"),
+                           std::forward_as_tuple(std::make_shared<CompanyPolylinesDrawer>(this)));
+    CompanyRouteLayersStrategy.emplace(std::piecewise_construct,
+                           std::forward_as_tuple("company_points"),
+                           std::forward_as_tuple(std::make_shared<CompanyRoundDrawer>(this)));
+    CompanyRouteLayersStrategy.emplace(std::piecewise_construct,
+                           std::forward_as_tuple("company_labels"),
+                           std::forward_as_tuple(std::make_shared<CompanyTextDrawer>(this)));
 
 }
 
@@ -250,6 +321,7 @@ bool Data_Structure::DataBaseSvgBuilder::IsConnected(std::string const & lhs, st
         return false;
 }
 
+// TODO сериализовывать новые данные + координаты организаций
 void Data_Structure::DataBaseSvgBuilder::Serialize(TCProto::TransportCatalog & tc) const{
     RenderProto::RenderSettings ser_render_sets;
 
@@ -490,4 +562,48 @@ Data_Structure::BusTextDrawer::DrawPartial(std::vector<std::string> &names_stops
             RenderBusLabel(doc, bus.name, *(std::next(stop_it)));
         }
     }
+}
+
+void Data_Structure::CompanyRoundDrawer::DrawPartial(const std::string & nearby_stop, const std::string & company_name,
+                                                     Svg::Document & doc) const {
+    doc.Add(Svg::Circle{}
+                            .SetFillColor("black")
+                            .SetRadius(db_svg->renderSettings.company_radius)
+                            .SetCenter(db_svg->company_coordinates.at(company_name)));
+
+}
+
+void
+Data_Structure::CompanyPolylinesDrawer::DrawPartial(const std::string & nearby_stop, const std::string & company_name,
+                                                    Svg::Document & doc) const {
+    doc.Add(Svg::Polyline{}
+                              .SetStrokeColor("black")
+                              .SetStrokeWidth(db_svg->renderSettings.company_line_width)
+                              .SetStrokeLineJoin("round")
+                              .SetStrokeLineCap("round")
+                              .AddPoint(db_svg->stops_coordinates.at(nearby_stop))
+                              .AddPoint(db_svg->company_coordinates.at(company_name)));
+}
+
+void Data_Structure::CompanyTextDrawer::DrawPartial(const std::string & nearby_stop, const std::string & company_name,
+                                                    Svg::Document & doc) const {
+    Svg::Text text = Svg::Text{}
+                              .SetPoint(db_svg->company_coordinates.at(company_name))
+                              .SetFontFamily("verdana")
+                              .SetData(company_name)
+                              .SetOffset({db_svg->renderSettings.stop_label_offset[0], db_svg->renderSettings.stop_label_offset[1]})
+                              .SetFontSize(db_svg->renderSettings.stop_label_font_size);
+
+    Svg::Text substrates = text;
+    substrates
+            .SetFillColor(db_svg->renderSettings.underlayer_color)
+            .SetStrokeColor(db_svg->renderSettings.underlayer_color)
+            .SetStrokeWidth(db_svg->renderSettings.underlayer_width)
+            .SetStrokeLineCap("round")
+            .SetStrokeLineJoin("round");
+
+    text.SetFillColor("black");
+
+    doc.Add(std::move(substrates));
+    doc.Add(std::move(text));
 }

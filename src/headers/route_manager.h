@@ -12,20 +12,16 @@
 #include "transport_catalog.pb.h"
 #include "transport_router.pb.h"
 
-template <typename T>
-using Dict = std::map<std::string, const T *>;
-
 namespace Data_Structure {
     using RouteRespType = std::shared_ptr<RouteResponse>;
+    struct RoutingSettings {
+        double bus_wait_time;
+        int bus_velocity;
+        double pedestrian_velocity;
+    };
     struct DataBaseRouter {
     private:
-        struct RoutingSettings {
-            explicit RoutingSettings(std::pair<double, int> pr) : bus_wait_time(pr.first), bus_velocity(pr.second) {}
-
-            double bus_wait_time{};
-            int bus_velocity{};
-        };
-        const RoutingSettings routing_settings;
+        const struct RoutingSettings routing_settings;
         Graph::DirectedWeightedGraph<double> graph_map;
         std::shared_ptr<Graph::Router<double>> router;
 
@@ -40,12 +36,15 @@ namespace Data_Structure {
         private:
             std::shared_ptr<Graph::Router<double>> main_router;
             std::optional<Graph::Router<double>::RouteInfo> rf;
+
+            double extra_time = 0.f;
         public:
             proxy_route(std::shared_ptr<Graph::Router<double>> router, std::optional<Graph::Router<double>::RouteInfo> rinf) : main_router(std::move(router)),
                                                                                                 rf(rinf) {}
             proxy_route(const proxy_route &) = delete;
             proxy_route &operator=(const proxy_route &) = delete;
             proxy_route(proxy_route &&) = default;
+            proxy_route& operator=(proxy_route &&) = default;
 
             [[nodiscard]] auto GetRoute() const;
             [[nodiscard]] std::optional<Graph::Router<double>::RouteInfo> const & GetInfo() const;
@@ -54,10 +53,13 @@ namespace Data_Structure {
             ~proxy_route();
         };
 
-        DataBaseRouter(const std::unordered_map<std::string, struct Stop> &, const std::unordered_map<std::string, struct Bus> &, std::pair<double, int> routing_settings_);
+        DataBaseRouter(const std::unordered_map<std::string, struct Stop> &, const std::unordered_map<std::string, struct Bus> &, RoutingSettings routing_settings_);
         explicit DataBaseRouter(RouterProto::Router const & router_mes);
 
         RouteRespType CreateRoute(std::string const & from, std::string const & to);
+        std::optional<double> GetRouteWeight(std::string const & from, std::string const & to);
+        proxy_route GetRoute(std::string const & from, std::string const & to);
+        RoutingSettings GetSettings() const;
         void Serialize(TCProto::TransportCatalog &) const;
     private:
         void FillGraphWithStops(const std::unordered_map<std::string, Stop> &);

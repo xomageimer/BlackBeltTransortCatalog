@@ -11,8 +11,8 @@ std::vector<DS::DBItem> ReadBaseRequests(const Json::Node &input) {
     return std::move(elements);
 }
 
-std::pair<double, int> ReadRoutingSettings(const Json::Node &input) {
-    return {static_cast<double>(input["bus_wait_time"].AsNumber<int>()), input["bus_velocity"].AsNumber<int>()};
+DS::RoutingSettings ReadRoutingSettings(const Json::Node &input) {
+    return {static_cast<double>(input["bus_wait_time"].AsNumber<int>()), input["bus_velocity"].AsNumber<int>(), input["pedestrian_velocity"].AsNumber<double>()};
 }
 
 std::vector<JsonResponse> ReadStatRequests(const DS::DataBase &db, const Json::Node &input) {
@@ -40,6 +40,7 @@ YellowPages::Database ReadYellowPagesData(const Json::Node &input) {
         }
         db.mutable_rubrics()->insert({std::stoi(rubric.first), rubric_mes});
     }
+
     for (auto & company : input["companies"].AsArray()) {
         YellowPages::Company company_mes;
 
@@ -273,6 +274,10 @@ JsonResponse FindCompaniesRequest::Process(const DS::DataBase & db) {
     return ProcessResponse(&DS::DataBase::FindCompanies, std::ref(db), std::ref(querys));
 }
 
+JsonResponse FindRouteToCompaniesRequest::Process(const DS::DataBase & db) {
+    return ProcessResponse(&DS::DataBase::FindRouteToCompanies, std::ref(db), std::ref(from), std::ref(querys));
+}
+
 RequestType CreateRequest(IRequest::Type type) {
     switch(type){
         case IRequest::Type::READ_BUS:
@@ -289,6 +294,8 @@ RequestType CreateRequest(IRequest::Type type) {
             return std::make_unique<MapRouteRequest>();
         case IRequest::Type::FIND_COMPANIES:
             return std::make_unique<FindCompaniesRequest>();
+        case IRequest::Type::FIND_ROUTE_COMPANY:
+            return std::make_unique<FindRouteToCompaniesRequest>();
     }
     throw std::logic_error("Bad type");
 }
@@ -304,6 +311,8 @@ DS::RenderSettings ReadRenderSettings(const Json::Node &input) {
         METHOD(outer_margin, AsNumber<double>());
         METHOD(stop_radius, AsNumber<double>());
         METHOD(line_width, AsNumber<double>());
+        METHOD(company_radius, AsNumber<double>());
+        METHOD(company_line_width, AsNumber<double>());
 
         METHOD(stop_label_font_size, AsNumber<int>());
         METHOD(underlayer_width, AsNumber<double>());

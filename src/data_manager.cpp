@@ -8,7 +8,7 @@ Data_Structure::DataBase::DataBase(std::istream & is) {
     Deserialize(is);
 }
 
-Data_Structure::DataBase::DataBase(const std::vector<DBItem>& elems, const std::pair<double, int> routing_settings_) {
+Data_Structure::DataBase::DataBase(const std::vector<DBItem>& elems, const RoutingSettings routing_settings_) {
     Init(elems);
 
     router = std::make_unique<DataBaseRouter>(
@@ -18,7 +18,7 @@ Data_Structure::DataBase::DataBase(const std::vector<DBItem>& elems, const std::
     );
 }
 
-Data_Structure::DataBase::DataBase(std::vector<DBItem> items, std::pair<double, int> routing_settings_,
+Data_Structure::DataBase::DataBase(std::vector<DBItem> items, RoutingSettings routing_settings_,
                                    RenderSettings render_settings){
     Init(items);
 
@@ -33,7 +33,7 @@ Data_Structure::DataBase::DataBase(std::vector<DBItem> items, std::pair<double, 
     );
 }
 
-Data_Structure::DataBase::DataBase(std::vector<DBItem> items, YellowPages::Database yellow_pages, std::pair<double, int> routing_settings_,
+Data_Structure::DataBase::DataBase(std::vector<DBItem> items, YellowPages::Database yellow_pages, RoutingSettings routing_settings_,
                                    Data_Structure::RenderSettings render_settings) {
     Init(items);
 
@@ -128,6 +128,57 @@ ResponseType Data_Structure::DataBase::FindCompanies(const std::vector<std::shar
     return ret;
 }
 
+ResponseType Data_Structure::DataBase::FindRouteToCompanies(const std::string &from,
+                                                            const std::vector<std::shared_ptr<Query>> &querys) const {
+    auto resp = FindCompanies(querys);
+    if (!resp)
+        return GenerateBad();
+
+    double route_time = 0;
+    double time_from_stop = 0;
+    YellowPages::Company const * company;
+    std::string nearby_stop;
+    for (auto company_ptr : reinterpret_cast<CompaniesResponse const *>(resp.get())->companies){
+        for (auto & stop : company_ptr->nearby_stops()){
+            auto cur_route_time = router->GetRouteWeight(from, stop.name());
+            double time_to_cur = ComputeTimeToWalking(stop.meters(), router->GetSettings().pedestrian_velocity);
+            if (!company || route_time + time_from_stop > *cur_route_time + time_to_cur) {
+                company = company_ptr;
+                route_time = *cur_route_time;
+                time_from_stop = time_to_cur;
+                nearby_stop = stop.name();
+            }
+        }
+    }
+
+    auto result_resp = std::make_shared<RouteToCompaniesResponse>();
+    std::shared_ptr<RouteResponse> route_resp = result_resp;
+    route_resp = router->CreateRoute(from, nearby_stop);
+
+    result_resp->total_time = route_resp->total_time + time_from_stop;
+    result_resp->time_to_walk = time_from_stop;
+    result_resp->nearby_stop_name = nearby_stop;
+    for (auto & name : company->names()){
+        if (name.type() == YellowPages::Name_Type_MAIN){
+            result_resp->company_full_name = name.value();
+            if (!company->rubrics().empty()) {
+                std::string new_name = yellow_pages_db->GetRubric(company->rubrics(0)).keywords(0) + " " + result_resp->company_full_name;
+                result_resp->company_full_name = new_name;
+            }
+            break;
+        }
+    }
+
+    auto render_items = result_resp->items;
+    if (!render_items.empty()) {
+        auto finish = render_items.insert(render_items.end(), std::make_shared<RouteResponse::Wait>());
+        (*finish)->name = nearby_stop;
+    }
+    result_resp->route_render = std::move(svg_builder->RenderPathToCompany(render_items, result_resp->company_full_name)->svg_xml_answer);
+
+    return std::move(result_resp);
+}
+
 ResponseType Data_Structure::DataBase::GenerateBad() {
     auto ret = std::make_shared<BadResponse>();
     ret->error_message = "not found";
@@ -160,7 +211,7 @@ double Data_Structure::ComputeGeoDistance(const std::vector<std::string> &stops,
 }
 
 std::set<std::string>
-Data_Structure::GetBearingPoints(const std::unordered_map<std::string, Stop> &stops, const std::unordered_map<std::string, Bus> &buses) {
+Data_Structure::GetBearingPoints(const std::unordered_map<std::string, stop_n_companies> &stops, const std::unordered_map<std::string, Bus> &buses) {
     std::set<std::string> res;
     std::map<std::string, std::string> stop_and_buses;
     std::map<std::string, int> stops_count;
@@ -191,6 +242,10 @@ Data_Structure::GetBearingPoints(const std::unordered_map<std::string, Stop> &st
     }
 
     return res;
+}
+
+double Data_Structure::ComputeTimeToWalking(double meters, double walk_speed) {
+    return meters / walk_speed;
 }
 
 void Data_Structure::DataBase::Serialize(std::ostream &os) const {
@@ -276,8 +331,24 @@ void Data_Structure::DataBase::Deserialize(std::istream &is) {
         pure_buses.emplace(pure_bus.name, pure_bus);
     }
 
-
     yellow_pages_db = std::make_unique<DataBaseYellowPages>(tc.yellow_pages());
+
     router = std::make_unique<DataBaseRouter>(tc.router());
-    svg_builder = std::make_unique<DataBaseSvgBuilder>(tc.render(), pure_stops, pure_buses);
+
+    std::unordered_map<std::string, const YellowPages::Company *> companies_map;
+    for (auto & company : yellow_pages_db->Serialize().companies()){
+        std::string company_name;
+        for (auto & name : company.names()){
+            if (name.type() == YellowPages::Name_Type_MAIN) {
+                company_name += name.value();
+                break;
+            }
+        }
+        if (!company.rubrics().empty()) {
+            std::string new_name = yellow_pages_db->GetRubric(company.rubrics(0)).keywords(0) + " " + company_name;
+            company_name = new_name;
+        }
+        companies_map.emplace(company_name, &company);
+    }
+    svg_builder = std::make_unique<DataBaseSvgBuilder>(tc.render(), pure_stops, pure_buses, companies_map);
 }
