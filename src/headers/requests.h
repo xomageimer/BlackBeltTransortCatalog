@@ -111,36 +111,32 @@ YellowPages::Url ParseUrl(Json::Node const & json_node);
     if (!objects.empty())                                                                    \
         querys.emplace_back(std::make_shared<DS::struct_name ## Query>(std::move(objects))); \
 }
-struct FindCompaniesRequest final : public ExecuteRequest {
+struct FindCompaniesRequest : public ExecuteRequest {
     JsonResponse Process(const DS::DataBase &) override;
     void ParseFrom(Json::Node const & json_node) override {
         ExecuteRequest::ParseFrom(json_node);
-
+        ParseQueries(json_node);
+    }
+    void ParseQueries(Json::Node const & json_node){
         ParseLike(Rubric, rubrics);
         ParseLike(Phone, phones);
         ParseLike(Url, urls);
         ParseLike(Name, names);
     }
-
-private:
+protected:
     std::vector<std::shared_ptr<DS::Query>> querys;
 };
 
-struct FindRouteToCompaniesRequest final : public ExecuteRequest {
+struct FindRouteToCompaniesRequest final : public FindCompaniesRequest {
     JsonResponse Process(const DS::DataBase &) override;
     void ParseFrom(Json::Node const & json_node) override {
-        ExecuteRequest::ParseFrom(json_node);
+        FindCompaniesRequest::ExecuteRequest::ParseFrom(json_node);
+        FindCompaniesRequest::ParseQueries(json_node["companies"]);
 
         from = json_node["from"].AsString();
-
-        ParseLike(Rubric, rubrics);
-        ParseLike(Phone, phones);
-        ParseLike(Url, urls);
-        ParseLike(Name, names);
     }
 private:
     std::string from;
-    std::vector<std::shared_ptr<DS::Query>> querys;
 };
 #undef ParseLike
 

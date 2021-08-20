@@ -12,7 +12,7 @@ std::vector<DS::DBItem> ReadBaseRequests(const Json::Node &input) {
 }
 
 DS::RoutingSettings ReadRoutingSettings(const Json::Node &input) {
-    return {static_cast<double>(input["bus_wait_time"].AsNumber<int>()), input["bus_velocity"].AsNumber<int>(), input["pedestrian_velocity"].AsNumber<double>()};
+    return {static_cast<double>(input["bus_wait_time"].AsNumber<int>()), input["bus_velocity"].AsNumber<int>(), static_cast<double>(input["pedestrian_velocity"].AsNumber<int>())};
 }
 
 std::vector<JsonResponse> ReadStatRequests(const DS::DataBase &db, const Json::Node &input) {
@@ -45,8 +45,8 @@ YellowPages::Database ReadYellowPagesData(const Json::Node &input) {
         YellowPages::Company company_mes;
 
         if (company.AsMap().count("address")) {
+            YellowPages::Address address_mes;
             for (auto &address : company["address"].AsMap()) {
-                YellowPages::Address address_mes;
                 if (address.first == "formatted") {
                     address_mes.set_formatted(address.second.AsString());
                 } else if (address.first == "components") {
@@ -65,6 +65,7 @@ YellowPages::Database ReadYellowPagesData(const Json::Node &input) {
                     address_mes.set_comment(address.second.AsString());
                 }
             }
+            *company_mes.mutable_address() = std::move(address_mes);
         }
 
         if (company.AsMap().count("names")) {

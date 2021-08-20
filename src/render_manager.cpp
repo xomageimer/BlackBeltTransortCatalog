@@ -81,12 +81,10 @@ Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(Data_Structure::RenderSet
 Data_Structure::DataBaseSvgBuilder::DataBaseSvgBuilder(const RenderProto::RenderSettings & ren_set, const std::unordered_map<std::string, Stop> & stops, const std::unordered_map<std::string, Bus> & buses,
                                                        const std::unordered_map<std::string, const YellowPages::Company *> & companies) {
     std::unordered_map<std::string, stop_n_companies> points;
-    stop_n_companies var;
     for (auto& stop : stops)
         points.emplace(std::piecewise_construct, std::forward_as_tuple(stop.first), std::forward_as_tuple(stop.second));
-    for (auto& company : companies) {
+    for (auto& company : companies)
         points.emplace(std::piecewise_construct, std::forward_as_tuple(company.first), std::forward_as_tuple(*company.second));
-    }
 
     Deserialize(ren_set);
     CalculateCoordinates(points, buses);
@@ -163,7 +161,8 @@ std::map<std::string, Svg::Point> Data_Structure::DataBaseSvgBuilder::Coordinate
         }
     }
 
-    BuildNeighborhoodConnections(uniform, buses);
+    BuildNeighborhoodConnections(buses);
+    BuildNeighborhoodCompaniesWithStops(stops);
     return uniform;
 }
 
@@ -228,7 +227,6 @@ std::pair<std::map<std::string, int>, int> Data_Structure::DataBaseSvgBuilder::G
     }
 
     return {std::move(gluing), idx_max};
-
 }
 
 std::pair<std::map<std::string, Svg::Point>, std::map<std::string, Svg::Point>>
@@ -304,7 +302,7 @@ void Data_Structure::DataBaseSvgBuilder::Init(const std::unordered_map<std::stri
 
 }
 
-void Data_Structure::DataBaseSvgBuilder::BuildNeighborhoodConnections( std::map<std::string, Svg::Point> const & new_coords, const std::unordered_map<std::string, Bus> &buses) {
+void Data_Structure::DataBaseSvgBuilder::BuildNeighborhoodConnections(const std::unordered_map<std::string, Bus> &buses) {
     for (auto & [_, bus] : buses) {
         auto & stops_ = bus.stops;
         if (stops_.empty()) continue;
@@ -323,67 +321,14 @@ bool Data_Structure::DataBaseSvgBuilder::IsConnected(std::string const & lhs, st
         return false;
 }
 
-void Data_Structure::DataBaseSvgBuilder::Serialize(TCProto::TransportCatalog & tc) const{
-    RenderProto::RenderSettings ser_render_sets;
-
-    ser_render_sets.set_width(renderSettings.width);
-    ser_render_sets.set_height(renderSettings.height);
-    ser_render_sets.set_outer_margin(renderSettings.outer_margin);
-    ser_render_sets.set_padding(renderSettings.padding);
-    ser_render_sets.set_stop_radius(renderSettings.stop_radius);
-    ser_render_sets.set_line_width(renderSettings.line_width);
-    ser_render_sets.set_company_radius(renderSettings.company_radius);
-    ser_render_sets.set_company_line_width(renderSettings.company_line_width);
-
-    ser_render_sets.set_stop_label_font_size(renderSettings.stop_label_font_size);
-
-    ser_render_sets.add_stop_label_offset(renderSettings.stop_label_offset[0]);
-    ser_render_sets.add_stop_label_offset(renderSettings.stop_label_offset[1]);
-
-    ser_render_sets.set_bus_label_font_size(renderSettings.bus_label_font_size);
-
-    ser_render_sets.add_bus_label_offset(renderSettings.bus_label_offset[0]);
-    ser_render_sets.add_bus_label_offset(renderSettings.bus_label_offset[1]);
-
-    *ser_render_sets.mutable_color() = renderSettings.underlayer_color.Serialize();
-    ser_render_sets.set_underlayer_width(renderSettings.underlayer_width);
-
-    for (auto & color : renderSettings.color_palette){
-        *ser_render_sets.add_color_palette() = color.Serialize();
-    }
-    for (auto & layer : renderSettings.layers){
-        ser_render_sets.add_layers(layer);
-    }
-
-    *tc.mutable_render() = std::move(ser_render_sets);
-}
-
-void Data_Structure::DataBaseSvgBuilder::Deserialize(const RenderProto::RenderSettings & ren_mes) {
-    renderSettings.width = ren_mes.width();
-    renderSettings.height = ren_mes.height();
-    renderSettings.outer_margin = ren_mes.outer_margin();
-    renderSettings.padding = ren_mes.padding();
-    renderSettings.stop_radius = ren_mes.stop_radius();
-    renderSettings.line_width = ren_mes.line_width();
-    renderSettings.company_radius = ren_mes.company_radius();
-    renderSettings.company_line_width = ren_mes.company_line_width();
-
-    renderSettings.stop_label_font_size = ren_mes.stop_label_font_size();
-    renderSettings.stop_label_offset[0] = ren_mes.stop_label_offset(0);
-    renderSettings.stop_label_offset[1] = ren_mes.stop_label_offset(1);
-
-    renderSettings.bus_label_font_size = ren_mes.bus_label_font_size();
-    renderSettings.bus_label_offset[0] = ren_mes.bus_label_offset(0);
-    renderSettings.bus_label_offset[1] = ren_mes.bus_label_offset(1);
-
-    renderSettings.underlayer_color = Svg::Color(ren_mes.color());
-    renderSettings.underlayer_width = ren_mes.underlayer_width();
-
-    for (auto & color : ren_mes.color_palette()){
-        renderSettings.color_palette.emplace_back(color);
-    }
-    for (auto & layer : ren_mes.layers()){
-        renderSettings.layers.emplace_back(layer);
+void Data_Structure::DataBaseSvgBuilder::BuildNeighborhoodCompaniesWithStops(const std::unordered_map<std::string, stop_n_companies> & points) {
+    for (auto & point : points){
+        if (std::holds_alternative<YellowPages::Company>(point.second)){
+            for (auto & stop : std::get<YellowPages::Company>(point.second).nearby_stops()){
+                db_connected[point.first].emplace(stop.name());
+                db_connected[stop.name()].emplace(point.first);
+            }
+        }
     }
 }
 
@@ -594,7 +539,7 @@ void Data_Structure::CompanyTextDrawer::DrawPartial(const std::string & nearby_s
                                                     Svg::Document & doc) const {
     Svg::Text text = Svg::Text{}
                               .SetPoint(db_svg->company_coordinates.at(company_name))
-                              .SetFontFamily("verdana")
+                              .SetFontFamily("Verdana")
                               .SetData(company_name)
                               .SetOffset({db_svg->renderSettings.stop_label_offset[0], db_svg->renderSettings.stop_label_offset[1]})
                               .SetFontSize(db_svg->renderSettings.stop_label_font_size);
@@ -611,4 +556,68 @@ void Data_Structure::CompanyTextDrawer::DrawPartial(const std::string & nearby_s
 
     doc.Add(std::move(substrates));
     doc.Add(std::move(text));
+}
+
+void Data_Structure::DataBaseSvgBuilder::Serialize(TCProto::TransportCatalog & tc) const{
+    RenderProto::RenderSettings ser_render_sets;
+
+    ser_render_sets.set_width(renderSettings.width);
+    ser_render_sets.set_height(renderSettings.height);
+    ser_render_sets.set_outer_margin(renderSettings.outer_margin);
+    ser_render_sets.set_padding(renderSettings.padding);
+    ser_render_sets.set_stop_radius(renderSettings.stop_radius);
+    ser_render_sets.set_line_width(renderSettings.line_width);
+    ser_render_sets.set_company_radius(renderSettings.company_radius);
+    ser_render_sets.set_company_line_width(renderSettings.company_line_width);
+
+    ser_render_sets.set_stop_label_font_size(renderSettings.stop_label_font_size);
+
+    ser_render_sets.add_stop_label_offset(renderSettings.stop_label_offset[0]);
+    ser_render_sets.add_stop_label_offset(renderSettings.stop_label_offset[1]);
+
+    ser_render_sets.set_bus_label_font_size(renderSettings.bus_label_font_size);
+
+    ser_render_sets.add_bus_label_offset(renderSettings.bus_label_offset[0]);
+    ser_render_sets.add_bus_label_offset(renderSettings.bus_label_offset[1]);
+
+    *ser_render_sets.mutable_color() = renderSettings.underlayer_color.Serialize();
+    ser_render_sets.set_underlayer_width(renderSettings.underlayer_width);
+
+    for (auto & color : renderSettings.color_palette){
+        *ser_render_sets.add_color_palette() = color.Serialize();
+    }
+    for (auto & layer : renderSettings.layers){
+        ser_render_sets.add_layers(layer);
+    }
+
+    *tc.mutable_render() = std::move(ser_render_sets);
+}
+
+void Data_Structure::DataBaseSvgBuilder::Deserialize(const RenderProto::RenderSettings & ren_mes) {
+    renderSettings.width = ren_mes.width();
+    renderSettings.height = ren_mes.height();
+    renderSettings.outer_margin = ren_mes.outer_margin();
+    renderSettings.padding = ren_mes.padding();
+    renderSettings.stop_radius = ren_mes.stop_radius();
+    renderSettings.line_width = ren_mes.line_width();
+    renderSettings.company_radius = ren_mes.company_radius();
+    renderSettings.company_line_width = ren_mes.company_line_width();
+
+    renderSettings.stop_label_font_size = ren_mes.stop_label_font_size();
+    renderSettings.stop_label_offset[0] = ren_mes.stop_label_offset(0);
+    renderSettings.stop_label_offset[1] = ren_mes.stop_label_offset(1);
+
+    renderSettings.bus_label_font_size = ren_mes.bus_label_font_size();
+    renderSettings.bus_label_offset[0] = ren_mes.bus_label_offset(0);
+    renderSettings.bus_label_offset[1] = ren_mes.bus_label_offset(1);
+
+    renderSettings.underlayer_color = Svg::Color(ren_mes.color());
+    renderSettings.underlayer_width = ren_mes.underlayer_width();
+
+    for (auto & color : ren_mes.color_palette()){
+        renderSettings.color_palette.emplace_back(color);
+    }
+    for (auto & layer : ren_mes.layers()){
+        renderSettings.layers.emplace_back(layer);
+    }
 }

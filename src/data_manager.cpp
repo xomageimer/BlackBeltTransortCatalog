@@ -130,8 +130,10 @@ ResponseType Data_Structure::DataBase::FindCompanies(const std::vector<std::shar
 
 ResponseType Data_Structure::DataBase::FindRouteToCompanies(const std::string &from,
                                                             const std::vector<std::shared_ptr<Query>> &querys) const {
-    auto resp = FindCompanies(querys);
-    if (!resp)
+    if (!yellow_pages_db)
+        return GenerateBad();
+    auto resp = yellow_pages_db->FindCompanies(querys);
+    if (reinterpret_cast<CompaniesResponse*>(resp.get())->companies.empty())
         return GenerateBad();
 
     double route_time = 0;
@@ -151,30 +153,37 @@ ResponseType Data_Structure::DataBase::FindRouteToCompanies(const std::string &f
         }
     }
 
-    auto result_resp = std::make_shared<RouteToCompaniesResponse>();
-    std::shared_ptr<RouteResponse> route_resp = result_resp;
-    route_resp = router->CreateRoute(from, nearby_stop);
+    if (!company)
+        return GenerateBad();
 
-    result_resp->total_time = route_resp->total_time + time_from_stop;
+    auto result_resp = std::make_shared<RouteToCompaniesResponse>();
+    auto router_resp = router->CreateRoute(from, nearby_stop);
+
+    result_resp->total_time = router_resp->total_time + time_from_stop;
     result_resp->time_to_walk = time_from_stop;
     result_resp->nearby_stop_name = nearby_stop;
+    std::string full_name;
     for (auto & name : company->names()){
         if (name.type() == YellowPages::Name_Type_MAIN){
-            result_resp->company_full_name = name.value();
+            result_resp->company_name = name.value();
+            full_name = result_resp->company_name;
             if (!company->rubrics().empty()) {
-                std::string new_name = yellow_pages_db->GetRubric(company->rubrics(0)).keywords(0) + " " + result_resp->company_full_name;
-                result_resp->company_full_name = new_name;
+                full_name = yellow_pages_db->GetRubric(company->rubrics(0)).keywords(0) + " " + result_resp->company_name;
             }
             break;
         }
     }
 
-    auto render_items = result_resp->items;
-    if (!render_items.empty()) {
+    result_resp->items = router_resp->items;
+    {
+        auto render_items = result_resp->items;
+
         auto finish = render_items.insert(render_items.end(), std::make_shared<RouteResponse::Wait>());
         (*finish)->name = nearby_stop;
+        
+        result_resp->route_render = std::move(
+                svg_builder->RenderPathToCompany(render_items, full_name)->svg_xml_answer);
     }
-    result_resp->route_render = std::move(svg_builder->RenderPathToCompany(render_items, result_resp->company_full_name)->svg_xml_answer);
 
     return std::move(result_resp);
 }
@@ -245,7 +254,7 @@ Data_Structure::GetBearingPoints(const std::unordered_map<std::string, stop_n_co
 }
 
 double Data_Structure::ComputeTimeToWalking(double meters, double walk_speed) {
-    return meters / walk_speed;
+    return meters / (walk_speed / 3.6f) / 60;
 }
 
 void Data_Structure::DataBase::Serialize(std::ostream &os) const {
@@ -340,7 +349,7 @@ void Data_Structure::DataBase::Deserialize(std::istream &is) {
         std::string company_name;
         for (auto & name : company.names()){
             if (name.type() == YellowPages::Name_Type_MAIN) {
-                company_name += name.value();
+                company_name = name.value();
                 break;
             }
         }

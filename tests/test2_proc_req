@@ -3,74 +3,48 @@
         "file": "/tmp/tmp7f2a431a"
     },
     "stat_requests": [
-    {
-            "id": 1297727706,
+        {
+            "id": 1804726714,
             "type": "Bus",
             "name": "13"
         },
         {
-            "id": 749458699,
+            "id": 1601390749,
             "type": "Stop",
             "name": "Sea Station"
         },
         {
-            "id": 2053647165,
+            "id": 1804743431,
             "type": "FindCompanies",
             "rubrics": [
-                "Square"
+                "Park"
             ]
         },
         {
-            "id": 866281987,
-            "type": "FindCompanies",
-            "rubrics": [
-                "Square"
-            ],
-            "phones": [
-                {
-                    "number": "2671646"
-                }
-            ]
+            "id": 179918605,
+            "type": "Route",
+            "from": "Kraevo-Gretskaya Street",
+            "to": "Organ Hall"
         },
         {
-            "id": 1306125210,
-            "type": "FindCompanies",
-            "phones": [
-                {
-                    "type": "PHONE",
-                    "number": "2671646"
-                }
-            ]
+            "id": 1578968634,
+            "type": "RouteToCompany",
+            "from": "Kraevo-Gretskaya Street",
+            "companies": {
+                "rubrics": [
+                    "Park"
+                ]
+            }
         },
         {
-            "id": 589984419,
-            "type": "FindCompanies",
-            "phones": [
-                {
-                    "type": "PHONE"
-                }
-            ]
-        },
-        {
-            "id": 1306125210,
-            "type": "FindCompanies",
-            "phones": [
-                {
-
-                },
-                {
-                    "country_code": "7",
-                    "local_code": "862",
-                    "number": "12345"
-                }
-            ],
-            "urls": [
-                "nigas.com"
-            ],
-            "names": [
-                "Abobi",
-                "Aboba"
-            ]
+            "id": 1499333079,
+            "type": "RouteToCompany",
+            "from": "Circus",
+            "companies": {
+                "rubrics": [
+                    "Circus"
+                ]
+            }
         }
     ]
 }

@@ -127,7 +127,8 @@ namespace Data_Structure {
         void CalculateCoordinates(const std::unordered_map<std::string, stop_n_companies> &, const std::unordered_map<std::string, Bus> &);
 
         std::map<std::string, Svg::Point> CoordinateUniformDistribution(const std::unordered_map<std::string, stop_n_companies> &, const std::unordered_map<std::string, Bus> &);
-        void BuildNeighborhoodConnections( std::map<std::string, Svg::Point> const & new_coords, const std::unordered_map<std::string, Bus> & buses);
+        void BuildNeighborhoodConnections(const std::unordered_map<std::string, Bus> & buses);
+        void BuildNeighborhoodCompaniesWithStops(const std::unordered_map<std::string, stop_n_companies> & points);
         static auto SortingByCoordinates(std::map<std::string, Svg::Point> const & uniform, const std::unordered_map<std::string, stop_n_companies> &);
         std::pair<std::map<std::string, int>, int> GluingCoordinates(std::vector<std::pair<double, std::string>> const & sorted_by_coord);
         std::pair<std::map<std::string, Svg::Point>, std::map<std::string, Svg::Point>> CoordinateCompression(const std::unordered_map<std::string, stop_n_companies> &,

@@ -11,6 +11,7 @@ message Router {
 message RoutingSettings {
     double bus_wait_time = 1;
     int32 bus_velocity = 2;
+    double pedestrian_velocity = 3;
 }
 
 message Vertex {

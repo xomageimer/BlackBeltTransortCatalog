@@ -11,6 +11,7 @@
         "width": 1200,
         "height": 500,
         "padding": 50,
+        "outer_margin": 200,
         "stop_radius": 5,
         "line_width": 14,
         "company_radius": 6,
@@ -215,9 +216,6 @@
                         {
                             "value": "Cooperativniy"
                         }
-                    ],
-                    "rubrics": [
-                        1
                     ],
                     "address": {
                         "coords": {

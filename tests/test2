@@ -25,6 +25,8 @@
            "padding": 50,
            "height": 950,
            "line_width": 10,
+           "company_radius": 5,
+           "company_line_width": 2,
            "underlayer_color": [
                255,
                255,
@@ -51,10 +53,13 @@
                -3
            ],
             "layers": [
-               "bus_lines",
-               "stop_points",
-               "bus_labels",
-               "stop_labels"
+                "bus_lines",
+                "company_lines",
+                "bus_labels",
+                "stop_points",
+                "company_points",
+                "stop_labels",
+                "company_labels"
             ]
        },
     "base_requests": [
@@ -466,22 +471,20 @@
     ],
     "routing_settings": {
         "bus_wait_time": 2,
-        "bus_velocity": 30
+        "bus_velocity": 30,
+        "pedestrian_velocity": 4
     }
     "yellow_pages": {
         "rubrics": {
             "1": {
-                "name": "Square"
-            },
-            "2": {
-                "name": "Club"
+                "name": "Park"
             }
         },
         "companies": [
             {
                 "names": [
                     {
-                        "value": "Arboretum"
+                        "value": "Dendrarium"
                     }
                 ],
                 "urls": [
@@ -518,31 +521,6 @@
                         "number": "2671842"
                     }
                 ]
-            },
-            {
-              "names": [
-                  {
-                      "value": "Aboba"
-                  }
-              ],
-              "rubrics": [
-                  2
-              ],
-              "phones": [
-                      {
-                          "country_code": "7",
-                          "local_code": "862",
-                          "number": "12345"
-                      }
-              ],
-              "urls": [
-                    {
-                        "value": "nigas.com"
-                    },
-                    {
-                        "value": "xvideos.com"
-                    }
-              ]
             },
             {
                 "names": [

@@ -72,10 +72,10 @@ void RouteToCompaniesResponse::MakeJson() {
     RouteResponse::MakeJson();
 
     Dict last_item;
-    last_item.emplace(std::piecewise_construct, std::forward_as_tuple("type"), std::forward_as_tuple("WalkToCompany"));
+    last_item.emplace(std::piecewise_construct, std::forward_as_tuple("type"), std::forward_as_tuple((std::string)"WalkToCompany"));
     last_item.emplace(std::piecewise_construct, std::forward_as_tuple("stop_name"), std::forward_as_tuple(nearby_stop_name));
     last_item.emplace(std::piecewise_construct, std::forward_as_tuple("time"), std::forward_as_tuple(time_to_walk));
-    last_item.emplace(std::piecewise_construct, std::forward_as_tuple("company"), std::forward_as_tuple(company_full_name));
+    last_item.emplace(std::piecewise_construct, std::forward_as_tuple("company"), std::forward_as_tuple(company_name));
 
     const_cast<std::vector<Json::Node> *>(&(valid_data["items"].AsArray()))->emplace_back(std::move(last_item));
 }

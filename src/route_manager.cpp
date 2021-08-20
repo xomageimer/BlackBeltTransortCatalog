@@ -24,7 +24,7 @@ bool Data_Structure::DataBaseRouter::proxy_route::IsValid() const {
     return false;
 }
 
-Data_Structure::DataBaseRouter::DataBaseRouter(RouterProto::Router const & router_mes) : routing_settings({router_mes.routing_settings().bus_wait_time(), router_mes.routing_settings().bus_velocity()}),  graph_map(router_mes) {
+Data_Structure::DataBaseRouter::DataBaseRouter(RouterProto::Router const & router_mes) : routing_settings({router_mes.routing_settings().bus_wait_time(), router_mes.routing_settings().bus_velocity(), router_mes.routing_settings().pedestrian_velocity()}),  graph_map(router_mes) {
     for (auto & vert : router_mes.vertexes()){
         waiting_stops.emplace(vert.name(), vertices_path{vert.route_data_in(0).vertex_id(), vert.route_data_out(0).vertex_id()});
     }
@@ -146,6 +146,7 @@ void Data_Structure::DataBaseRouter::Serialize(TCProto::TransportCatalog & tc) c
     RouterProto::RoutingSettings rs_mes;
     rs_mes.set_bus_wait_time(routing_settings.bus_wait_time);
     rs_mes.set_bus_velocity(routing_settings.bus_velocity);
+    rs_mes.set_pedestrian_velocity(routing_settings.pedestrian_velocity);
     *router_mes.mutable_routing_settings() = std::move(rs_mes);
 
     for (auto & [stop_name, verts] : waiting_stops){
