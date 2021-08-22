@@ -36,7 +36,7 @@ namespace Data_Structure {
     };
     double ToMinute(Datetime const &);
     Datetime ToDatetime(double minutes, size_t day);
-    double ExtraTime(YellowPages::Company const &, Datetime const &);
+    void ExtraTime(YellowPages::Company const &, Datetime const &, double * min_time, double cur_time, double & result);
 
     int ComputeStopsDistance(const Stop& lhs, const Stop& rhs);
     int ComputeRouteDistance(std::vector<std::string> const & stops, const std::unordered_map<std::string, Stop> &);

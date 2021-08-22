@@ -146,7 +146,12 @@ ResponseType Data_Structure::DataBase::FindRouteToCompanies(const std::string &f
         for (auto & stop : company_ptr->nearby_stops()){
             auto cur_route_time = router->GetRouteWeight(from, stop.name());
             double time_to_cur = ComputeTimeToWalking(stop.meters(), router->GetSettings().pedestrian_velocity);
-            double cur_time_to_wait = ExtraTime(*company_ptr, ToDatetime(ToMinute(cur_time) + *cur_route_time + time_to_cur, cur_time.day));
+            // TODO можно как-то сгруппировать интервалы и получать их с помощью lower_bound (или что-то типо того)
+            // TODO + также не продолжать вычислять ExtraTime, если время итак уже превысило минимальный маршрут
+            double cur_time_to_wait = 0;
+            double cur_min_time = route_time + time_from_stop + time_to_wait;
+            ExtraTime(*company_ptr, ToDatetime(ToMinute(cur_time) + *cur_route_time + time_to_cur, cur_time.day),
+                      !company ? nullptr : &cur_min_time, *cur_route_time + time_to_cur, cur_time_to_wait);
             if (!company || route_time + time_from_stop + time_to_wait > *cur_route_time + time_to_cur + cur_time_to_wait) {
                 company = company_ptr;
                 route_time = *cur_route_time;
@@ -184,7 +189,7 @@ ResponseType Data_Structure::DataBase::FindRouteToCompanies(const std::string &f
 
         auto finish = render_items.insert(render_items.end(), std::make_shared<RouteResponse::Wait>());
         (*finish)->name = nearby_stop;
-        
+
         result_resp->route_render = std::move(
                 svg_builder->RenderPathToCompany(render_items, full_name)->svg_xml_answer);
     }
@@ -280,9 +285,12 @@ Data_Structure::Datetime Data_Structure::ToDatetime(double minutes, size_t day) 
     return datetime;
 }
 
-double Data_Structure::ExtraTime(const YellowPages::Company & company, const Data_Structure::Datetime & datetime) {
-    if (!company.has_working_time() || company.working_time().intervals().empty())
-        return 0;
+void Data_Structure::ExtraTime(const YellowPages::Company & company, const Data_Structure::Datetime & datetime,
+                               double * min_time, double cur_time, double & result) {
+    if (!company.has_working_time() || company.working_time().intervals().empty()) {
+        result = 0;
+        return;
+    }
 
     static const std::map<size_t, YellowPages::WorkingTimeInterval_Day> num_by_day
             {
@@ -314,14 +322,22 @@ double Data_Structure::ExtraTime(const YellowPages::Company & company, const Dat
     const YellowPages::WorkingTimeInterval *cur_interval = nullptr;
     if (working_time.intervals(0).day() == YellowPages::WorkingTimeInterval_Day_EVERYDAY) {
         for (auto &interval : working_time.intervals()) {
-            if (!cur_interval || calculate_time(cur_interval).first > calculate_time(&interval).first)
+            if (!cur_interval || calculate_time(cur_interval).first > calculate_time(&interval).first) {
                 cur_interval = &interval;
+                if (calculate_time(cur_interval).first == 0) {
+                    break;
+                }
+            }
         }
     } else {
         for (auto &interval : working_time.intervals()) {
             if (interval.day() == num_by_day.at(datetime.day)) {
-                if (!cur_interval || calculate_time(cur_interval).first > calculate_time(&interval).first)
+                if (!cur_interval || calculate_time(cur_interval).first > calculate_time(&interval).first) {
                     cur_interval = &interval;
+                    if (calculate_time(cur_interval).first == 0) {
+                        break;
+                    }
+                }
             }
         }
     }
@@ -330,14 +346,20 @@ double Data_Structure::ExtraTime(const YellowPages::Company & company, const Dat
         Datetime new_datetime {};
         new_datetime.day = (datetime.day + 1) % 7;
         new_datetime.hours = new_datetime.minutes = new_datetime.part_of_minute = 0;
-        return static_cast<double>(24 * 60) - ToMinute(datetime) + ExtraTime(company, new_datetime);
+        result += static_cast<double>(24 * 60) - ToMinute(datetime);
+        if (min_time && cur_time + result > *min_time)
+            return;
+        return ExtraTime(company, new_datetime, min_time, cur_time, result);
     } else if (!calculate_time(cur_interval).second) {
         Datetime new_datetime {};
         new_datetime.day = (datetime.day + 1) % 7;
         new_datetime.hours = new_datetime.minutes = new_datetime.part_of_minute = 0;
-        return calculate_time(cur_interval).first + ExtraTime(company, new_datetime);
+        result += calculate_time(cur_interval).first;
+        if (min_time && cur_time + result > *min_time)
+            return;
+        return ExtraTime(company, new_datetime, min_time, cur_time, result);
     } else {
-        return calculate_time(cur_interval).first;
+        result += calculate_time(cur_interval).first;
     }
 }
 

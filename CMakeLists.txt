@@ -8,7 +8,7 @@ find_package(Protobuf REQUIRED)
 include_directories(${Protobuf_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-set(PROJECT_SOURCES json/json.cpp graph/graph.h graph/router.h src/data_manager.cpp src/route_manager.cpp src/render_manager.cpp src/distance.cpp src/requests.cpp src/responses.cpp xml/xml.cpp svg/svg.cpp src/yellow_pages_manager.cpp)
+set(PROJECT_SOURCES json/json.cpp graph/graph.h graph/router.h src/data_manager.cpp src/route_manager.cpp src/render_manager.cpp src/distance.cpp src/requests.cpp src/responses.cpp xml/xml.cpp svg/svg.cpp src/yellow_pages_manager.cpp src/headers/interval_map.h)
 set(PROJECT_HEADERS json/json.h src/headers/ranges.h src/headers/responses.h src/headers/data_manager.h src/headers/route_manager.h src/headers/render_manager.h src/headers/distance.h src/headers/requests.h xml/xml.h svg/svg.h src/headers/yellow_pages_manager.h)
 
 protobuf_generate_cpp(

@@ -5,6 +5,7 @@
 #include <list>
 #include <vector>
 
+#include "interval_map.h"
 #include "responses.h"
 
 #include "database.pb.h"
