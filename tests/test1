@@ -209,13 +209,35 @@
                             "name": "riviera bridge",
                             "meters": 150
                         }
-                    ]
+                    ],
+                    "working_time": {
+                         "intervals": [
+                             {
+                                 "day": "MONDAY",
+                                 "minutes_from": 600,
+                                 "minutes_to": 1020
+                             },
+                             {
+                                 "day": "WEDNESDAY",
+                                 "minutes_from": 600,
+                                 "minutes_to": 1020
+                             },
+                             {
+                                 "day": "FRIDAY",
+                                 "minutes_from": 600,
+                                 "minutes_to": 1080
+                             }
+                         ]
+                     }
                 },
                 {
                     "names": [
                         {
                             "value": "Cooperativniy"
                         }
+                    ],
+                    "rubrics": [
+                         1
                     ],
                     "address": {
                         "coords": {
@@ -228,7 +250,21 @@
                             "name": "sea station",
                             "meters": 15
                         }
-                    ]
+                    ],
+                     "working_time": {
+                         "intervals": [
+                             {
+                                 "day": "TUESDAY",
+                                 "minutes_from": 540,
+                                 "minutes_to": 900
+                             },
+                             {
+                                 "day": "THURSDAY",
+                                 "minutes_from": 540,
+                                 "minutes_to": 900
+                             }
+                         ]
+                     }
                 }
             ]
         }

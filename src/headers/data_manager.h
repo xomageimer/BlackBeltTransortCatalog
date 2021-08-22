@@ -28,6 +28,16 @@ namespace Data_Structure {
         Distance dist;
         std::map<std::string, int> adjacent_stops;
     };
+    struct Datetime {
+        size_t day;
+        size_t hours;
+        size_t minutes;
+        double part_of_minute;
+    };
+    double ToMinute(Datetime const &);
+    Datetime ToDatetime(double minutes, size_t day);
+    double ExtraTime(YellowPages::Company const &, Datetime const &);
+
     int ComputeStopsDistance(const Stop& lhs, const Stop& rhs);
     int ComputeRouteDistance(std::vector<std::string> const & stops, const std::unordered_map<std::string, Stop> &);
     double ComputeTimeToWalking(double meters, double walk_speed);
@@ -63,8 +73,11 @@ namespace Data_Structure {
         [[nodiscard]] ResponseType FindRoute(const std::string & from, const std::string & to) const;
         [[nodiscard]] ResponseType BuildMap() const;
         [[nodiscard]] ResponseType FindCompanies(const std::vector<std::shared_ptr<Query>> & querys) const;
-        [[nodiscard]] ResponseType FindRouteToCompanies(const std::string & from, const std::vector<std::shared_ptr<Query>> & querys) const;
+        [[nodiscard]] ResponseType FindRouteToCompanies(const std::string & from, const Datetime & cur_time, const std::vector<std::shared_ptr<Query>> & querys) const;
 
+        RoutingSettings GetSettings() const {
+            return router->GetSettings();
+        }
         void Serialize(std::ostream & os) const;
     private:
         void Deserialize(std::istream & is);

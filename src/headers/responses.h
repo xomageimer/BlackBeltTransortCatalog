@@ -91,6 +91,7 @@ struct RouteToCompaniesResponse : public RouteResponse {
     double time_to_walk;
     std::string nearby_stop_name;
     std::string company_name;
+    std::optional<double> time_to_wait;
 };
 
 struct BadResponse : public Response {

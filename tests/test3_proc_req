@@ -1,0 +1,449 @@
+{
+  "serialization_settings": {
+    "file": "/tmp/tmpwsix0w59"
+  },
+  "stat_requests": [
+    {
+      "id": 1300852901,
+      "phones": [
+        {}
+      ],
+      "type": "FindCompanies"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        0,
+        0
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1467446722,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        0,
+        12
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1224549340,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        0,
+        24
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1470272146,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        0,
+        36
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1639796834,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        0,
+        48
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1618833326,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        1,
+        0
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 134445439,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        1,
+        12
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1012354053,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        1,
+        24
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1453784734,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        1,
+        36
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 57266326,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        1,
+        48
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 745582262,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        2,
+        0
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 2134512235,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        2,
+        12
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 2136092604,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        2,
+        24
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 80718828,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        0,
+        2,
+        36
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 274202671,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        21,
+        0
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 999571495,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        21,
+        12
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1354458651,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        21,
+        24
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1197527507,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        21,
+        36
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 602426938,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        21,
+        48
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1447382348,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        22,
+        0
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1560949131,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        22,
+        12
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1268841938,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        22,
+        24
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 329247776,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        22,
+        36
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 513652720,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        22,
+        48
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 856425103,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        23,
+        0
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 764064436,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        23,
+        12
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 485800424,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        23,
+        24
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1936057164,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        23,
+        36
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 1468390218,
+      "type": "RouteToCompany"
+    },
+    {
+      "companies": {
+        "rubrics": [
+          "Park"
+        ]
+      },
+      "datetime": [
+        6,
+        23,
+        48
+      ],
+      "from": "Ulitsa Lizy Chaykinoy",
+      "id": 881246308,
+      "type": "RouteToCompany"
+    }
+  ]
+}

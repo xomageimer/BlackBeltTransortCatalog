@@ -176,6 +176,7 @@ YellowPages::Database ReadYellowPagesData(const Json::Node &input) {
                 }
                 *wt_mes.add_intervals() = std::move(std::move(wti_mes));
             }
+            *company_mes.mutable_working_time() = std::move(wt_mes);
         }
 
         if (company.AsMap().count("nearby_stops")) {
@@ -276,7 +277,7 @@ JsonResponse FindCompaniesRequest::Process(const DS::DataBase & db) {
 }
 
 JsonResponse FindRouteToCompaniesRequest::Process(const DS::DataBase & db) {
-    return ProcessResponse(&DS::DataBase::FindRouteToCompanies, std::ref(db), std::ref(from), std::ref(querys));
+    return ProcessResponse(&DS::DataBase::FindRouteToCompanies, std::ref(db), std::ref(from), std::ref(datetime), std::ref(querys));
 }
 
 RequestType CreateRequest(IRequest::Type type) {

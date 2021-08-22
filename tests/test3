@@ -1,66 +1,187 @@
 {
-    "stat_requests": [
-        {
-            "type": "Map",
-            "id": 1821171961
-        }
-    ],
-    "render_settings": {
-           "bus_label_font_size": 18,
-           "padding": 50,
-           "height": 950,
-           "line_width": 10,
-           "underlayer_color": [
-               255,
-               255,
-               255,
-               0.85
-           ],
-           "underlayer_width": 3,
-           "stop_label_font_size": 13,
-           "stop_radius": 3,
-           "width": 1500,
-           "bus_label_offset": [
-               7,
-               15
-           ],
-           "color_palette": [
-               "red",
-               "green",
-               "blue",
-               "brown",
-               "orange"
-           ],
-           "stop_label_offset": [
-               7,
-               -3
-           ],
-            "layers": [
-               "bus_lines",
-               "stop_points",
-               "bus_labels",
-               "stop_labels"
-            ]
-       },
-    "base_requests": [
-        {
-            "stops": [
-                "Zagorye"
-            ],
-            "name": "23",
-            "type": "Bus",
-            "is_roundtrip": true
-        },
-        {
-            "name": "Zagorye",
-            "latitude": 55.579909,
-            "type": "Stop",
-            "longitude": 37.000000,
-            "road_distances": {}
-        }
-    ],
-    "routing_settings": {
-        "bus_wait_time": 2,
-        "bus_velocity": 30
+  "base_requests": [
+    {
+      "is_roundtrip": true,
+      "name": "13",
+      "stops": [
+        "Ulitsa Lizy Chaykinoy"
+      ],
+      "type": "Bus"
+    },
+    {
+      "latitude": 43.5903,
+      "longitude": 39.7468,
+      "name": "Ulitsa Lizy Chaykinoy",
+      "road_distances": {},
+      "type": "Stop"
     }
+  ],
+  "render_settings": {
+    "bus_label_font_size": 20,
+    "bus_label_offset": [
+      7,
+      15
+    ],
+    "color_palette": [
+      [
+        255,
+        0,
+        255
+      ],
+      "red",
+      "green",
+      "blue"
+    ],
+    "company_line_width": 20,
+    "company_radius": 3,
+    "height": 2000,
+    "layers": [
+      "bus_lines",
+      "company_lines",
+      "bus_labels",
+      "stop_points",
+      "company_points",
+      "stop_labels",
+      "company_labels"
+    ],
+    "line_width": 14,
+    "outer_margin": 150,
+    "padding": 50,
+    "stop_label_font_size": 20,
+    "stop_label_offset": [
+      7,
+      -3
+    ],
+    "stop_radius": 5,
+    "underlayer_color": [
+      255,
+      255,
+      255,
+      0.85
+    ],
+    "underlayer_width": 3,
+    "width": 900
+  },
+  "routing_settings": {
+    "bus_velocity": 30,
+    "bus_wait_time": 2,
+    "pedestrian_velocity": 100
+  },
+  "serialization_settings": {
+    "file": "/tmp/tmpwsix0w59"
+  },
+  "yellow_pages": {
+    "companies": [
+      {
+        "address": {
+          "coords": {
+            "lat": "43.567998",
+            "lon": "39.734131"
+          }
+        },
+        "names": [
+          {
+            "value": "Dendrariy"
+          }
+        ],
+        "nearby_stops": [
+          {
+            "meters": 580,
+            "name": "Ulitsa Lizy Chaykinoy"
+          }
+        ],
+        "phones": [
+          {
+            "type": "FAX"
+          }
+        ],
+        "rubrics": [
+          1
+        ],
+        "working_time": {
+          "intervals": [
+            {
+              "day": "MONDAY",
+              "minutes_from": 0,
+              "minutes_to": 1440
+            },
+            {
+              "day": "TUESDAY",
+              "minutes_from": 0,
+              "minutes_to": 1440
+            },
+            {
+              "day": "THURSDAY",
+              "minutes_from": 0,
+              "minutes_to": 1440
+            },
+            {
+              "day": "FRIDAY",
+              "minutes_from": 0,
+              "minutes_to": 1440
+            },
+            {
+              "day": "SATURDAY",
+              "minutes_from": 0,
+              "minutes_to": 1440
+            },
+            {
+              "day": "SUNDAY",
+              "minutes_from": 0,
+              "minutes_to": 1440
+            }
+          ]
+        }
+      },
+      {
+        "address": {
+          "coords": {
+            "lat": "43.557998",
+            "lon": "39.734131"
+          }
+        },
+        "names": [
+          {
+            "value": "im. Frunze"
+          }
+        ],
+        "nearby_stops": [
+          {
+            "meters": 579,
+            "name": "Ulitsa Lizy Chaykinoy"
+          }
+        ],
+        "rubrics": [
+          1
+        ],
+        "working_time": {
+          "intervals": [
+            {
+              "day": "EVERYDAY",
+              "minutes_from": 60,
+              "minutes_to": 61
+            },
+            {
+              "day": "EVERYDAY",
+              "minutes_from": 120,
+              "minutes_to": 1200
+            },
+            {
+              "day": "EVERYDAY",
+              "minutes_from": 1201,
+              "minutes_to": 1439
+            }
+          ]
+        }
+      }
+    ],
+    "rubrics": {
+      "1": {
+        "name": "Park"
+      },
+      "2": {
+        "name": "Vokzal"
+      }
+    }
+  }
 }

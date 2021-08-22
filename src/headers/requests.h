@@ -134,8 +134,13 @@ struct FindRouteToCompaniesRequest final : public FindCompaniesRequest {
         FindCompaniesRequest::ParseQueries(json_node["companies"]);
 
         from = json_node["from"].AsString();
+
+        datetime.day = json_node["datetime"].AsArray()[0].AsNumber<int>();
+        datetime.hours = json_node["datetime"].AsArray()[1].AsNumber<int>();
+        datetime.minutes = json_node["datetime"].AsArray()[2].AsNumber<int>();
     }
 private:
+    DS::Datetime datetime;
     std::string from;
 };
 #undef ParseLike

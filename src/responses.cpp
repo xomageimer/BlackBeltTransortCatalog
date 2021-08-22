@@ -78,6 +78,14 @@ void RouteToCompaniesResponse::MakeJson() {
     last_item.emplace(std::piecewise_construct, std::forward_as_tuple("company"), std::forward_as_tuple(company_name));
 
     const_cast<std::vector<Json::Node> *>(&(valid_data["items"].AsArray()))->emplace_back(std::move(last_item));
+
+    if (time_to_wait && *time_to_wait > 0){
+        Dict wait_item;
+        wait_item.emplace(std::piecewise_construct, std::forward_as_tuple("type"), std::forward_as_tuple((std::string)"WaitCompany"));
+        wait_item.emplace(std::piecewise_construct, std::forward_as_tuple("time"), std::forward_as_tuple(*time_to_wait));
+        wait_item.emplace(std::piecewise_construct, std::forward_as_tuple("company"), std::forward_as_tuple(company_name));
+        const_cast<std::vector<Json::Node> *>(&(valid_data["items"].AsArray()))->emplace_back(std::move(wait_item));
+    }
 }
 
 void PrintResponses(std::vector<JsonResponse> responses, std::ostream & os) {

@@ -4,42 +4,61 @@
     },
     "stat_requests": [
         {
-            "id": 463508520,
-            "type": "FindCompanies",
-            "rubrics": [
-                "Square"
-            ]
-        },
-        {
-            "id": 1457284289,
-            "type": "FindCompanies",
-            "names": [
-                "Komsomolsky",
-                "Cooperativniy"
-            ],
-            "rubrics": [
-                "Square"
-            ]
-        },
-         {
-            "id": 638533243,
-            "type": "RouteToCompany",
-            "from": "parallel street",
-            "companies": {
-                "rubrics": [
-                    "Square"
-                ]
-            }
-        },
-        {
-            "id": 774281590,
+            "id": 193771898,
             "type": "RouteToCompany",
             "from": "sea station",
             "companies": {
                 "names": [
+                    "Komsomolsky",
                     "Cooperativniy"
+                ],
+                "rubrics": [
+                    "Square"
                 ]
-            }
+            },
+            "datetime": [
+                1,
+                7,
+                45
+            ]
+        },
+        {
+            "id": 464638028,
+            "type": "RouteToCompany",
+            "from": "sea station",
+            "companies": {
+                "names": [
+                    "Komsomolsky",
+                    "Cooperativniy"
+                ],
+                "rubrics": [
+                    "Square"
+                ]
+            },
+            "datetime": [
+                1,
+                9,
+                0
+            ]
+        },
+        {
+            "id": 1317455601,
+            "type": "RouteToCompany",
+            "from": "sea station",
+            "companies": {
+                "names": [
+                    "Komsomolsky",
+                    "Cooperativniy"
+                ],
+                "rubrics": [
+                    "Square"
+                ]
+            },
+            "datetime": [
+                1,
+                15,
+                0
+            ]
         }
     ]
 }
