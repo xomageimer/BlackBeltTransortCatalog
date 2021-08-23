@@ -21,6 +21,44 @@
                 15,
                 0
             ]
+        },
+        {
+            "id": 193771898,
+            "type": "RouteToCompany",
+            "from": "sea station",
+            "companies": {
+                "names": [
+                    "Komsomolsky",
+                    "Cooperativniy"
+                ],
+                "rubrics": [
+                    "Square"
+                ]
+            },
+            "datetime": [
+                1,
+                7,
+                45
+            ]
+        },
+        {
+            "id": 464638028,
+            "type": "RouteToCompany",
+            "from": "sea station",
+            "companies": {
+                "names": [
+                    "Komsomolsky",
+                    "Cooperativniy"
+                ],
+                "rubrics": [
+                    "Square"
+                ]
+            },
+            "datetime": [
+                1,
+                9,
+                0
+            ]
         }
     ]
 }

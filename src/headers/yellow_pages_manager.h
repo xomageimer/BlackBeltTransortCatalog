@@ -13,6 +13,8 @@
 #include "rubric.pb.h"
 
 namespace Data_Structure {
+    using TimeDatabase = std::unordered_map<std::string, std::unordered_map<int,
+                                            IntervalMap<int, YellowPages::WorkingTimeInterval const *>>>;
     struct Query {
     public:
         virtual void Compare(std::list<const YellowPages::Company *> &, struct DataBaseYellowPages * = nullptr) = 0;

@@ -36,7 +36,6 @@ namespace Data_Structure {
     };
     double ToMinute(Datetime const &);
     Datetime ToDatetime(double minutes, size_t day);
-    void ExtraTime(YellowPages::Company const &, Datetime const &, double * min_time, double cur_time, double & result);
 
     int ComputeStopsDistance(const Stop& lhs, const Stop& rhs);
     int ComputeRouteDistance(std::vector<std::string> const & stops, const std::unordered_map<std::string, Stop> &);
@@ -62,6 +61,8 @@ namespace Data_Structure {
         std::unique_ptr<DataBaseRouter> router;
         std::unique_ptr<DataBaseSvgBuilder> svg_builder;
         std::unique_ptr<DataBaseYellowPages> yellow_pages_db;
+
+        TimeDatabase time_database;
     public:
         explicit DataBase(std::istream & is);
         [[deprecated]] DataBase(const std::vector<DBItem>&, RoutingSettings routing_settings_);
@@ -83,6 +84,8 @@ namespace Data_Structure {
         void Deserialize(std::istream & is);
         static ResponseType GenerateBad() ;
         void Init(std::vector<DBItem> const &);
+        void ExtraTime(YellowPages::Company const &, Datetime const &,
+                       double * min_time, double cur_time, double & result) const;
     };
 }
 
